@@ -10,6 +10,13 @@
   <form method="post" action="#" id="newbug">
     Briefly describe your new problem:  <input name="title" />
   </form>
+
+  <script type="text/javascript" src="js/jquery.min.js"></script>
+  <script type="text/javascript" src="js/cbugg.js"></script>
+
+  <script type="text/javascript">
+    $("#newbug").submit(cbuggNewBug);
+  </script>
 </body>
 
 </html>
