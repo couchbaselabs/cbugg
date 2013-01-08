@@ -5,7 +5,16 @@
 </head>
 
 <body>
-  <p>Here there be bugs.</p>
+  <h1>cbugg</h1>
+
+  <h2>By State:</h2>
+
+  <ul>
+    {{ range .states.Rows }}
+    {{ $st := index .Key 0 }}
+    <li><a href="/bug/?state={{$st}}">{{$st}} ({{ .Value }})</a></li>
+    {{ end }}
+  </ul>
 
   <form method="POST" action="/bug/" id="newbug">
     Briefly describe your new problem:  <input name="title" />

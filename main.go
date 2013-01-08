@@ -92,8 +92,6 @@ func serveBugList(w http.ResponseWriter, r *http.Request) {
 		args["end_key"] = []interface{}{st, map[string]string{}}
 	}
 
-	log.Printf("Args: %v", args)
-
 	res, err := db.View("cbugg", "by_state", args)
 	if err != nil {
 		showError(w, r, err.Error(), 500)
@@ -124,8 +122,17 @@ func serveBugPath(w http.ResponseWriter, r *http.Request) {
 }
 
 func serveHome(w http.ResponseWriter, r *http.Request) {
+	args := map[string]interface{}{"group_level": 1}
+	states, err := db.View("cbugg", "by_state", args)
+	if err != nil {
+		showError(w, r, err.Error(), 500)
+		return
+	}
+
 	templates.ExecuteTemplate(w, "index.html",
-		map[string]interface{}{})
+		map[string]interface{}{
+			"states": states,
+		})
 }
 
 func initCb(serv, bucket string) {
