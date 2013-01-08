@@ -1,0 +1,31 @@
+<html>
+<head>
+  <title>cbugg - Bug {{.Id}}</title>
+  <link rel="stylesheet" href="/static/css/screen.css" type="text/css">
+</head>
+
+<body>
+  <h1>{{.Id}} - {{.Title | html}}</h1>
+
+  <p>
+    {{.Description | html}}
+  </p>
+  
+  <p>
+    Status: {{.Status}}.
+
+    {{ if .Tags }}
+      Tags:
+      {{ range .Tags }}
+        {{.}}
+      {{ end }}
+    {{ end }}
+  </p>
+
+  <p>
+    Filed on {{.CreatedAt}} by {{.Creator}}.
+  </p>
+
+</body>
+
+</html>

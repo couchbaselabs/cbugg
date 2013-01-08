@@ -7,16 +7,12 @@
 <body>
   <p>Here there be bugs.</p>
 
-  <form method="post" action="#" id="newbug">
+  <form method="POST" action="/bug/" id="newbug">
     Briefly describe your new problem:  <input name="title" />
   </form>
 
   <script type="text/javascript" src="/static/jquery.min.js"></script>
   <script type="text/javascript" src="/static/cbugg.js"></script>
-
-  <script type="text/javascript">
-    $("#newbug").submit(cbuggNewBug);
-  </script>
 </body>
 
 </html>
