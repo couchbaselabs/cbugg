@@ -82,9 +82,19 @@ func serveBug(w http.ResponseWriter, r *http.Request, id string) {
 }
 
 func serveBugList(w http.ResponseWriter, r *http.Request) {
-	res, err := db.View("cbugg", "by_state", map[string]interface{}{
+	args := map[string]interface{}{
 		"reduce": false,
-	})
+	}
+
+	if r.FormValue("state") != "" {
+		st := r.FormValue("state")
+		args["start_key"] = []interface{}{st}
+		args["end_key"] = []interface{}{st, map[string]string{}}
+	}
+
+	log.Printf("Args: %v", args)
+
+	res, err := db.View("cbugg", "by_state", args)
 	if err != nil {
 		showError(w, r, err.Error(), 500)
 		return
