@@ -81,6 +81,18 @@ func serveBug(w http.ResponseWriter, r *http.Request, id string) {
 	templates.ExecuteTemplate(w, "bug.html", bug)
 }
 
+func serveBugList(w http.ResponseWriter, r *http.Request) {
+	res, err := db.View("cbugg", "by_state", map[string]interface{}{
+		"reduce": false,
+	})
+	if err != nil {
+		showError(w, r, err.Error(), 500)
+		return
+	}
+
+	templates.ExecuteTemplate(w, "buglist.html", res)
+}
+
 func minusPrefix(s, prefix string) string {
 	return s[len(prefix):]
 }
@@ -91,6 +103,8 @@ func serveBugPath(w http.ResponseWriter, r *http.Request) {
 	switch {
 	case r.Method == "POST" && path == "":
 		serveNewBug(w, r)
+	case r.Method == "GET" && path == "":
+		serveBugList(w, r)
 	case r.Method == "GET":
 		serveBug(w, r, path)
 	default:
