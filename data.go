@@ -5,7 +5,8 @@ import (
 )
 
 type Bug struct {
-	Id          string    `json:"-"`
+	Id          string    `json:"id"`
+	Parent      string    `json:"parent,omitempty"`
 	Title       string    `json:"title"`
 	Description string    `json:"description"`
 	Status      string    `json:"status"`

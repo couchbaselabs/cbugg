@@ -70,7 +70,6 @@ func serveBug(w http.ResponseWriter, r *http.Request) {
 		showError(w, r, err.Error(), 404)
 		return
 	}
-	bug.Id = id
 
 	templates.ExecuteTemplate(w, "bug.html", bug)
 }
@@ -79,6 +78,8 @@ func serveBugUpdate(w http.ResponseWriter, r *http.Request) {
 	id := mux.Vars(r)["bugid"]
 	r.ParseForm()
 	val := r.FormValue("value")
+
+	historyKey := id + "-" + time.Now().UTC().Format(time.RFC3339Nano)
 
 	err := db.Update(id, 0, func(current []byte) ([]byte, error) {
 		if len(current) == 0 {
@@ -90,6 +91,19 @@ func serveBugUpdate(w http.ResponseWriter, r *http.Request) {
 			return nil, err
 		}
 		bug.ModifiedAt = time.Now().UTC()
+		bug.Parent = historyKey
+
+		// This is a side-effect in a CAS operation.  It's is
+		// correct and safe because the side effect is the
+		// creation of a document that is only used and
+		// correct relative to the final value from the CAS.
+		history := bug
+		history.Type = "bughistory"
+
+		err = db.Set(historyKey, 0, &history)
+		if err != nil {
+			return nil, err
+		}
 
 		switch r.FormValue("id") {
 		case "description":
