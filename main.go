@@ -8,6 +8,7 @@ import (
 	"html/template"
 	"log"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/couchbaselabs/go-couchbase"
@@ -97,6 +98,16 @@ func serveBugUpdate(w http.ResponseWriter, r *http.Request) {
 			bug.Title = val
 		case "status":
 			bug.Status = val
+		case "tags":
+			bug.Tags = strings.FieldsFunc(val,
+				func(r rune) bool {
+					switch r {
+					case ',', ' ':
+						return true
+					}
+					return false
+				})
+			val = strings.Join(bug.Tags, ", ")
 		default:
 			return nil, fmt.Errorf("Unhandled id: %v",
 				r.FormValue("id"))
@@ -109,7 +120,7 @@ func serveBugUpdate(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), 400)
 	}
 
-	w.Write([]byte(r.FormValue("value")))
+	w.Write([]byte(val))
 }
 
 func serveBugList(w http.ResponseWriter, r *http.Request) {

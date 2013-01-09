@@ -9,6 +9,16 @@ function  cbuggMakePageEditable(buginfo) {
                'closed': 'closed', 'selected': buginfo.status }
     });
 
+    $('#tags').editable(url, {
+        data: function(value, settings) {
+            var val = $.trim(value);
+            if (val === '<em>Untagged</em>') {
+                val = '';
+            }
+            return val.replace(/\s+/g, ' ');
+        }
+    });
+
     $('.edit_area').editable(url, {
         type: 'textarea',
         cancel: 'Cancel',
