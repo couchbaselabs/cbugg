@@ -20,6 +20,9 @@ function  cbuggMakePageEditable(buginfo) {
     });
 
     $('.edit_area').editable(url, {
+        data:  function(value, settings) {
+            return $.trim(value);
+        },
         type: 'textarea',
         cancel: 'Cancel',
         submit: 'OK',
