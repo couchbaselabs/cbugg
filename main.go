@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"github.com/couchbaselabs/go-couchbase"
+	"github.com/gorilla/mux"
 )
 
 var templates *template.Template
@@ -25,10 +26,18 @@ func init() {
 	if err != nil {
 		panic("Couldn't parse templates.")
 	}
-	http.HandleFunc("/", serveHome)
-	http.HandleFunc("/bug/", serveBugPath)
-	http.Handle("/static/", http.StripPrefix("/static/",
+
+	r := mux.NewRouter()
+	// Bugs are fancy
+	r.HandleFunc("/bug/", serveNewBug).Methods("POST")
+	r.HandleFunc("/bug/", serveBugList).Methods("GET")
+	r.HandleFunc("/bug/{bugid}", serveBug).Methods("GET")
+	r.HandleFunc("/bug/{bugid}", serveBugUpdate).Methods("POST")
+	r.PathPrefix("/static/").Handler(http.StripPrefix("/static/",
 		http.FileServer(http.Dir(*staticPath))))
+	r.HandleFunc("/", serveHome)
+
+	http.Handle("/", r)
 }
 
 func newBugId() (uint64, error) {
@@ -72,7 +81,8 @@ func serveNewBug(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, bug.Url(), 303)
 }
 
-func serveBug(w http.ResponseWriter, r *http.Request, id string) {
+func serveBug(w http.ResponseWriter, r *http.Request) {
+	id := mux.Vars(r)["bugid"]
 	bug := Bug{}
 	err := db.Get(id, &bug)
 	if err != nil {
@@ -84,7 +94,8 @@ func serveBug(w http.ResponseWriter, r *http.Request, id string) {
 	templates.ExecuteTemplate(w, "bug.html", bug)
 }
 
-func serveBugUpdate(w http.ResponseWriter, r *http.Request, id string) {
+func serveBugUpdate(w http.ResponseWriter, r *http.Request) {
+	id := mux.Vars(r)["bugid"]
 	r.ParseForm()
 	val := r.FormValue("value")
 
@@ -139,28 +150,6 @@ func serveBugList(w http.ResponseWriter, r *http.Request) {
 	}
 
 	templates.ExecuteTemplate(w, "buglist.html", res)
-}
-
-func minusPrefix(s, prefix string) string {
-	return s[len(prefix):]
-}
-
-func serveBugPath(w http.ResponseWriter, r *http.Request) {
-	path := minusPrefix(r.URL.Path, "/bug/")
-
-	switch {
-	case r.Method == "POST" && path == "":
-		serveNewBug(w, r)
-	case r.Method == "GET" && path == "":
-		serveBugList(w, r)
-	case r.Method == "GET":
-		serveBug(w, r, path)
-	case r.Method == "POST":
-		serveBugUpdate(w, r, path)
-	default:
-		showError(w, r, "Can't service "+r.Method+":"+path,
-			http.StatusMethodNotAllowed)
-	}
 }
 
 func serveHome(w http.ResponseWriter, r *http.Request) {
