@@ -157,14 +157,6 @@ func serveHome(w http.ResponseWriter, r *http.Request) {
 		})
 }
 
-func initCb(serv, bucket string) {
-	var err error
-	db, err = couchbase.GetBucket(serv, "default", bucket)
-	if err != nil {
-		log.Fatalf("Error connecting to couchbase: %v", err)
-	}
-}
-
 func main() {
 	addr := flag.String("addr", ":8066", "http listen address")
 	cbServ := flag.String("couchbase", "http://localhost:8091/",
@@ -191,7 +183,10 @@ func main() {
 
 	http.Handle("/", r)
 
-	initCb(*cbServ, *cbBucket)
+	db, err = dbConnect(*cbServ, *cbBucket)
+	if err != nil {
+		log.Fatalf("Error connecting to couchbase: %v", err)
+	}
 
 	log.Printf("Listening on %v", *addr)
 	log.Fatal(http.ListenAndServe(*addr, nil))
