@@ -1,6 +1,8 @@
 package main
 
 import (
+	"encoding/json"
+	"errors"
 	"flag"
 	"fmt"
 	"html/template"
@@ -13,6 +15,7 @@ import (
 
 var templates *template.Template
 var db *couchbase.Bucket
+var NotFound = errors.New("not found")
 
 var staticPath = flag.String("static", "static", "Path to the static content")
 
@@ -81,6 +84,43 @@ func serveBug(w http.ResponseWriter, r *http.Request, id string) {
 	templates.ExecuteTemplate(w, "bug.html", bug)
 }
 
+func serveBugUpdate(w http.ResponseWriter, r *http.Request, id string) {
+	r.ParseForm()
+	val := r.FormValue("value")
+
+	err := db.Update(id, 0, func(current []byte) ([]byte, error) {
+		if len(current) == 0 {
+			return nil, NotFound
+		}
+		bug := Bug{}
+		err := json.Unmarshal(current, &bug)
+		if err != nil {
+			return nil, err
+		}
+		bug.ModifiedAt = time.Now().UTC()
+
+		switch r.FormValue("id") {
+		case "description":
+			bug.Description = val
+		case "title":
+			bug.Title = val
+		case "status":
+			bug.Status = val
+		default:
+			return nil, fmt.Errorf("Unhandled id: %v",
+				r.FormValue("id"))
+		}
+
+		return json.Marshal(&bug)
+	})
+
+	if err != nil {
+		http.Error(w, err.Error(), 400)
+	}
+
+	w.Write([]byte(r.FormValue("value")))
+}
+
 func serveBugList(w http.ResponseWriter, r *http.Request) {
 	args := map[string]interface{}{
 		"reduce": false,
@@ -115,6 +155,8 @@ func serveBugPath(w http.ResponseWriter, r *http.Request) {
 		serveBugList(w, r)
 	case r.Method == "GET":
 		serveBug(w, r, path)
+	case r.Method == "POST":
+		serveBugUpdate(w, r, path)
 	default:
 		showError(w, r, "Can't service "+r.Method+":"+path,
 			http.StatusMethodNotAllowed)

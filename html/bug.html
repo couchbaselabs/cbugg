@@ -5,14 +5,14 @@
 </head>
 
 <body>
-  <h1>{{.Id}} - {{.Title | html}}</h1>
+  <h1>{{.Id}} - <span id="title" style="display: inline" class="edit">{{.Title | html}}</span></h1>
 
-  <p>
+  <p id="description" class="edit_area">
     {{.Description | html}}
   </p>
   
   <p>
-    Status: {{.Status}}.
+    Status: <span id="status">{{.Status}}</span>.
 
     {{ if .Tags }}
       Tags:
@@ -26,6 +26,17 @@
     Filed on {{.CreatedAt}} by {{.Creator}}.
   </p>
 
+  <script type="text/javascript" src="/static/jquery.min.js"></script>
+  <script type="text/javascript"
+          src="/static/jquery.jeditable.mini.js"></script>
+  <script type="text/javascript" src="/static/cbugg.js"></script>
+
+  <script type="text/javascript">
+    $(document).ready(function() {
+      cbuggMakePageEditable({bugid: {{.Id}}, status: {{.Status}} });
+    });
+
+  </script>
 </body>
 
 </html>

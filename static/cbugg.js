@@ -1,55 +1,20 @@
-function cbuggFormToJSON(selector, defaults) {
-    var form = defaults;
-    $(selector).find(':input[name]:enabled').each(function() {
-        var self = $(this);
-        var name = self.attr('name');
-        if (form[name]) {
-            form[name] = form[name] + ',' + self.val();
-        } else {
-            form[name] = self.val();
-        }
+function  cbuggMakePageEditable(buginfo) {
+    var url = '/bug/' + buginfo.bugid;
+    $('.edit').editable(url);
+
+    $('#status').editable(url, {
+        type: 'select',
+        submit: 'OK',
+        data: {'new': 'new', 'open': 'open', 'resolved': 'resolved',
+               'closed': 'closed', 'selected': buginfo.status }
     });
 
-    return form;
-}
-
-if (!Date.prototype.toISOString) {
-    Date.prototype.toISOString = function() {
-        function pad(n) { return n < 10 ? '0' + n : n; }
-        return this.getUTCFullYear() + '-'
-            + pad(this.getUTCMonth() + 1) + '-'
-            + pad(this.getUTCDate()) + 'T'
-            + pad(this.getUTCHours()) + ':'
-            + pad(this.getUTCMinutes()) + ':'
-            + pad(this.getUTCSeconds()) + 'Z';
-    };
-}
-
-function cbuggNewID() {
-    return "bug-" + new Date().toISOString();
-}
-
-function cbuggNewBug() {
-    var data = JSON.stringify(cbuggFormToJSON("#newbug", {
-        description: "",
-        status: "new",
-        creator: "me",
-        tags: [],
-        type: "bug",
-        created_at: new Date().toISOString()
-    }));
-
-    var newId = cbuggNewID();
-
-    $.ajax({
-        type: "PUT",
-        url: "/.cbfs/crudproxy/" + newId,
-        contentType: "application/json",
-        data: data,
-        success: function(data) {
-            alert('Bug submitted!');
-        }
+    $('.edit_area').editable(url, {
+        type: 'textarea',
+        cancel: 'Cancel',
+        submit: 'OK',
+        width: "none",
+        height: "none",
+        tooltip: 'click to modify description'
     });
-
-    return false;
 }
