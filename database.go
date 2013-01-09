@@ -45,7 +45,7 @@ func dbConnect(serv, bucket string) (*couchbase.Bucket, error) {
 		log.Printf("Installing new version of views (old version=%v)",
 			marker.Version)
 		doc := json.RawMessage([]byte(designDoc))
-		err = rv.PutDDoc("cbfs", &doc)
+		err = rv.PutDDoc("cbugg", &doc)
 		if err != nil {
 			return nil, err
 		}
