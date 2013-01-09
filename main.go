@@ -20,26 +20,6 @@ var NotFound = errors.New("not found")
 
 var staticPath = flag.String("static", "static", "Path to the static content")
 
-func init() {
-	var err error
-	templates, err = template.ParseGlob("html/*.html")
-	if err != nil {
-		panic("Couldn't parse templates.")
-	}
-
-	r := mux.NewRouter()
-	// Bugs are fancy
-	r.HandleFunc("/bug/", serveNewBug).Methods("POST")
-	r.HandleFunc("/bug/", serveBugList).Methods("GET")
-	r.HandleFunc("/bug/{bugid}", serveBug).Methods("GET")
-	r.HandleFunc("/bug/{bugid}", serveBugUpdate).Methods("POST")
-	r.PathPrefix("/static/").Handler(http.StripPrefix("/static/",
-		http.FileServer(http.Dir(*staticPath))))
-	r.HandleFunc("/", serveHome)
-
-	http.Handle("/", r)
-}
-
 func newBugId() (uint64, error) {
 	return db.Incr(".bugid", 1, 0, 0)
 }
@@ -181,6 +161,24 @@ func main() {
 	cbBucket := flag.String("bucket", "cbugg", "couchbase bucket")
 
 	flag.Parse()
+
+	var err error
+	templates, err = template.ParseGlob("html/*.html")
+	if err != nil {
+		panic("Couldn't parse templates.")
+	}
+
+	r := mux.NewRouter()
+	// Bugs are fancy
+	r.HandleFunc("/bug/", serveNewBug).Methods("POST")
+	r.HandleFunc("/bug/", serveBugList).Methods("GET")
+	r.HandleFunc("/bug/{bugid}", serveBug).Methods("GET")
+	r.HandleFunc("/bug/{bugid}", serveBugUpdate).Methods("POST")
+	r.PathPrefix("/static/").Handler(http.StripPrefix("/static/",
+		http.FileServer(http.Dir(*staticPath))))
+	r.HandleFunc("/", serveHome)
+
+	http.Handle("/", r)
 
 	initCb(*cbServ, *cbBucket)
 
