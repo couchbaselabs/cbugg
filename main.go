@@ -22,7 +22,7 @@ var staticPath = flag.String("static", "static", "Path to the static content")
 
 func init() {
 	var err error
-	templates, err = template.ParseGlob(fmt.Sprintf("html/%c.html", '*'))
+	templates, err = template.ParseGlob("html/*.html")
 	if err != nil {
 		panic("Couldn't parse templates.")
 	}
