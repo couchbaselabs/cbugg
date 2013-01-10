@@ -1,0 +1,38 @@
+<h2>{{bug.id}} -
+    <span class="title">
+        <span ng-hide="editingTitle" ng-click="editTitle()">{{bug.title}}</span>
+        <form ng-submit="submitTitle()" ng-show="editingTitle">
+            <input name="titleInput" ng-model="bug.title">
+            <input type="submit" value="OK">
+        </form>
+</span></h2>
+<cbmarkdown class="description" ng-model="$parent.bug.description"></cbmarkdown>
+
+<p>
+Status:
+<select class="status" ng-model="bug.status" ng-options="state for state in allStates">
+</select>
+<div class="tags">Tags: 
+    <span ng-hide="editingTags" ng-click="editTags()" ng-repeat="tag in bug.tags" class="tag">{{tag}}</span>
+    <em ng-hide="bug.tags || editingTags" ng-click="editTags()">Untagged</em>
+    <form ng-submit="submitTags()" ng-show="editingTags">
+        <input name="tagsInput" ng-model="bug.tags" ng-list="/[,\s]+/">
+        <input type="submit" value="OK">
+    </form>
+</div>
+</p>
+
+<p>
+Filed {{bug.created_at | relDate}} by {{bug.creator}}.
+</p>
+
+<h2>History</h2>
+<ul>
+    <li ng-repeat="hi in history">
+    Changed
+    <span ng-show="hi.ModType">{{hi.ModType}}</span>
+    <span ng-hide="hi.ModType">(unknown)</span>
+    {{hi.Timestamp | relDate}}
+    </li>
+</ul>
+

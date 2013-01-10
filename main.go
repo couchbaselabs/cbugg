@@ -77,10 +77,19 @@ func serveBug(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	templates.ExecuteTemplate(w, "bug.html", map[string]interface{}{
+	/*templates.ExecuteTemplate(w, "bug.html", map[string]interface{}{
+		"bug":     bug,
+		"history": hist,
+	})*/
+	robj, err := json.Marshal(map[string]interface{}{
 		"bug":     bug,
 		"history": hist,
 	})
+	if err != nil {
+		showError(w, r, err.Error(), 404)
+		return
+	}
+	w.Write(robj)
 }
 
 type BugHistoryItem struct {
@@ -89,7 +98,7 @@ type BugHistoryItem struct {
 	ModType   string
 }
 
-func getBugHistory(id string) (chan BugHistoryItem, error) {
+func getBugHistory(id string) ([]BugHistoryItem, error) {
 	args := map[string]interface{}{
 		"start_key": []interface{}{id},
 		"end_key":   []interface{}{id, map[string]string{}},
@@ -100,35 +109,33 @@ func getBugHistory(id string) (chan BugHistoryItem, error) {
 		return nil, err
 	}
 
-	ch := make(chan BugHistoryItem)
+	histitems := []BugHistoryItem{}
 
-	go func() {
-		defer close(ch)
-		for _, r := range res.Rows {
-			var typestr string
-			if s, ok := r.Value.(string); ok {
-				typestr = s
-			}
-			t, err := time.Parse(time.RFC3339, r.Key.([]interface{})[1].(string))
-			if err != nil {
-				log.Printf("Error parsing timestamp: %v", err)
-				continue
-			}
-			ch <- BugHistoryItem{
-				r.ID,
-				t,
-				typestr,
-			}
+	for _, r := range res.Rows {
+		var typestr string
+		if s, ok := r.Value.(string); ok {
+			typestr = s
 		}
-	}()
+		t, err := time.Parse(time.RFC3339, r.Key.([]interface{})[1].(string))
+		if err != nil {
+			log.Printf("Error parsing timestamp: %v", err)
+			continue
+		}
+		histitems = append(histitems, BugHistoryItem{
+			r.ID,
+			t,
+			typestr,
+		})
+	}
 
-	return ch, nil
+	return histitems, nil
 }
 
 func serveBugUpdate(w http.ResponseWriter, r *http.Request) {
 	id := mux.Vars(r)["bugid"]
 	r.ParseForm()
 	val := r.FormValue("value")
+	rval := []byte{}
 
 	historyKey := id + "-" + time.Now().UTC().Format(time.RFC3339Nano)
 
@@ -169,7 +176,6 @@ func serveBugUpdate(w http.ResponseWriter, r *http.Request) {
 					}
 					return false
 				})
-			val = strings.Join(bug.Tags, ", ")
 		default:
 			return nil, fmt.Errorf("Unhandled id: %v",
 				r.FormValue("id"))
@@ -186,14 +192,15 @@ func serveBugUpdate(w http.ResponseWriter, r *http.Request) {
 
 		bug.ModifiedAt = time.Now().UTC()
 		bug.Parent = historyKey
-		return json.Marshal(&bug)
+		rval, err = json.Marshal(&bug)
+		return rval, err
 	})
 
 	if err != nil {
 		http.Error(w, err.Error(), 400)
 	}
 
-	w.Write([]byte(val))
+	w.Write([]byte(rval))
 }
 
 func serveBugList(w http.ResponseWriter, r *http.Request) {
@@ -213,7 +220,35 @@ func serveBugList(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	templates.ExecuteTemplate(w, "buglist.html", res)
+	jres, err := json.Marshal(res.Rows)
+	if err != nil {
+		showError(w, r, err.Error(), 500)
+		return
+	}
+	w.Write(jres)
+}
+
+func serveStateCounts(w http.ResponseWriter, r *http.Request) {
+	args := map[string]interface{}{"group_level": 1}
+	states, err := db.View("cbugg", "by_state", args)
+	if err != nil {
+		showError(w, r, err.Error(), 500)
+		return
+	}
+
+	statemap := map[string]interface{}{}
+	for _, row := range states.Rows {
+		statemap[row.Key.([]interface{})[0].(string)] = row.Value
+	}
+
+	jres, err := json.Marshal(map[string]interface{}{
+		"states": statemap,
+	})
+	if err != nil {
+		showError(w, r, err.Error(), 500)
+		return
+	}
+	w.Write(jres)
 }
 
 func serveHome(w http.ResponseWriter, r *http.Request) {
@@ -239,20 +274,17 @@ func main() {
 	flag.Parse()
 
 	var err error
-	templates, err = template.ParseGlob("html/*.html")
-	if err != nil {
-		panic("Couldn't parse templates.")
-	}
 
 	r := mux.NewRouter()
 	// Bugs are fancy
-	r.HandleFunc("/bug/", serveNewBug).Methods("POST")
-	r.HandleFunc("/bug/", serveBugList).Methods("GET")
-	r.HandleFunc("/bug/{bugid}", serveBug).Methods("GET")
-	r.HandleFunc("/bug/{bugid}", serveBugUpdate).Methods("POST")
+	r.HandleFunc("/api/bug/", serveNewBug).Methods("POST")
+	r.HandleFunc("/api/bug/", serveBugList).Methods("GET")
+	r.HandleFunc("/api/bug/{bugid}", serveBug).Methods("GET")
+	r.HandleFunc("/api/bug/{bugid}", serveBugUpdate).Methods("POST")
+	r.HandleFunc("/api/state-counts", serveStateCounts)
 	r.PathPrefix("/static/").Handler(http.StripPrefix("/static/",
 		http.FileServer(http.Dir(*staticPath))))
-	r.HandleFunc("/", serveHome)
+	r.Handle("/", http.RedirectHandler("/static/app.html", 302))
 
 	http.Handle("/", r)
 

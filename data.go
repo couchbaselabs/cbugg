@@ -19,5 +19,5 @@ type Bug struct {
 }
 
 func (b Bug) Url() string {
-	return "/bug/" + b.Id
+	return "/static/app.html#/bug/" + b.Id
 }
