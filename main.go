@@ -90,8 +90,6 @@ func serveBugUpdate(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			return nil, err
 		}
-		bug.ModifiedAt = time.Now().UTC()
-		bug.Parent = historyKey
 
 		// This is a side-effect in a CAS operation.  It's is
 		// correct and safe because the side effect is the
@@ -127,6 +125,8 @@ func serveBugUpdate(w http.ResponseWriter, r *http.Request) {
 				r.FormValue("id"))
 		}
 
+		bug.ModifiedAt = time.Now().UTC()
+		bug.Parent = historyKey
 		return json.Marshal(&bug)
 	})
 
