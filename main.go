@@ -95,6 +95,7 @@ func serveBugUpdate(w http.ResponseWriter, r *http.Request) {
 			Id:         id,
 			Type:       "bughistory",
 			ModifiedAt: bug.ModifiedAt,
+			ModType:    r.FormValue("id"),
 		}
 
 		switch r.FormValue("id") {

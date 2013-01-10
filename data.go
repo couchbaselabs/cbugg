@@ -15,6 +15,7 @@ type Bug struct {
 	Tags        []string  `json:"tags,omitempty"`
 	CreatedAt   time.Time `json:"created_at,omitempty"`
 	ModifiedAt  time.Time `json:"modified_at,omitempty"`
+	ModType     string    `json:"modify_type,omitempty"`
 }
 
 func (b Bug) Url() string {
