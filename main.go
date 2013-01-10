@@ -91,26 +91,24 @@ func serveBugUpdate(w http.ResponseWriter, r *http.Request) {
 			return nil, err
 		}
 
-		// This is a side-effect in a CAS operation.  It's is
-		// correct and safe because the side effect is the
-		// creation of a document that is only used and
-		// correct relative to the final value from the CAS.
-		history := bug
-		history.Type = "bughistory"
-
-		err = db.Set(historyKey, 0, &history)
-		if err != nil {
-			return nil, err
+		history := Bug{
+			Id:         id,
+			Type:       "bughistory",
+			ModifiedAt: bug.ModifiedAt,
 		}
 
 		switch r.FormValue("id") {
 		case "description":
+			history.Description = bug.Description
 			bug.Description = val
 		case "title":
+			history.Title = bug.Title
 			bug.Title = val
 		case "status":
+			history.Status = bug.Status
 			bug.Status = val
 		case "tags":
+			history.Tags = bug.Tags
 			bug.Tags = strings.FieldsFunc(val,
 				func(r rune) bool {
 					switch r {
@@ -123,6 +121,15 @@ func serveBugUpdate(w http.ResponseWriter, r *http.Request) {
 		default:
 			return nil, fmt.Errorf("Unhandled id: %v",
 				r.FormValue("id"))
+		}
+
+		// This is a side-effect in a CAS operation.  It's is
+		// correct and safe because the side effect is the
+		// creation of a document that is only used and
+		// correct relative to the final value from the CAS.
+		err = db.Set(historyKey, 0, &history)
+		if err != nil {
+			return nil, err
 		}
 
 		bug.ModifiedAt = time.Now().UTC()
