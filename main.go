@@ -71,7 +71,58 @@ func serveBug(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	templates.ExecuteTemplate(w, "bug.html", bug)
+	hist, err := getBugHistory(id)
+	if err != nil {
+		showError(w, r, err.Error(), 404)
+		return
+	}
+
+	templates.ExecuteTemplate(w, "bug.html", map[string]interface{}{
+		"bug":     bug,
+		"history": hist,
+	})
+}
+
+type BugHistoryItem struct {
+	Key       string
+	Timestamp time.Time
+	ModType   string
+}
+
+func getBugHistory(id string) (chan BugHistoryItem, error) {
+	args := map[string]interface{}{
+		"start_key": []interface{}{id},
+		"end_key":   []interface{}{id, map[string]string{}},
+	}
+
+	res, err := db.View("cbugg", "bug_history", args)
+	if err != nil {
+		return nil, err
+	}
+
+	ch := make(chan BugHistoryItem)
+
+	go func() {
+		defer close(ch)
+		for _, r := range res.Rows {
+			var typestr string
+			if s, ok := r.Value.(string); ok {
+				typestr = s
+			}
+			t, err := time.Parse(time.RFC3339, r.Key.([]interface{})[1].(string))
+			if err != nil {
+				log.Printf("Error parsing timestamp: %v", err)
+				continue
+			}
+			ch <- BugHistoryItem{
+				r.ID,
+				t,
+				typestr,
+			}
+		}
+	}()
+
+	return ch, nil
 }
 
 func serveBugUpdate(w http.ResponseWriter, r *http.Request) {

@@ -1,23 +1,23 @@
 <html>
 <head>
-  <title>cbugg - Bug {{.Id}}</title>
+  <title>cbugg - Bug {{.bug.Id}}</title>
   <link rel="stylesheet" href="/static/css/screen.css" type="text/css">
 </head>
 
 <body>
-  <h1>{{.Id}} - <span id="title" style="display: inline" class="edit">{{.Title}}</span></h1>
+  <h1>{{.bug.Id}} - <span id="title" style="display: inline" class="edit">{{.bug.Title}}</span></h1>
 
   <p id="description" class="edit_area">
     {{.Description}}
   </p>
   
   <p>
-    Status: <span id="status">{{.Status}}</span>.
+    Status: <span id="status">{{.bug.Status}}</span>.
 
     Tags:
     <span id="tags">
-    {{ if .Tags }}
-      {{ range .Tags }}
+    {{ if .bug.Tags }}
+      {{ range .bug.Tags }}
         {{.}}
       {{ end }}
     {{ else }}
@@ -27,8 +27,22 @@
   </p>
 
   <p>
-    Filed on {{.CreatedAt}} by {{.Creator}}.
+    Filed on {{.bug.CreatedAt}} by {{.bug.Creator}}.
   </p>
+
+  <h2>History</h2>
+
+  <ul>
+    {{ range .history }}
+    <li title="{{.Key}}">Changed
+      {{ if .ModType }}
+      {{.ModType}}
+      {{ else }}
+      (unknown)
+      {{ end }}
+      at {{.Timestamp}}</li>
+    {{ end }}
+  </ul>
 
   <script type="text/javascript" src="/static/jquery.min.js"></script>
   <script type="text/javascript"
@@ -37,7 +51,7 @@
 
   <script type="text/javascript">
     $(document).ready(function() {
-      cbuggMakePageEditable({bugid: {{.Id}}, status: {{.Status}} });
+      cbuggMakePageEditable({bugid: {{.bug.Id}}, status: {{.bug.Status}} });
     });
 
   </script>
