@@ -172,6 +172,9 @@ func serveBugUpdate(w http.ResponseWriter, r *http.Request) {
 			ModType:    r.FormValue("id"),
 			ModBy:      email,
 		}
+		if history.ModifiedAt.IsZero() {
+			history.ModifiedAt = bug.CreatedAt
+		}
 
 		switch r.FormValue("id") {
 		case "description":
