@@ -277,6 +277,88 @@ func serveStateCounts(w http.ResponseWriter, r *http.Request) {
 	w.Write(jres)
 }
 
+func serveNewComment(w http.ResponseWriter, r *http.Request) {
+	email := whoami(r)
+	if email == "" {
+		showError(w, r, "You are not authenticated", 401)
+		return
+	}
+
+	bugid := mux.Vars(r)["bugid"]
+	id := "c-" + bugid + "-" + time.Now().UTC().Format(time.RFC3339Nano)
+
+	c := Comment{
+		Id:        id,
+		BugId:     bugid,
+		Type:      "comment",
+		User:      email,
+		Text:      r.FormValue("body"),
+		CreatedAt: time.Now().UTC(),
+	}
+
+	added, err := db.Add(c.Id, 0, c)
+	if err != nil {
+		showError(w, r, err.Error(), 500)
+		return
+	}
+	if !added {
+		// This is a bug bug
+		showError(w, r, "Comment collision on "+c.Id, 500)
+		return
+	}
+
+	mustEncode(w, APIComment(c))
+}
+
+func serveCommentList(w http.ResponseWriter, r *http.Request) {
+	bugid := mux.Vars(r)["bugid"]
+
+	args := map[string]interface{}{
+		"start_key":    []interface{}{bugid},
+		"end_key":      []interface{}{bugid, map[string]string{}},
+		"include_docs": true,
+	}
+
+	viewRes := struct {
+		Rows []struct {
+			Doc struct {
+				Json APIComment
+			}
+		}
+	}{}
+
+	err := db.ViewCustom("cbugg", "comments", args, &viewRes)
+	if err != nil {
+		showError(w, r, err.Error(), 500)
+		return
+	}
+
+	comments := []APIComment{}
+
+	for _, r := range viewRes.Rows {
+		comments = append(comments, r.Doc.Json)
+	}
+
+	w.Header().Set("Content-type", "application/json")
+	mustEncode(w, comments)
+}
+
+func serveDelComment(w http.ResponseWriter, r *http.Request) {
+	email := whoami(r)
+	if email == "" {
+		showError(w, r, "You are not authenticated", 401)
+		return
+	}
+
+	err := db.Delete(mux.Vars(r)["commid"])
+	if err != nil {
+		showError(w, r, err.Error(), 500)
+		return
+	}
+
+	w.WriteHeader(204)
+}
+
 func serveHome(w http.ResponseWriter, r *http.Request) {
 	args := map[string]interface{}{"group_level": 1}
 	states, err := db.View("cbugg", "by_state", args)
@@ -311,6 +393,10 @@ func main() {
 	r.HandleFunc("/api/bug/", serveBugList).Methods("GET")
 	r.HandleFunc("/api/bug/{bugid}", serveBug).Methods("GET")
 	r.HandleFunc("/api/bug/{bugid}", serveBugUpdate).Methods("POST")
+	r.HandleFunc("/api/bug/{bugid}/comments/", serveCommentList).Methods("GET")
+	r.HandleFunc("/api/bug/{bugid}/comments/", serveNewComment).Methods("POST")
+	r.HandleFunc("/api/bug/{bugid}/comments/{commid}",
+		serveDelComment).Methods("DELETE")
 	r.HandleFunc("/api/state-counts", serveStateCounts)
 	r.HandleFunc("/auth/login", serveLogin).Methods("POST")
 	r.HandleFunc("/auth/logout", serveLogout).Methods("POST")

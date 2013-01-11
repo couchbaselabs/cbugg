@@ -22,6 +22,18 @@ type Bug struct {
 	ModBy       string    `json:"modified_by,omitempty"`
 }
 
+type Comment struct {
+	Id        string    `json:"id"`
+	BugId     string    `json:"bugId"`
+	Type      string    `json:"type"`
+	Deleted   bool      `json:"deleted"`
+	User      string    `json:"user"`
+	Text      string    `json:"text"`
+	CreatedAt time.Time `json:"created_at"`
+}
+
+type APIComment Comment
+
 type APIBug Bug
 
 func (u User) MarshalJSON() ([]byte, error) {
@@ -31,6 +43,11 @@ func (u User) MarshalJSON() ([]byte, error) {
 	}
 
 	return json.Marshal(m)
+}
+
+func maybenil(m map[string]interface{}, k string) string {
+	s, _ := m[k].(string)
+	return s
 }
 
 func (b APIBug) MarshalJSON() ([]byte, error) {
@@ -44,13 +61,23 @@ func (b APIBug) MarshalJSON() ([]byte, error) {
 		return nil, err
 	}
 
-	maybenil := func(k string) string {
-		s, _ := m[k].(string)
-		return s
+	m["creator"] = User(maybenil(m, "creator"))
+	m["modified_by"] = User(maybenil(m, "modified_by"))
+	return json.Marshal(m)
+}
+
+func (c APIComment) MarshalJSON() ([]byte, error) {
+	d, err := json.Marshal(Comment(c))
+	if err != nil {
+		return nil, err
+	}
+	m := map[string]interface{}{}
+	err = json.Unmarshal(d, &m)
+	if err != nil {
+		return nil, err
 	}
 
-	m["creator"] = User(maybenil("creator"))
-	m["modified_by"] = User(maybenil("modified_by"))
+	m["user"] = User(maybenil(m, "user"))
 	return json.Marshal(m)
 }
 
