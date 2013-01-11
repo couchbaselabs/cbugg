@@ -1,10 +1,11 @@
 angular.module('cbuggDirectives', [])
-    .directive('cbmarkdown', function () {
+    .directive('cbMarkdown', function () {
         var converter = new Showdown.converter();
         var editTemplate = '<div ng-class="{edithide: !isEditMode}" ng-dblclick="switchToPreview()">'+
                            '<textarea ui-codemirror="{theme:\'monokai\', mode: {name:\'markdown\'}}"'+
                            ' ng-model="markdown"></textarea></div>';
-        var previewTemplate = '<div ng-hide="isEditMode" ng-dblclick="switchToEdit()">Preview</div>';
+        var previewInner = '<i class="icon-pencil pull-right"></i>';
+        var previewTemplate = '<div ng-hide="isEditMode" class="well" ng-click="switchToEdit()">'+previewInner+'</div>';
         return {
             restrict:'E',
             scope:{},
@@ -16,7 +17,7 @@ angular.module('cbuggDirectives', [])
 
                 return function (scope, element, attrs, model) {
                     scope.renderPreview = function() {
-                        var makeHtml = converter.makeHtml(scope.markdown);
+                        var makeHtml = previewInner + converter.makeHtml(scope.markdown);
                         previewElement.html(makeHtml);
                     }
                     scope.switchToPreview = function () {
@@ -104,13 +105,23 @@ function BugCtrl($scope, $routeParams, $http) {
         });
     })
 
-    $scope.editTags = function() {
-        $scope.editingTags = true;
+    $scope.killTag = function(kill) {
+        $scope.bug.tags = _.filter($scope.bug.tags, function(t) {
+            return t !== kill;
+        });
+        updateBug("tags");
     }
 
-    $scope.submitTags = function() {
+    $scope.addTags = function($event) {
+        var newtag = $scope.newtag.split(" ").shift();
+        $scope.newtag = '';
+        if(!$scope.bug.tags) {
+            $scope.bug.tags = [];
+        }
+        $scope.bug.tags.push(newtag);
+        $scope.bug.tags = _.uniq($scope.bug.tags);
+        $event.preventDefault();
         updateBug("tags");
-        $scope.editingTags = false;
     }
 
     $scope.editTitle = function() {

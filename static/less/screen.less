@@ -1,17 +1,3 @@
-@import-once "normalize.less";
-
-.label(@fg, @bg) {
-    color: @fg;
-    background-color: @bg;
-    border-radius: 3px;
-    padding: 0px 2px 0px 2px;
-}
-
-.tag {
-    .label(#eee, #336699);
-    margin-left: 3px;
-}
-
 h1 {
     a {
         text-decoration: none;
@@ -26,27 +12,14 @@ h1 {
     background-color: #ffd;
 }
 
-form {
-    display: inline;
+.tag {
+    margin-left: 3px;
 }
 
 /*Codemirror won't update if hidden by display: none. */
 .edithide {
     position: absolute;
     top: -9999px;
-}
-
-.edit_area {
-    textarea {
-        min-width: 90%;
-        min-height: 100px;
-        display: block;
-    }
-}
-
-body {
-    max-width: 900px;
-    margin: 0 auto;
 }
 
 input[name="title"] {

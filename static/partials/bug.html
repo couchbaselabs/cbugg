@@ -1,23 +1,25 @@
 <h2>{{bug.id}} -
     <span class="title">
         <span ng-hide="editingTitle" ng-click="editTitle()">{{bug.title}}</span>
-        <form ng-submit="submitTitle()" ng-show="editingTitle">
+        <form ng-submit="submitTitle()" ng-show="editingTitle" class="form-inline">
             <input name="titleInput" ng-model="bug.title">
             <input type="submit" value="OK">
         </form>
 </span></h2>
-<cbmarkdown class="description" ng-model="$parent.bug.description"></cbmarkdown>
+
+<cb-markdown ng-model="$parent.bug.description"></cb-markdown>
 
 <p>
 Status:
 <select class="status" ng-model="bug.status" ng-options="state for state in allStates">
 </select>
-<div class="tags">Tags: 
-    <span ng-hide="editingTags" ng-click="editTags()" ng-repeat="tag in bug.tags" class="tag">{{tag}}</span>
-    <em ng-hide="bug.tags || editingTags" ng-click="editTags()">Untagged</em>
-    <form ng-submit="submitTags()" ng-show="editingTags">
-        <input name="tagsInput" ng-model="bug.tags" ng-list="/[,\s]+/">
-        <input type="submit" value="OK">
+<div class="tags">
+    <form class="form-inline">
+        Tags:
+        <button ng-click="killTag(tag)"
+            ng-repeat="tag in bug.tags" class="tag btn btn-mini btn-success">{{tag}} <i class="icon-white icon-remove"></i>
+        </button>
+        <input type="text" ui-keypress="{'enter space':'addTags($event)'}" ng-model="newtag" class="input-small"/>
     </form>
 </div>
 </p>
@@ -26,8 +28,8 @@ Status:
 Filed {{bug.created_at | relDate}} by {{bug.creator}}.
 </p>
 
-<h2>History</h2>
-<ul>
+<h3>History</h3>
+<ul class="unstyled">
     <li ng-repeat="hi in history">
     Changed
     <span ng-show="hi.ModType">{{hi.ModType}}</span>
