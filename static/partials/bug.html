@@ -1,18 +1,22 @@
-<h2>{{bug.id}} -
-    <span class="title">
-        <span ng-hide="editingTitle" ng-click="editTitle()">{{bug.title}}</span>
-        <form ng-submit="submitTitle()" ng-show="editingTitle" class="form-inline">
-            <input name="titleInput" ng-model="bug.title">
-            <input type="submit" value="OK">
-        </form>
-</span></h2>
+<div class="titlearea">
+    <form ng-submit="submitTitle()" class="form-inline">
+        {{bug.id}} -
+        <span class="title" ng-hide="editingTitle" ng-click="editTitle()">{{bug.title}}
+            <i class="icon-pencil"></i>
+        </span>
+        <input class="title-input" ng-show="editingTitle" name="titleInput" ng-model="bug.title">
+        <input class="btn btn-medium" ng-show="editingTitle" type="submit" value="OK">
+    </form>
+</div>
 
 <cb-markdown ng-model="$parent.bug.description"></cb-markdown>
 
 <p>
+<form class="form-inline">
 Status:
 <select class="status" ng-model="bug.status" ng-options="state for state in allStates">
 </select>
+</form>
 <div class="tags">
     <form class="form-inline">
         Tags:
@@ -37,4 +41,3 @@ Filed {{bug.created_at | relDate}} by {{bug.creator}}.
     {{hi.Timestamp | relDate}}
     </li>
 </ul>
-

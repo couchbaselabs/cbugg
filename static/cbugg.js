@@ -133,7 +133,3 @@ function BugCtrl($scope, $routeParams, $http) {
         $scope.editingTitle = false;
     }
 }
-
-function relDate(dstr) {
-    return moment(dstr).fromNow();
-}
