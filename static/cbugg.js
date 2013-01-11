@@ -1,10 +1,6 @@
 angular.module('cbuggDirectives', [])
     .directive('cbMarkdown', function () {
         var converter = new Showdown.converter();
-        var editTemplate = '<div ng-class="{edithide: !isEditMode}">'+
-                           '<textarea ui-codemirror="{theme:\'monokai\', mode: {name:\'markdown\'}}"'+
-                           ' ng-model="markdown"></textarea><button class="btn pull-right"'+
-                           ' ng-click="switchToPreview()">Save</button></div>';
         var previewEditIcon = '<i class="icon-pencil hand pull-right" ng-click="switchToEdit()"></i>';
         var previewTemplate = '<div ng-hide="isEditMode" class="well">'+previewEditIcon+'</div>';
         return {
@@ -12,12 +8,20 @@ angular.module('cbuggDirectives', [])
             scope:{},
             require:'ngModel',
             compile:function (tElement, tAttrs, transclude) {
-                tElement.html(editTemplate);
+                var initial = tElement.text();
+                var saveText = tAttrs["savetext"];
+                var modeflag = tAttrs["modeflag"];
+                if(!saveText) { saveText = "Save"; }
+                tElement.html('<div ng-class="{edithide: !isEditMode}">'+
+                              '<textarea ui-codemirror="{theme:\'monokai\', '+
+                              'mode: {name:\'markdown\'}}" ng-model="markdown">'+
+                              '</textarea><button class="btn pull-right"'+
+                              ' ng-click="switchToPreview()">'+saveText+'</button></div>');
+                var editing = tAttrs["edit"];
                 var previewOuterElement = angular.element(previewTemplate);
                 var previewInnerElement = angular.element('<div></div>');
                 tElement.append(previewOuterElement);
                 previewOuterElement.append(previewInnerElement);
-
 
                 return function (scope, element, attrs, model) {
                     scope.renderPreview = function() {
@@ -28,9 +32,15 @@ angular.module('cbuggDirectives', [])
                         model.$setViewValue(scope.markdown);
                         scope.renderPreview();
                         scope.isEditMode = false;
+                        if(modeflag) {
+                            scope.$parent[modeflag] = false;
+                        }
                     }
                     scope.switchToEdit = function () {
                         scope.isEditMode = true;
+                        if(modeflag) {
+                            scope.$parent[modeflag] = true;
+                        }
                     }
                     scope.$watch(attrs["ngModel"], function() {
                         var up = model.$modelValue;
@@ -39,8 +49,12 @@ angular.module('cbuggDirectives', [])
                             scope.renderPreview();
                         }
                     })
-                    scope.markdown="Double-click to edit";
-                    scope.switchToPreview()
+                    scope.markdown=initial;
+                    if(editing) {
+                        scope.switchToEdit()
+                    } else {
+                        scope.switchToPreview()
+                    }
                 }
             }
         }
@@ -59,6 +73,12 @@ function bAlert(heading, message, kind) {
 }
 
 angular.module('cbuggFilters', []).
+    filter('markdownify', function() {
+        var converter = new Showdown.converter();
+        return function(string) {
+            return converter.makeHtml(string)
+        }
+    }).
     filter('relDate', function() {
         return function(dstr) {
             return moment(dstr).fromNow();
@@ -106,13 +126,15 @@ function BugCtrl($scope, $routeParams, $http) {
     }
 
     $scope.allStates = ["new", "open", "resolved", "closed"];
+    $scope.comments = [];
+    $scope.draftcomment = "";
 
+    
     $http.get('/api/bug/' + $routeParams.bugId).success(function(data) {
         $scope.bug = data.bug;
         $scope.history = data.history;
         $scope.history.reverse();
         $scope.$watch('bug.description', function(next, prev) {
-            console.log("N", next, prev);
             if($scope.bug && next !== prev) {
                 updateBug("description");
             }
@@ -122,7 +144,11 @@ function BugCtrl($scope, $routeParams, $http) {
                 updateBug("status");
             }
         });
-    })
+    });
+
+    $http.get('/api/bug/' + $routeParams.bugId + '/comments/').success(function(data) {
+        $scope.comments = data;
+    });
 
     $scope.killTag = function(kill) {
         $scope.bug.tags = _.filter($scope.bug.tags, function(t) {
@@ -151,6 +177,24 @@ function BugCtrl($scope, $routeParams, $http) {
         updateBug("title");
         $scope.editingTitle = false;
     }
+
+    $scope.startComment = function() {
+        $scope.addingcomment = true;
+    }
+
+    $scope.postComment = function() {
+        $scope.addingcomment = false;
+        $http.post('/api/bug/' + $routeParams.bugId + '/comments/',
+                    'body=' + encodeURIComponent($scope.draftcomment),
+                  {headers: {"Content-Type": "application/x-www-form-urlencoded"}}).
+            success(function(data) {
+                $scope.comments.push(data);
+            }).
+            error(function(data, code) {
+                bAlert("Error " + code, "could not post comment: " + data, "error")
+            })
+        $scope.draftcomment="";
+    }
 }
 
 function FakeLoginCtrl($scope) {
@@ -176,7 +220,6 @@ function LoginCtrl($scope, $http) {
                     $scope.gravatar = res.emailmd5;
                 }).
                 error(function(res, err) {
-                    console.log(res, err)
                     bAlert("Error", "Couldn't log you in.", "error");
                 });
         },

@@ -9,7 +9,7 @@
     </form>
 </div>
 
-<cb-markdown ng-model="$parent.bug.description"></cb-markdown>
+<cb-markdown ng-model="$parent.bug.description">Click pencil to edit</cb-markdown>
 
 <p>
 <form class="form-inline">
@@ -36,6 +36,27 @@
   <img ng-src="http://www.gravatar.com/avatar/{{bug.creator.md5}}?s=16">
   {{bug.creator.email}}.
 </p>
+
+<h3>Comments</h3>
+<div class="comments">
+  <div class="comment well well-small" ng-repeat="comment in comments">
+    <div ng-hide="comment.deleted">
+      <div class="author">
+        <img ng-src="http://www.gravatar.com/avatar/{{comment.user.md5}}?s=16">
+        {{comment.user.email}} commented {{comment.created_at | relDate}}
+      </div>
+      <div class="comment-text" ng-bind-html-unsafe="comment.text | markdownify">
+      </div>
+    </div>
+  </div>
+</div>
+<button ng-hide="addingcomment" ng-click="startComment()" class="btn">Add Comment</button>
+<div ng-show="addingcomment">
+  <cb-markdown modeflag="editingcomment" ng-model="$parent.draftcomment"
+  edit="true" savetext="Preview"></cb-markdown>
+  <button ng-hide="editingcomment" ng-click="postComment()"
+    class="btn btn-success pull-right">Post Comment</button>
+</div>
 
 <h3>History</h3>
 <ul class="unstyled">
