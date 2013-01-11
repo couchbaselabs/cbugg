@@ -166,7 +166,11 @@ function LoginCtrl($scope, $http) {
         }
     });
 
-    $scope.logout = navigator.id.logout;
+    $scope.logout = function() {
+        document.cookie = "";
+        navigator.id.logout();
+        $scope.loggedin = false;
+    }
 
     $scope.login = function() {
         navigator.id.request();
