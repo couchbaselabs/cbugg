@@ -57,7 +57,7 @@ func serveNewBug(w http.ResponseWriter, r *http.Request) {
 		Title:       r.FormValue("title"),
 		Description: r.FormValue("description"),
 		Status:      "new",
-		Creator:     User(email),
+		Creator:     email,
 		Tags:        r.Form["tag"],
 		Type:        "bug",
 		CreatedAt:   time.Now().UTC(),
@@ -79,7 +79,7 @@ func serveNewBug(w http.ResponseWriter, r *http.Request) {
 
 func serveBug(w http.ResponseWriter, r *http.Request) {
 	id := mux.Vars(r)["bugid"]
-	bug := Bug{}
+	bug := APIBug{}
 	err := db.Get(id, &bug)
 	if err != nil {
 		showError(w, r, err.Error(), 404)
@@ -159,7 +159,7 @@ func serveBugUpdate(w http.ResponseWriter, r *http.Request) {
 		if len(current) == 0 {
 			return nil, NotFound
 		}
-		bug := Bug{}
+		bug := APIBug{}
 		err := json.Unmarshal(current, &bug)
 		if err != nil {
 			return nil, err
@@ -170,7 +170,7 @@ func serveBugUpdate(w http.ResponseWriter, r *http.Request) {
 			Type:       "bughistory",
 			ModifiedAt: bug.ModifiedAt,
 			ModType:    r.FormValue("id"),
-			ModBy:      User(email),
+			ModBy:      email,
 		}
 
 		switch r.FormValue("id") {
