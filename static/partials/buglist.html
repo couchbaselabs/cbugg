@@ -4,3 +4,7 @@
         <a href="#/bug/{{bug.ID}}">{{bug.ID}} - {{bug.Value}}</a>
     </li>
 </ul>
+<hr/>
+<form action="/api/bug/" id="newbug" method="POST">
+    Briefly describe your new problem: <input name="title"/>
+</form>
