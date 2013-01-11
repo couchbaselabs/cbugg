@@ -159,7 +159,7 @@ func serveBugUpdate(w http.ResponseWriter, r *http.Request) {
 		if len(current) == 0 {
 			return nil, NotFound
 		}
-		bug := APIBug{}
+		bug := Bug{}
 		err := json.Unmarshal(current, &bug)
 		if err != nil {
 			return nil, err
@@ -209,8 +209,17 @@ func serveBugUpdate(w http.ResponseWriter, r *http.Request) {
 
 		bug.ModifiedAt = time.Now().UTC()
 		bug.Parent = historyKey
-		rval, err = json.Marshal(&bug)
-		return rval, err
+
+		// The version that goes to the DB is different from
+		// the one that goes to the API.
+		dbval, err := json.Marshal(&bug)
+		if err != nil {
+			return nil, err
+		}
+
+		rval, err = json.Marshal(APIBug(bug))
+
+		return dbval, err
 	})
 
 	if err != nil {
