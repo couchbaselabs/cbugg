@@ -46,6 +46,18 @@ angular.module('cbuggDirectives', [])
         }
     });
 
+function bAlert(heading, message, kind) {
+    var kindclass = "";
+    if(kind) {
+        kindclass = "alert-" + kind;
+    }
+    $(".app").prepend(
+            "<div class='alert fade in " + kindclass + "'>"+
+            "<button type='button' class='close' data-dismiss='alert'>&times;</button>"+
+            "<strong>" + heading + ":</strong> " + message + "</div>");
+    $(".alert").alert();
+}
+
 angular.module('cbuggFilters', []).
     filter('relDate', function() {
         return function(dstr) {
@@ -86,6 +98,9 @@ function BugCtrl($scope, $routeParams, $http) {
                        {headers: {"Content-Type": "application/x-www-form-urlencoded"}}).
             success(function(data) {
                 $scope.bug = data;
+            }).
+            error(function(data, code) {
+                bAlert("Error " + code, "could not update bug: " + data, "error")
             });
         }
     }
@@ -161,9 +176,9 @@ function LoginCtrl($scope, $http) {
                     $scope.gravatar = res.emailmd5;
                 }).
                 error(function(res, err) {
-                    console.log(res, err);
-                    alert("Couldn't log you in.")
-                })
+                    console.log(res, err)
+                    bAlert("Error", "Couldn't log you in.", "error");
+                });
         },
         onlogout: function() {
             $scope.loggedin = false;
@@ -177,7 +192,7 @@ function LoginCtrl($scope, $http) {
             $scope.loggedin = false;
         }).
         error(function(res) {
-            alert("Problem logging out.");
+            bAlert("Error", "Problem logging out.", "error");
             $scope.loggedin = false;
         })
     }
@@ -186,3 +201,4 @@ function LoginCtrl($scope, $http) {
         navigator.id.request();
     }
 }
+
