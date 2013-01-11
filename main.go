@@ -124,7 +124,7 @@ func getBugHistory(id string) ([]BugHistoryItem, error) {
 	for _, r := range res.Rows {
 		h := r.Value.(map[string]interface{})
 		if s, ok := h["by"].(string); ok && s != "" {
-			h["byhash"] = md5string(s)
+			h["by"] = User(s)
 		}
 		t, err := time.Parse(time.RFC3339, r.Key.([]interface{})[1].(string))
 		if err != nil {

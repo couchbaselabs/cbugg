@@ -38,8 +38,8 @@ Status:
 <ul class="unstyled">
     <li ng-repeat="hi in history">
     <span ng-show="hi.ModInfo.by">
-      <img ng-src="http://www.gravatar.com/avatar/{{hi.ModInfo.byhash}}?s=16">
-      {{hi.ModInfo.by}}
+      <img ng-src="http://www.gravatar.com/avatar/{{hi.ModInfo.by.md5}}?s=16">
+      {{hi.ModInfo.by.email}}
     </span>
     <span ng-hide="hi.ModInfo.by"><em>somebody</em></span>
     changed
