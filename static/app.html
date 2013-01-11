@@ -10,8 +10,29 @@
         <link rel="stylesheet" type="text/css" href="/static/lib/codemirror/theme/monokai.css"/>
     </head>
     <body>
-        <div class="container">
-            <div class="page-header"><h1><a href="#/">cbugg</a></h1></div>
+        <div class="navbar navbar-fixed-top">
+            <div class="navbar-inner">
+                <div class="container" ng-controller="LoginCtrl">
+                    <form class="navbar-form pull-right" ng-show="loggedin">
+                        <img ng-src="http://www.gravatar.com/avatar/{{gravatar}}?s=28" class="uimg">
+                        <div class="btn-group">
+                            <button class="btn dropdown-toggle" data-toggle="dropdown">
+                                {{username}}
+                                <span class="caret"></span>
+                            </button>
+                            <ul class="dropdown-menu">
+                                <li> <a ng-click="logout()">Log Out</a> </li>
+                            </ul>
+                        </div>
+                    </form>
+                    <p class="navbar-text pull-right">
+                    <a ng-hide="loggedin" ng-click="login()">Log In</a>
+                    </p>
+                    <a href="#/" class="brand gohome">cbugg</a>
+                </div>
+            </div>
+        </div>
+        <div class="container app">
             <div ng-view></div>
         </div>
         <script src="/static/bootstrap/js/bootstrap.min.js"></script>
@@ -22,5 +43,6 @@
         <script src="/static/lib/codemirror.js"></script>
         <script src="/static/lib/codemirror/mode/markdown/markdown.js"></script>
         <script src="/static/cbugg.js"></script>
+        <script src="https://login.persona.org/include.js"></script>
     </body>
 </html>

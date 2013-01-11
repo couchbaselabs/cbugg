@@ -133,3 +133,37 @@ function BugCtrl($scope, $routeParams, $http) {
         $scope.editingTitle = false;
     }
 }
+
+function FakeLoginCtrl($scope) {
+    $scope.login = function() {
+        $scope.loggedin = true;
+        $scope.username = "Test User";
+        $scope.gravatar = "eee3b47a26586bb79e0a832466c066be";
+    }
+    $scope.logout = function() {
+        $scope.loggedin = false;
+    }
+}
+
+function LoginCtrl($scope, $http) {
+    navigator.id.watch({
+        onlogin: function(assertion) {
+            $http.post('/auth/login', assertion).
+                success(function(res) { 
+                    $scope.loggedin = true;
+                    $scope.username = res.email;
+                    $scope.gravatar = res.emailmd5;
+                }).
+                error(function(res) {
+                    alert("Couldn't log you in.")
+                })
+        },
+        onlogout: function() {
+            $scope.loggedin = false;
+        }
+    });
+
+    $scope.login = function() {
+        navigator.id.request();
+    }
+}
