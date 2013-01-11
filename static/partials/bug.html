@@ -13,16 +13,19 @@
 
 <p>
 <form class="form-inline">
-Status:
-<select class="status" ng-model="bug.status" ng-options="state for state in allStates">
-</select>
+    Status:
+    <select class="status" ng-model="bug.status" ng-options="state for state in allStates">
+    </select>
 </form>
 <div class="tags">
     <form class="form-inline">
         Tags:
-        <button ng-click="killTag(tag)"
-            ng-repeat="tag in bug.tags" class="tag btn btn-mini btn-success">{{tag}} <i class="icon-white icon-remove"></i>
-        </button>
+        <div class="btn-group" ng-repeat="tag in bug.tags">
+            <button class="tag btn btn-mini btn-success">{{tag}}</button>
+            <button class="btn btn-mini btn-danger" ng-click="killTag(tag)">
+                <i class="icon-white icon-remove"></i>
+            </button>
+        </div>
         <input type="text" ui-keypress="{'enter space':'addTags($event)'}" ng-model="newtag" class="input-small"/>
     </form>
 </div>
