@@ -6,6 +6,7 @@ import (
 	"flag"
 	"fmt"
 	"html/template"
+	"io"
 	"log"
 	"net/http"
 	"strings"
@@ -29,6 +30,13 @@ func showError(w http.ResponseWriter, r *http.Request,
 	msg string, code int) {
 	log.Printf("Reporting error %v/%v", code, msg)
 	http.Error(w, msg, code)
+}
+
+func mustEncode(w io.Writer, i interface{}) {
+	e := json.NewEncoder(w)
+	if err := e.Encode(i); err != nil {
+		panic(err)
+	}
 }
 
 func serveNewBug(w http.ResponseWriter, r *http.Request) {
@@ -271,8 +279,12 @@ func main() {
 	cbServ := flag.String("couchbase", "http://localhost:8091/",
 		"URL to couchbase")
 	cbBucket := flag.String("bucket", "cbugg", "couchbase bucket")
+	secCookKey := flag.String("cookieKey", "youcandobetter",
+		"The secure cookie auth code.")
 
 	flag.Parse()
+
+	initSecureCookie([]byte(*secCookKey))
 
 	var err error
 
@@ -283,6 +295,7 @@ func main() {
 	r.HandleFunc("/api/bug/{bugid}", serveBug).Methods("GET")
 	r.HandleFunc("/api/bug/{bugid}", serveBugUpdate).Methods("POST")
 	r.HandleFunc("/api/state-counts", serveStateCounts)
+	r.HandleFunc("/auth/login", serveLogin).Methods("POST")
 	r.PathPrefix("/static/").Handler(http.StripPrefix("/static/",
 		http.FileServer(http.Dir(*staticPath))))
 	r.Handle("/", http.RedirectHandler("/static/app.html", 302))
