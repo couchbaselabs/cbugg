@@ -57,7 +57,7 @@ func serveNewBug(w http.ResponseWriter, r *http.Request) {
 		Title:       r.FormValue("title"),
 		Description: r.FormValue("description"),
 		Status:      "new",
-		Creator:     email,
+		Creator:     User(email),
 		Tags:        r.Form["tag"],
 		Type:        "bug",
 		CreatedAt:   time.Now().UTC(),
@@ -91,11 +91,6 @@ func serveBug(w http.ResponseWriter, r *http.Request) {
 		showError(w, r, err.Error(), 404)
 		return
 	}
-
-	/*templates.ExecuteTemplate(w, "bug.html", map[string]interface{}{
-		"bug":     bug,
-		"history": hist,
-	})*/
 	robj, err := json.Marshal(map[string]interface{}{
 		"bug":     bug,
 		"history": hist,
@@ -175,7 +170,7 @@ func serveBugUpdate(w http.ResponseWriter, r *http.Request) {
 			Type:       "bughistory",
 			ModifiedAt: bug.ModifiedAt,
 			ModType:    r.FormValue("id"),
-			ModBy:      email,
+			ModBy:      User(email),
 		}
 
 		switch r.FormValue("id") {
