@@ -350,7 +350,30 @@ func serveDelComment(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err := db.Delete(mux.Vars(r)["commid"])
+	err := db.Update(mux.Vars(r)["commid"], 0, func(current []byte) ([]byte, error) {
+		if len(current) == 0 {
+			return nil, NotFound
+		}
+		comment := Comment{}
+		err := json.Unmarshal(current, &comment)
+		if err != nil {
+			return nil, err
+		}
+
+		if comment.Type != "comment" {
+			return nil, fmt.Errorf("Expected a comment, got %v",
+				comment.Type)
+		}
+
+		if comment.User != email {
+			return nil, fmt.Errorf("You can only delete your own comments")
+		}
+
+		comment.Deleted = true
+
+		return json.Marshal(comment)
+	})
+
 	if err != nil {
 		showError(w, r, err.Error(), 500)
 		return
