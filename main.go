@@ -110,7 +110,7 @@ func serveBug(w http.ResponseWriter, r *http.Request) {
 type BugHistoryItem struct {
 	Key       string
 	Timestamp time.Time
-	ModInfo   interface{}
+	ModInfo   map[string]interface{}
 }
 
 func getBugHistory(id string) ([]BugHistoryItem, error) {
@@ -127,6 +127,10 @@ func getBugHistory(id string) ([]BugHistoryItem, error) {
 	histitems := []BugHistoryItem{}
 
 	for _, r := range res.Rows {
+		h := r.Value.(map[string]interface{})
+		if s, ok := h["by"].(string); ok && s != "" {
+			h["byhash"] = md5string(s)
+		}
 		t, err := time.Parse(time.RFC3339, r.Key.([]interface{})[1].(string))
 		if err != nil {
 			log.Printf("Error parsing timestamp: %v", err)
@@ -135,7 +139,7 @@ func getBugHistory(id string) ([]BugHistoryItem, error) {
 		histitems = append(histitems, BugHistoryItem{
 			r.ID,
 			t,
-			r.Value,
+			h,
 		})
 	}
 

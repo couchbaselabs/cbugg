@@ -35,7 +35,10 @@ Filed {{bug.created_at | relDate}} by {{bug.creator}}.
 <h3>History</h3>
 <ul class="unstyled">
     <li ng-repeat="hi in history">
-    <span ng-show="hi.ModInfo.by">{{hi.ModInfo.by}}</span>
+    <span ng-show="hi.ModInfo.by">
+      <img ng-src="http://www.gravatar.com/avatar/{{hi.ModInfo.byhash}}?s=16">
+      {{hi.ModInfo.by}}
+    </span>
     <span ng-hide="hi.ModInfo.by"><em>somebody</em></span>
     changed
     <span ng-show="hi.ModInfo.type"><tt>{{hi.ModInfo.type}}</tt></span>
