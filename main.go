@@ -147,6 +147,12 @@ func getBugHistory(id string) ([]BugHistoryItem, error) {
 }
 
 func serveBugUpdate(w http.ResponseWriter, r *http.Request) {
+	email := whoami(r)
+	if email == "" {
+		showError(w, r, "You are not authenticated", 401)
+		return
+	}
+
 	id := mux.Vars(r)["bugid"]
 	r.ParseForm()
 	val := r.FormValue("value")
@@ -169,6 +175,7 @@ func serveBugUpdate(w http.ResponseWriter, r *http.Request) {
 			Type:       "bughistory",
 			ModifiedAt: bug.ModifiedAt,
 			ModType:    r.FormValue("id"),
+			ModBy:      email,
 		}
 
 		switch r.FormValue("id") {
