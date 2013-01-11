@@ -148,7 +148,8 @@ function FakeLoginCtrl($scope) {
 function LoginCtrl($scope, $http) {
     navigator.id.watch({
         onlogin: function(assertion) {
-            $http.post('/auth/login', "assertion="+assertion,
+            $http.post('/auth/login', "assertion="+assertion+"&audience=" +
+                encodeURIComponent(location.protocol+"//"+location.host),
                 {headers: {"Content-Type": "application/x-www-form-urlencoded"}}).
                 success(function(res) { 
                     $scope.loggedin = true;
