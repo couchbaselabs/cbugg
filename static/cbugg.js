@@ -167,9 +167,15 @@ function LoginCtrl($scope, $http) {
     });
 
     $scope.logout = function() {
-        document.cookie = "";
         navigator.id.logout();
-        $scope.loggedin = false;
+        $http.post('/auth/logout').
+        success(function(res) {
+            $scope.loggedin = false;
+        }).
+        error(function(res) {
+            alert("Problem logging out.");
+            $scope.loggedin = false;
+        })
     }
 
     $scope.login = function() {
