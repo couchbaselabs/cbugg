@@ -148,13 +148,14 @@ function FakeLoginCtrl($scope) {
 function LoginCtrl($scope, $http) {
     navigator.id.watch({
         onlogin: function(assertion) {
-            $http.post('/auth/login', assertion).
+            $http.post('/auth/login', "assertion="+assertion).
                 success(function(res) { 
                     $scope.loggedin = true;
                     $scope.username = res.email;
                     $scope.gravatar = res.emailmd5;
                 }).
-                error(function(res) {
+                error(function(res, err) {
+                    console.log(res, err);
                     alert("Couldn't log you in.")
                 })
         },
@@ -162,6 +163,8 @@ function LoginCtrl($scope, $http) {
             $scope.loggedin = false;
         }
     });
+
+    $scope.logout = navigator.id.logout;
 
     $scope.login = function() {
         navigator.id.request();
