@@ -1,24 +1,28 @@
 angular.module('cbuggDirectives', [])
     .directive('cbMarkdown', function () {
         var converter = new Showdown.converter();
-        var editTemplate = '<div ng-class="{edithide: !isEditMode}" ng-dblclick="switchToPreview()">'+
+        var editTemplate = '<div ng-class="{edithide: !isEditMode}">'+
                            '<textarea ui-codemirror="{theme:\'monokai\', mode: {name:\'markdown\'}}"'+
-                           ' ng-model="markdown"></textarea></div>';
-        var previewInner = '<i class="icon-pencil pull-right"></i>';
-        var previewTemplate = '<div ng-hide="isEditMode" class="well" ng-click="switchToEdit()">'+previewInner+'</div>';
+                           ' ng-model="markdown"></textarea><button class="btn pull-right"'+
+                           ' ng-click="switchToPreview()">Save</button></div>';
+        var previewEditIcon = '<i class="icon-pencil hand pull-right" ng-click="switchToEdit()"></i>';
+        var previewTemplate = '<div ng-hide="isEditMode" class="well">'+previewEditIcon+'</div>';
         return {
             restrict:'E',
             scope:{},
             require:'ngModel',
             compile:function (tElement, tAttrs, transclude) {
                 tElement.html(editTemplate);
-                var previewElement = angular.element(previewTemplate);
-                tElement.append(previewElement);
+                var previewOuterElement = angular.element(previewTemplate);
+                var previewInnerElement = angular.element('<div></div>');
+                tElement.append(previewOuterElement);
+                previewOuterElement.append(previewInnerElement);
+
 
                 return function (scope, element, attrs, model) {
                     scope.renderPreview = function() {
-                        var makeHtml = previewInner + converter.makeHtml(scope.markdown);
-                        previewElement.html(makeHtml);
+                        var makeHtml = converter.makeHtml(scope.markdown);
+                        previewInnerElement.html(makeHtml);
                     }
                     scope.switchToPreview = function () {
                         model.$setViewValue(scope.markdown);
