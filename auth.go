@@ -13,6 +13,7 @@ import (
 
 const (
 	BROWSERID_ENDPOINT = "https://verifier.login.persona.org/verify"
+	AUTH_COOKIE        = "cbugger"
 )
 
 type browserIdData struct {
@@ -30,7 +31,24 @@ func initSecureCookie(hashKey []byte) {
 	secureCookie = securecookie.New(hashKey, nil)
 }
 
-func serveLogin(w http.ResponseWriter, r *http.Request) {
+func whoami(r *http.Request) string {
+	if cookie, err := r.Cookie(AUTH_COOKIE); err == nil {
+		val := browserIdData{}
+		if err = secureCookie.Decode("user", cookie.Value, &val); err == nil {
+			// TODO: Check expiration
+			return val.Email
+		}
+	}
+	return ""
+}
+
+func md5string(i string) string {
+	h := md5.New()
+	h.Write([]byte(i))
+	return hex.EncodeToString(h.Sum(nil))
+}
+
+func performAuth(w http.ResponseWriter, r *http.Request) {
 	assertion := r.FormValue("assertion")
 	if assertion == "" {
 		showError(w, r, "No assertion requested.", 400)
@@ -91,21 +109,33 @@ func serveLogin(w http.ResponseWriter, r *http.Request) {
 	}
 
 	cookie := &http.Cookie{
-		Name:  "cookie-name",
+		Name:  AUTH_COOKIE,
 		Value: encoded,
 		Path:  "/",
 	}
 	http.SetCookie(w, cookie)
-
-	h := md5.New()
-	h.Write([]byte(resdata.Email))
-	emailmd5 := hex.EncodeToString(h.Sum(nil))
 
 	log.Printf("Logged in %v", resdata.Email)
 
 	w.Header().Set("Content-Type", "application/json")
 	mustEncode(w, map[string]string{
 		"email":    resdata.Email,
-		"emailmd5": emailmd5,
+		"emailmd5": md5string(resdata.Email),
 	})
+}
+
+func serveLogin(w http.ResponseWriter, r *http.Request) {
+	email := whoami(r)
+
+	if email == "" {
+		performAuth(w, r)
+	} else {
+		log.Printf("Reusing existing thing: %v", email)
+		w.Header().Set("Content-Type", "application/json")
+		mustEncode(w, map[string]string{
+			"email":    email,
+			"emailmd5": md5string(email),
+		})
+		return
+	}
 }
