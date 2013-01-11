@@ -40,6 +40,12 @@ func mustEncode(w io.Writer, i interface{}) {
 }
 
 func serveNewBug(w http.ResponseWriter, r *http.Request) {
+	email := whoami(r)
+	if email == "" {
+		showError(w, r, "You are not authenticated", 401)
+		return
+	}
+
 	id, err := newBugId()
 	if err != nil {
 		showError(w, r, err.Error(), 500)
@@ -51,7 +57,7 @@ func serveNewBug(w http.ResponseWriter, r *http.Request) {
 		Title:       r.FormValue("title"),
 		Description: r.FormValue("description"),
 		Status:      "new",
-		Creator:     "me", // XXX: Better
+		Creator:     email,
 		Tags:        r.Form["tag"],
 		Type:        "bug",
 		CreatedAt:   time.Now().UTC(),
