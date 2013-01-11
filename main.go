@@ -27,6 +27,7 @@ func newBugId() (uint64, error) {
 
 func showError(w http.ResponseWriter, r *http.Request,
 	msg string, code int) {
+	log.Printf("Reporting error %v/%v", code, msg)
 	http.Error(w, msg, code)
 }
 
