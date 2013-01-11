@@ -296,6 +296,7 @@ func main() {
 	r.HandleFunc("/api/bug/{bugid}", serveBugUpdate).Methods("POST")
 	r.HandleFunc("/api/state-counts", serveStateCounts)
 	r.HandleFunc("/auth/login", serveLogin).Methods("POST")
+	r.HandleFunc("/auth/logout", serveLogout).Methods("POST")
 	r.PathPrefix("/static/").Handler(http.StripPrefix("/static/",
 		http.FileServer(http.Dir(*staticPath))))
 	r.Handle("/", http.RedirectHandler("/static/app.html", 302))

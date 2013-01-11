@@ -139,3 +139,13 @@ func serveLogin(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 }
+
+func serveLogout(w http.ResponseWriter, r *http.Request) {
+	cookie := &http.Cookie{
+		Name:  AUTH_COOKIE,
+		Value: "",
+		Path:  "/",
+	}
+
+	http.SetCookie(w, cookie)
+}
