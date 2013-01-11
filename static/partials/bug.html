@@ -35,9 +35,11 @@ Filed {{bug.created_at | relDate}} by {{bug.creator}}.
 <h3>History</h3>
 <ul class="unstyled">
     <li ng-repeat="hi in history">
-    Changed
-    <span ng-show="hi.ModType">{{hi.ModType}}</span>
-    <span ng-hide="hi.ModType">(unknown)</span>
+    <span ng-show="hi.ModInfo.by">{{hi.ModInfo.by}}</span>
+    <span ng-hide="hi.ModInfo.by"><em>somebody</em></span>
+    changed
+    <span ng-show="hi.ModInfo.type"><tt>{{hi.ModInfo.type}}</tt></span>
+    <span ng-hide="hi.ModInfo.type">(unknown)</span>
     {{hi.Timestamp | relDate}}
     </li>
 </ul>
