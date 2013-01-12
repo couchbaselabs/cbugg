@@ -17,10 +17,6 @@ func newBugId() (uint64, error) {
 
 func serveNewBug(w http.ResponseWriter, r *http.Request) {
 	email := whoami(r)
-	if email == "" {
-		showError(w, r, "You are not authenticated", 401)
-		return
-	}
 
 	id, err := newBugId()
 	if err != nil {
@@ -119,10 +115,6 @@ func getBugHistory(id string) ([]BugHistoryItem, error) {
 
 func serveBugUpdate(w http.ResponseWriter, r *http.Request) {
 	email := whoami(r)
-	if email == "" {
-		showError(w, r, "You are not authenticated", 401)
-		return
-	}
 
 	id := mux.Vars(r)["bugid"]
 	r.ParseForm()

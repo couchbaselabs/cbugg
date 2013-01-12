@@ -11,10 +11,6 @@ import (
 
 func serveNewComment(w http.ResponseWriter, r *http.Request) {
 	email := whoami(r)
-	if email == "" {
-		showError(w, r, "You are not authenticated", 401)
-		return
-	}
 
 	bugid := mux.Vars(r)["bugid"]
 	id := "c-" + bugid + "-" + time.Now().UTC().Format(time.RFC3339Nano)
@@ -77,10 +73,6 @@ func serveCommentList(w http.ResponseWriter, r *http.Request) {
 
 func serveDelComment(w http.ResponseWriter, r *http.Request) {
 	email := whoami(r)
-	if email == "" {
-		showError(w, r, "You are not authenticated", 401)
-		return
-	}
 
 	err := db.Update(mux.Vars(r)["commid"], 0, func(current []byte) ([]byte, error) {
 		if len(current) == 0 {

@@ -69,6 +69,14 @@ func serveHome(w http.ResponseWriter, r *http.Request) {
 		})
 }
 
+func authRequired(r *http.Request, rm *mux.RouteMatch) bool {
+	return whoami(r) != ""
+}
+
+func notAuthed(w http.ResponseWriter, r *http.Request) {
+	showError(w, r, "You are not authenticated", 401)
+}
+
 func main() {
 	addr := flag.String("addr", ":8066", "http listen address")
 	cbServ := flag.String("couchbase", "http://localhost:8091/",
@@ -85,14 +93,23 @@ func main() {
 
 	r := mux.NewRouter()
 	// Bugs are fancy
-	r.HandleFunc("/api/bug/", serveNewBug).Methods("POST")
+	r.HandleFunc("/api/bug/", serveNewBug).Methods("POST").MatcherFunc(authRequired)
+	r.HandleFunc("/api/bug/", notAuthed).Methods("POST")
 	r.HandleFunc("/api/bug/", serveBugList).Methods("GET")
+
 	r.HandleFunc("/api/bug/{bugid}", serveBug).Methods("GET")
-	r.HandleFunc("/api/bug/{bugid}", serveBugUpdate).Methods("POST")
+	r.HandleFunc("/api/bug/{bugid}",
+		serveBugUpdate).Methods("POST").MatcherFunc(authRequired)
+	r.HandleFunc("/api/bug/{bugid}", notAuthed).Methods("POST")
+
 	r.HandleFunc("/api/bug/{bugid}/comments/", serveCommentList).Methods("GET")
-	r.HandleFunc("/api/bug/{bugid}/comments/", serveNewComment).Methods("POST")
+	r.HandleFunc("/api/bug/{bugid}/comments/",
+		serveNewComment).Methods("POST").MatcherFunc(authRequired)
+	r.HandleFunc("/api/bug/{bugid}/comments/", notAuthed).Methods("POST")
 	r.HandleFunc("/api/bug/{bugid}/comments/{commid}",
-		serveDelComment).Methods("DELETE")
+		serveDelComment).Methods("DELETE").MatcherFunc(authRequired)
+	r.HandleFunc("/api/bug/{bugid}/comments/{commid}", notAuthed).Methods("DELETE")
+
 	r.HandleFunc("/api/state-counts", serveStateCounts)
 	r.HandleFunc("/auth/login", serveLogin).Methods("POST")
 	r.HandleFunc("/auth/logout", serveLogout).Methods("POST")
