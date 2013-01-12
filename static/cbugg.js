@@ -198,17 +198,21 @@ function BugCtrl($scope, $routeParams, $http) {
 }
 
 function FakeLoginCtrl($scope) {
+    $rootScope.loginscope = $scope;
     $scope.login = function() {
+        $rootScope.loggedin = true;
         $scope.loggedin = true;
         $scope.username = "Test User";
         $scope.gravatar = "eee3b47a26586bb79e0a832466c066be";
     }
     $scope.logout = function() {
+        $rootScope.loggedin = false;
         $scope.loggedin = false;
     }
 }
 
-function LoginCtrl($scope, $http) {
+function LoginCtrl($scope, $http, $rootScope) {
+    $rootScope.loginscope = $scope;
     navigator.id.watch({
         onlogin: function(assertion) {
             $http.post('/auth/login', "assertion="+assertion+"&audience=" +
@@ -218,12 +222,14 @@ function LoginCtrl($scope, $http) {
                     $scope.loggedin = true;
                     $scope.username = res.email;
                     $scope.gravatar = res.emailmd5;
+                    $rootScope.loggedin = true;
                 }).
                 error(function(res, err) {
                     bAlert("Error", "Couldn't log you in.", "error");
                 });
         },
         onlogout: function() {
+            $rootScope.loggedin = false;
             $scope.loggedin = false;
         }
     });
@@ -232,10 +238,12 @@ function LoginCtrl($scope, $http) {
         navigator.id.logout();
         $http.post('/auth/logout').
         success(function(res) {
+            $rootScope.loggedin = false;
             $scope.loggedin = false;
         }).
         error(function(res) {
             bAlert("Error", "Problem logging out.", "error");
+            $rootScope.loggedin = false;
             $scope.loggedin = false;
         })
     }
