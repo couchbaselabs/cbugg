@@ -44,10 +44,15 @@
       <div class="author">
         <img ng-src="http://www.gravatar.com/avatar/{{comment.user.md5}}?s=16">
         {{comment.user.email}} commented {{comment.created_at | relDate}}
+        <button ng-click="deleteComment(comment)" ng-show="comment.mine" 
+                class="btn btn-mini pull-right">
+          <i class="icon-trash"></i>
+        </button>
       </div>
       <div class="comment-text" ng-bind-html-unsafe="comment.text | markdownify">
       </div>
     </div>
+    <em class="muted" ng-show="comment.deleted">This comment has been deleted</em>
   </div>
 </div>
 <button ng-hide="addingcomment" ng-click="startComment()" class="btn">Add Comment</button>

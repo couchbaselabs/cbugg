@@ -110,7 +110,7 @@ function BugsByStateCtrl($scope, $routeParams, $http) {
     });
 }
 
-function BugCtrl($scope, $routeParams, $http) {
+function BugCtrl($scope, $routeParams, $http, $rootScope) {
     var updateBug = function(field) {
         var bug = $scope.bug;
         if(bug && bug[field]) {
@@ -146,8 +146,25 @@ function BugCtrl($scope, $routeParams, $http) {
         });
     });
 
+    var checkComments = function (comments) {
+        return _.map(comments, function(comment) {
+            if($rootScope.loggedin &&
+               $rootScope.loginscope.username == comment.user.email) {
+                comment.mine = true;
+            } else {
+                comment.mine = false;
+            }
+            return comment;
+        });
+    }
+
+    $rootScope.$watch("loggedin", function(nv, ov) {
+        //Update delete button available on loggedinnness change
+        $scope.comments = checkComments($scope.comments);
+    });
+
     $http.get('/api/bug/' + $routeParams.bugId + '/comments/').success(function(data) {
-        $scope.comments = data;
+        $scope.comments = checkComments(data);
     });
 
     $scope.killTag = function(kill) {
@@ -188,12 +205,29 @@ function BugCtrl($scope, $routeParams, $http) {
                     'body=' + encodeURIComponent($scope.draftcomment),
                   {headers: {"Content-Type": "application/x-www-form-urlencoded"}}).
             success(function(data) {
+                data.mine = true;
                 $scope.comments.push(data);
             }).
             error(function(data, code) {
                 bAlert("Error " + code, "could not post comment: " + data, "error")
             })
         $scope.draftcomment="";
+    }
+
+    $scope.deleteComment = function(comment) {
+        console.log(comment);
+        $http.delete('/api/bug/' + $routeParams.bugId + '/comments/' + comment.id).
+            success(function(data) {
+                $scope.comments = _.map($scope.comments, function(check) {
+                    if(check.id == comment.id) {
+                        check.deleted = true;
+                    };
+                    return check;
+                });
+            }).
+            error(function(data, code) {
+                bAlert("Error " + code, "could not post comment: " + data, "error")
+            })
     }
 }
 
