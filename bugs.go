@@ -128,8 +128,9 @@ func serveBugUpdate(w http.ResponseWriter, r *http.Request) {
 	r.ParseForm()
 	val := r.FormValue("value")
 	rval := []byte{}
+	now := time.Now().UTC()
 
-	historyKey := id + "-" + time.Now().UTC().Format(time.RFC3339Nano)
+	historyKey := id + "-" + now.Format(time.RFC3339Nano)
 
 	err := db.Update(id, 0, func(current []byte) ([]byte, error) {
 		if len(current) == 0 {
@@ -144,12 +145,9 @@ func serveBugUpdate(w http.ResponseWriter, r *http.Request) {
 		history := Bug{
 			Id:         id,
 			Type:       "bughistory",
-			ModifiedAt: bug.ModifiedAt,
+			ModifiedAt: now,
 			ModType:    r.FormValue("id"),
 			ModBy:      email,
-		}
-		if history.ModifiedAt.IsZero() {
-			history.ModifiedAt = bug.CreatedAt
 		}
 
 		switch r.FormValue("id") {
@@ -186,7 +184,7 @@ func serveBugUpdate(w http.ResponseWriter, r *http.Request) {
 			return nil, err
 		}
 
-		bug.ModifiedAt = time.Now().UTC()
+		bug.ModifiedAt = now
 		bug.Parent = historyKey
 
 		// The version that goes to the DB is different from
