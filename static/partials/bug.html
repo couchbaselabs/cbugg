@@ -55,7 +55,7 @@
     <em class="muted" ng-show="comment.deleted">This comment has been deleted</em>
   </div>
 </div>
-<button ng-hide="addingcomment" ng-click="startComment()" class="btn">Add Comment</button>
+<button ng-hide="addingcomment" ng-click="startComment()" ng-show="loggedin" class="btn">Add Comment</button>
 <div ng-show="addingcomment">
   <cb-markdown modeflag="editingcomment" ng-model="$parent.draftcomment"
   edit="true" savetext="Preview"></cb-markdown>
