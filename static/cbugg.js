@@ -200,18 +200,18 @@ function BugCtrl($scope, $routeParams, $http, $rootScope) {
     }
 
     $scope.postComment = function() {
-        $scope.addingcomment = false;
         $http.post('/api/bug/' + $routeParams.bugId + '/comments/',
                     'body=' + encodeURIComponent($scope.draftcomment),
                   {headers: {"Content-Type": "application/x-www-form-urlencoded"}}).
             success(function(data) {
                 data.mine = true;
                 $scope.comments.push(data);
+                $scope.draftcomment="";
+                $scope.addingcomment = false;
             }).
             error(function(data, code) {
                 bAlert("Error " + code, "could not post comment: " + data, "error")
             })
-        $scope.draftcomment="";
     }
 
     $scope.deleteComment = function(comment) {
