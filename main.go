@@ -9,6 +9,8 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"sort"
+	"strings"
 
 	"github.com/couchbaselabs/go-couchbase"
 	"github.com/gorilla/mux"
@@ -70,6 +72,35 @@ func serveHome(w http.ResponseWriter, r *http.Request) {
 		})
 }
 
+func serveUserList(w http.ResponseWriter, r *http.Request) {
+	args := map[string]interface{}{
+		"group_level": 1,
+	}
+
+	viewRes := struct {
+		Rows []struct {
+			Key string
+		}
+	}{}
+
+	err := db.ViewCustom("cbugg", "users", args, &viewRes)
+	if err != nil {
+		showError(w, r, err.Error(), 500)
+		return
+	}
+
+	rv := []string{}
+	for _, r := range viewRes.Rows {
+		if strings.Contains(r.Key, "@") {
+			rv = append(rv, r.Key)
+		}
+	}
+	sort.Strings(rv)
+
+	w.Header().Set("Content-type", "application/json")
+	mustEncode(w, rv)
+}
+
 func authRequired(r *http.Request, rm *mux.RouteMatch) bool {
 	return whoami(r) != ""
 }
@@ -112,6 +143,8 @@ func main() {
 	r.HandleFunc("/api/bug/{bugid}/comments/{commid}",
 		serveDelComment).Methods("DELETE").MatcherFunc(authRequired)
 	r.HandleFunc("/api/bug/{bugid}/comments/{commid}", notAuthed).Methods("DELETE")
+
+	r.HandleFunc("/api/users/", serveUserList).Methods("GET")
 
 	r.HandleFunc("/api/state-counts", serveStateCounts)
 	r.HandleFunc("/auth/login", serveLogin).Methods("POST")
