@@ -37,6 +37,21 @@
   {{bug.creator.email}}.
 </p>
 
+<p>
+<div ng-click="editAssignee()">
+  <form class="form-horizontal" ng-submit="submitAssignee()">
+    <label>Assigned to
+      <span ng-hide="editingassignee">
+        <em>{{bug.assignee || 'nobody'}}</em>
+        <i class="icon-pencil"></i>
+      </span>
+      <input ng-show="editingassignee" type="text" ng-model="bug.assignee" class="assigneebox input-medium">
+      <button ng-show="editingassignee" type="submit" class="btn">Save</button>
+    </label>
+  </form>
+</div>
+</p>
+
 <h3>Comments</h3>
 <div class="comments">
   <div class="comment well well-small" ng-repeat="comment in comments">

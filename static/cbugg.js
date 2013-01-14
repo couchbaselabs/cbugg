@@ -229,6 +229,22 @@ function BugCtrl($scope, $routeParams, $http, $rootScope) {
                 bAlert("Error " + code, "could not post comment: " + data, "error")
             })
     }
+
+    var getUsers = function(query, process) {
+        console.log("Getting users..");
+        $http.get('/api/users/').success(function(data) {
+            process(data);
+        });
+    }
+
+    $scope.editAssignee = function() {
+        $(".assigneebox").typeahead({source: getUsers});
+        $scope.editingassignee = true;
+    }
+
+    $scope.submitAssignee = function() {
+        bAlert("Error", "assignee save not wired up yet!", "error");
+    }
 }
 
 function FakeLoginCtrl($scope) {
