@@ -8,6 +8,7 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"os"
 
 	"github.com/couchbaselabs/go-couchbase"
 	"github.com/gorilla/mux"
@@ -84,6 +85,8 @@ func main() {
 	cbBucket := flag.String("bucket", "cbugg", "couchbase bucket")
 	secCookKey := flag.String("cookieKey", "youcandobetter",
 		"The secure cookie auth code.")
+	quitPath := flag.String("quitpath", "",
+		"a path that will shut down the service if requested")
 
 	flag.Parse()
 
@@ -115,6 +118,14 @@ func main() {
 	r.HandleFunc("/auth/logout", serveLogout).Methods("POST")
 	r.PathPrefix("/static/").Handler(http.StripPrefix("/static/",
 		http.FileServer(http.Dir(*staticPath))))
+
+	if *quitPath != "" {
+		r.HandleFunc(*quitPath, func(w http.ResponseWriter, r *http.Request) {
+			log.Printf("Quitting per user request.")
+			os.Exit(0)
+		})
+	}
+
 	r.Handle("/", http.RedirectHandler("/static/app.html", 302))
 
 	http.Handle("/", r)
