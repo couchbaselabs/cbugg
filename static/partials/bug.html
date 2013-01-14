@@ -38,15 +38,21 @@
 </p>
 
 <p>
-<div ng-click="editAssignee()">
-  <form class="form-horizontal" ng-submit="submitAssignee()">
+<div ng-click="editOwner()">
+  <form class="form-horizontal" ng-submit="submitOwner()">
     <label>Assigned to
-      <span ng-hide="editingassignee">
-        <em>{{bug.assignee || 'nobody'}}</em>
+
+      <span ng-hide="editingowner">
+        <span ng-show="bug.owner">
+          <img ng-src="http://www.gravatar.com/avatar/{{bug.owner.md5}}?s=16">
+          {{bug.owner.email}}
+        </span>
+        <span ng-hide="bug.owner"><em>nobody</em></span>
         <i class="icon-pencil"></i>
       </span>
-      <input ng-show="editingassignee" type="text" ng-model="bug.assignee" class="assigneebox input-medium">
-      <button ng-show="editingassignee" type="submit" class="btn">Save</button>
+
+      <input ng-show="editingowner" type="text" ng-model-instant="bug.owner.email" class="ownerbox input-medium">
+      <button ng-show="editingowner" type="submit" class="btn">Save</button>
     </label>
   </form>
 </div>

@@ -111,10 +111,13 @@ function BugsByStateCtrl($scope, $routeParams, $http) {
 }
 
 function BugCtrl($scope, $routeParams, $http, $rootScope) {
-    var updateBug = function(field) {
+    var updateBug = function(field, newValue) {
         var bug = $scope.bug;
-        if(bug && bug[field]) {
-            $http.post('/api/bug/' + bug.id, "id=" + field + "&value=" + encodeURIComponent(bug[field]),
+        if (!newValue) {
+            newValue = bug[field];
+        }
+        if(bug && newValue) {
+            $http.post('/api/bug/' + bug.id, "id=" + field + "&value=" + encodeURIComponent(newValue),
                        {headers: {"Content-Type": "application/x-www-form-urlencoded"}}).
             success(function(data) {
                 $scope.bug = data;
@@ -129,7 +132,7 @@ function BugCtrl($scope, $routeParams, $http, $rootScope) {
     $scope.comments = [];
     $scope.draftcomment = "";
 
-    
+
     $http.get('/api/bug/' + $routeParams.bugId).success(function(data) {
         $scope.bug = data.bug;
         $scope.history = data.history;
@@ -237,13 +240,15 @@ function BugCtrl($scope, $routeParams, $http, $rootScope) {
         });
     }
 
-    $scope.editAssignee = function() {
-        $(".assigneebox").typeahead({source: getUsers});
-        $scope.editingassignee = true;
+    $scope.editOwner = function() {
+        $(".ownerbox").typeahead({source: getUsers});
+        $scope.editingowner = true;
     }
 
-    $scope.submitAssignee = function() {
-        bAlert("Error", "assignee save not wired up yet!", "error");
+    $scope.submitOwner = function() {
+        $scope.bug.owner.email = $(".ownerbox").val();
+        updateBug("owner", $scope.bug.owner.email);
+        $scope.editingowner = false;
     }
 }
 
@@ -268,7 +273,7 @@ function LoginCtrl($scope, $http, $rootScope) {
             $http.post('/auth/login', "assertion="+assertion+"&audience=" +
                 encodeURIComponent(location.protocol+"//"+location.host),
                 {headers: {"Content-Type": "application/x-www-form-urlencoded"}}).
-                success(function(res) { 
+                success(function(res) {
                     $scope.loggedin = true;
                     $scope.username = res.email;
                     $scope.gravatar = res.emailmd5;
@@ -302,4 +307,3 @@ function LoginCtrl($scope, $http, $rootScope) {
         navigator.id.request();
     }
 }
-

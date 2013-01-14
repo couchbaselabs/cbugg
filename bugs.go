@@ -152,6 +152,9 @@ func serveBugUpdate(w http.ResponseWriter, r *http.Request) {
 		case "status":
 			history.Status = bug.Status
 			bug.Status = val
+		case "owner":
+			history.Owner = bug.Owner
+			bug.Owner = val
 		case "tags":
 			history.Tags = bug.Tags
 			bug.Tags = strings.FieldsFunc(val,

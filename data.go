@@ -15,6 +15,7 @@ type Bug struct {
 	Description string    `json:"description,omitempty"`
 	Status      string    `json:"status,omitempty"`
 	Creator     string    `json:"creator,omitempty"`
+	Owner       string    `json:"owner,omitempty"`
 	Tags        []string  `json:"tags,omitempty"`
 	CreatedAt   time.Time `json:"created_at,omitempty"`
 	ModifiedAt  time.Time `json:"modified_at,omitempty"`
@@ -62,6 +63,7 @@ func (b APIBug) MarshalJSON() ([]byte, error) {
 	}
 
 	m["creator"] = User(maybenil(m, "creator"))
+	m["owner"] = User(maybenil(m, "owner"))
 	m["modified_by"] = User(maybenil(m, "modified_by"))
 	return json.Marshal(m)
 }
