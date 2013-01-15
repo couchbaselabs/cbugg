@@ -15,7 +15,7 @@ angular.module('cbuggDirectives', [])
                 if(!saveText) { saveText = "Save"; }
                 tElement.html('<div ng-class="{edithide: !isEditMode}">'+
                               '<textarea ui-codemirror="{theme:\'monokai\', '+
-                              'mode: {name:\'markdown\'}}" ng-model="markdown">'+
+                              'mode: {name:\'markdown\'}, lineWrapping: true}" ng-model="markdown">'+
                               '</textarea>Format with <a href="http://daringfireball.net/projects/markdown/syntax">Markdown</a>'+
                               '<button class="btn pull-right" ng-click="switchToPreview()">'+
                               saveText+'</button></div>');
