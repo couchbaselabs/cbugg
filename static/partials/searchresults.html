@@ -1,0 +1,10 @@
+<h2>Query: {{query}}</h2>
+<ul class="unstyled">
+    <li ng-repeat="result in results">
+        <a href="#/bug/{{result._id}}">{{result._id}} - {{result.source.doc.title}}</a>
+    </li>
+</ul>
+<hr/>
+<form action="/api/bug/" id="newbug" method="POST">
+    Briefly describe your new problem: <input name="title"/>
+</form>

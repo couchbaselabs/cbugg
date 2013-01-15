@@ -35,6 +35,11 @@
                     <a ng-hide="loggedin" ng-click="login()">Log In</a>
                     </p>
                     <a href="#/" class="brand gohome"><img id="logo" src="/static/cbugg.png"/> cbugg</a>
+                    <div ng-controller="SearchCtrl">
+                        <form ng-submit="search()" class="navbar-search" method="GET">
+                            <input ng-model="query" type="text" class="search-query" placeholder="Search">
+                        </form>
+                    </div>
                 </div>
             </div>
         </div>

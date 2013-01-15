@@ -157,7 +157,7 @@ func main() {
 	r.HandleFunc("/api/users/", serveUserList).Methods("GET")
 	r.HandleFunc("/api/tags/", serveTagList).Methods("GET")
 
-	r.HandleFunc("/api/search", searchBugs).Methods("POST")
+	r.HandleFunc("/api/search/", searchBugs).Methods("POST")
 
 	r.HandleFunc("/api/state-counts", serveStateCounts)
 	r.HandleFunc("/auth/login", serveLogin).Methods("POST")
