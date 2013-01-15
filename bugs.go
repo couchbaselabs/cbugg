@@ -215,7 +215,7 @@ func serveBugList(w http.ResponseWriter, r *http.Request) {
 			args["end_key"] = []interface{}{st, map[string]string{}}
 		}
 	} else {
-		viewName = "users"
+		viewName = "owners"
 		u := r.FormValue("user")
 		if r.FormValue("state") != "" {
 			st := r.FormValue("state")
