@@ -18,6 +18,10 @@ import (
 
 var templates *template.Template
 var db *couchbase.Bucket
+var esHost = flag.String("elasticsearchHost", "localhost", "ElasticSearch hostname")
+var esPort = flag.String("elasticsearchPort", "9200", "ElasticSearch port")
+var esScheme = flag.String("elasticsearchScheme", "http", "ElasticSearch scheme")
+var esIndex = flag.String("elasticsearchIndex", "cbugg", "ElasticSearch index")
 var NotFound = errors.New("not found")
 
 var staticPath = flag.String("static", "static", "Path to the static content")
@@ -176,6 +180,8 @@ func main() {
 
 	r.HandleFunc("/api/users/", serveUserList).Methods("GET")
 	r.HandleFunc("/api/tags/", serveTagList).Methods("GET")
+
+	r.HandleFunc("/api/search", searchBugs).Methods("POST")
 
 	r.HandleFunc("/api/state-counts", serveStateCounts)
 	r.HandleFunc("/auth/login", serveLogin).Methods("POST")
