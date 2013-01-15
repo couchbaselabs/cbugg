@@ -171,7 +171,7 @@ function BugCtrl($scope, $routeParams, $http, $rootScope) {
     var checkComments = function (comments) {
         return _.map(comments, function(comment) {
             if($rootScope.loggedin &&
-               $rootScope.loginscope.username == comment.user.email) {
+               $rootScope.loginscope.gravatar == comment.user.md5) {
                 comment.mine = true;
             } else {
                 comment.mine = false;
