@@ -212,7 +212,12 @@ function BugCtrl($scope, $routeParams, $http, $rootScope) {
 
     var getTags = function(query, process) {
         $http.get('/api/tags/').success(function(data) {
-            process(data);
+            var tags = [];
+            for (var k in data) {
+                tags.push(k);
+            }
+            tags.sort();
+            process(tags);
         });
     }
 

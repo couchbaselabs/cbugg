@@ -108,33 +108,6 @@ func serveUserList(w http.ResponseWriter, r *http.Request) {
 	mustEncode(w, rv)
 }
 
-func serveTagList(w http.ResponseWriter, r *http.Request) {
-	args := map[string]interface{}{
-		"group_level": 1,
-	}
-
-	viewRes := struct {
-		Rows []struct {
-			Key string
-		}
-	}{}
-
-	err := db.ViewCustom("cbugg", "tags", args, &viewRes)
-	if err != nil {
-		showError(w, r, err.Error(), 500)
-		return
-	}
-
-	rv := []string{}
-	for _, r := range viewRes.Rows {
-		rv = append(rv, r.Key)
-	}
-	sort.Strings(rv)
-
-	w.Header().Set("Content-type", "application/json")
-	mustEncode(w, rv)
-}
-
 func authRequired(r *http.Request, rm *mux.RouteMatch) bool {
 	return whoami(r) != ""
 }
