@@ -297,6 +297,22 @@ function BugCtrl($scope, $routeParams, $http, $rootScope) {
             })
     }
 
+    $scope.unDeleteComment = function(comment) {
+        console.log(comment);
+        $http.post('/api/bug/' + $routeParams.bugId + '/comments/' + comment.id + '/undel').
+            success(function(data) {
+                $scope.comments = _.map($scope.comments, function(check) {
+                    if(check.id == comment.id) {
+                        check.deleted = false;
+                    };
+                    return check;
+                });
+            }).
+            error(function(data, code) {
+                bAlert("Error " + code, "could not post comment: " + data, "error")
+            })
+    }
+
     var getUsers = function(query, process) {
         console.log("Getting users..");
         $http.get('/api/users/').success(function(data) {
