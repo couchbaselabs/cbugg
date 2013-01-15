@@ -42,6 +42,7 @@ func serveCommentList(w http.ResponseWriter, r *http.Request) {
 	bugid := mux.Vars(r)["bugid"]
 
 	args := map[string]interface{}{
+		"stale":        false,
 		"start_key":    []interface{}{bugid},
 		"end_key":      []interface{}{bugid, map[string]string{}},
 		"include_docs": true,

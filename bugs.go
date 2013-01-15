@@ -82,6 +82,7 @@ type BugHistoryItem struct {
 
 func getBugHistory(id string) ([]BugHistoryItem, error) {
 	args := map[string]interface{}{
+		"stale":     false,
 		"start_key": []interface{}{id},
 		"end_key":   []interface{}{id, map[string]string{}},
 	}
@@ -204,6 +205,7 @@ func serveBugUpdate(w http.ResponseWriter, r *http.Request) {
 func serveBugList(w http.ResponseWriter, r *http.Request) {
 	args := map[string]interface{}{
 		"reduce": false,
+		"stale":  false,
 	}
 
 	viewName := "by_state"
@@ -219,7 +221,6 @@ func serveBugList(w http.ResponseWriter, r *http.Request) {
 		u := r.FormValue("user")
 		if r.FormValue("state") != "" {
 			st := r.FormValue("state")
-			args["reduce"] = false
 			args["start_key"] = []interface{}{u, st}
 			args["end_key"] = []interface{}{u, st, map[string]string{}}
 		}

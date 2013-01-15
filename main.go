@@ -36,7 +36,7 @@ func mustEncode(w io.Writer, i interface{}) {
 }
 
 func serveStateCounts(w http.ResponseWriter, r *http.Request) {
-	args := map[string]interface{}{"group_level": 1}
+	args := map[string]interface{}{"group_level": 1, "stale": false}
 	states, err := db.View("cbugg", "by_state", args)
 	if err != nil {
 		showError(w, r, err.Error(), 500)
@@ -59,7 +59,7 @@ func serveStateCounts(w http.ResponseWriter, r *http.Request) {
 }
 
 func serveHome(w http.ResponseWriter, r *http.Request) {
-	args := map[string]interface{}{"group_level": 1}
+	args := map[string]interface{}{"group_level": 1, "stale": false}
 	states, err := db.View("cbugg", "by_state", args)
 	if err != nil {
 		showError(w, r, err.Error(), 500)
