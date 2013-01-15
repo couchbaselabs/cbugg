@@ -49,10 +49,15 @@ func serveNewBug(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, bug.Url(), 303)
 }
 
+func getBug(bugid string) (Bug, error) {
+	bug := Bug{}
+	err := db.Get(bugid, &bug)
+	return bug, err
+}
+
 func serveBug(w http.ResponseWriter, r *http.Request) {
 	id := mux.Vars(r)["bugid"]
-	bug := APIBug{}
-	err := db.Get(id, &bug)
+	bug, err := getBug(id)
 	if err != nil {
 		showError(w, r, err.Error(), 404)
 		return
@@ -64,7 +69,7 @@ func serveBug(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	robj, err := json.Marshal(map[string]interface{}{
-		"bug":     bug,
+		"bug":     APIBug(bug),
 		"history": hist,
 	})
 	if err != nil {

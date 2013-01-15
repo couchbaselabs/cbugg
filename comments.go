@@ -35,6 +35,8 @@ func serveNewComment(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	notifyComment(c)
+
 	mustEncode(w, APIComment(c))
 }
 

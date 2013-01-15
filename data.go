@@ -22,6 +22,7 @@ type Bug struct {
 	ModifiedAt  time.Time `json:"modified_at,omitempty"`
 	ModType     string    `json:"modify_type,omitempty"`
 	ModBy       string    `json:"modified_by,omitempty"`
+	Subscribers []string  `json:"subscribers,omitempty"`
 }
 
 type Comment struct {
