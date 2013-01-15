@@ -15,7 +15,7 @@ type viewMarker struct {
 }
 
 const ddocKey = "/@cbuggddocVersion"
-const ddocVersion = 6
+const ddocVersion = 7
 const designDoc = `
 {
     "views": {
@@ -31,6 +31,10 @@ const designDoc = `
         },
         "owners": {
             "map": "function (doc, meta) {\n  if (doc.type === 'bug' && doc.owner) {\n    emit([doc.owner, doc.status, doc.created_at], doc.title);\n  }\n}",
+            "reduce": "_count"
+        },
+        "tags": {
+            "map": "function (doc, meta) {\n  if (doc.type === 'bug' && doc.tags) {\n    for (var i = 0; i < doc.tags.length; i++) {\n      emit(doc.tags[i], null);\n    }\n  }\n}",
             "reduce": "_count"
         },
         "users": {
