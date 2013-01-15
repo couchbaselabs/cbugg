@@ -7,7 +7,10 @@ import (
 	"fmt"
 	"log"
 	"net/smtp"
+	"sort"
+	"sync"
 	"text/template"
+	"time"
 )
 
 const commentNotificationText = `From: CBugg <{{.MailFrom}}>
@@ -49,11 +52,15 @@ var bugNotificationTmpl = template.Must(
 	template.New("").Parse(bugChangeNotificationText))
 
 type bugChange struct {
-	bugid, field string
+	bugid  string
+	fields []string
 }
 
 var commentChan = make(chan Comment, 100)
 var bugChan = make(chan bugChange, 100)
+
+var bugNotifyDelays map[string]chan bugChange
+var bugNotifyDelayLock sync.Mutex
 
 // Email configuration
 
@@ -63,8 +70,13 @@ var mailFrom = flag.String("mailfrom", "",
 	"cbugg email address for notifications")
 var baseURL = flag.String("baseurl", "http://localhost:8066",
 	"base URL of cbugg service")
+var bugDelay = flag.Duration("notificationDelay",
+	time.Duration(10*time.Second),
+	"bug change stabilization delay timer")
 
 func init() {
+	bugNotifyDelays = make(map[string]chan bugChange)
+
 	go commentNotificationLoop()
 	go bugNotificationLoop()
 }
@@ -74,7 +86,7 @@ func notifyComment(c Comment) {
 }
 
 func notifyBugChange(bugid, field string) {
-	bugChan <- bugChange{bugid, field}
+	bugChan <- bugChange{bugid, []string{field}}
 }
 
 func sendEmail(to string, body []byte) error {
@@ -149,17 +161,17 @@ func sendCommentNotification(c Comment) {
 		})
 }
 
-func sendBugNotification(bc bugChange) {
-	b, err := getBug(bc.bugid)
+func sendBugNotification(bugid string, fields []string) {
+	b, err := getBug(bugid)
 	if err != nil {
 		log.Printf("Error getting bug %v for bug notification: %v",
-			bc.bugid, err)
+			bugid, err)
 		return
 	}
 
-	sendNotifications(commentNotificationTmpl, b.Subscribers,
+	sendNotifications(bugNotificationTmpl, b.Subscribers,
 		map[string]interface{}{
-			"Fields": []string{bc.field},
+			"Fields": fields,
 			"Bug":    b,
 		})
 }
@@ -170,9 +182,56 @@ func commentNotificationLoop() {
 	}
 }
 
+func bugNotifyDelay(bugid string) chan bugChange {
+	rv := make(chan bugChange)
+
+	go func() {
+		changes := map[string]bool{}
+
+		t := time.NewTimer(*bugDelay)
+
+		for t != nil {
+			select {
+			case <-t.C:
+				t = nil
+			case tc := <-rv:
+				changes[tc.fields[0]] = true
+				t.Stop()
+				t = time.NewTimer(*bugDelay)
+			}
+		}
+
+		bugNotifyDelayLock.Lock()
+		defer bugNotifyDelayLock.Unlock()
+		delete(bugNotifyDelays, bugid)
+
+		fields := []string{}
+		for k := range changes {
+			fields = append(fields, k)
+		}
+		sort.Strings(fields)
+
+		sendBugNotification(bugid, fields)
+	}()
+
+	return rv
+}
+
+func addBugNotification(bc bugChange) {
+	bugNotifyDelayLock.Lock()
+	defer bugNotifyDelayLock.Unlock()
+
+	c, ok := bugNotifyDelays[bc.bugid]
+	if !ok {
+		c = bugNotifyDelay(bc.bugid)
+		bugNotifyDelays[bc.bugid] = c
+	}
+	c <- bc
+}
+
 func bugNotificationLoop() {
 	for c := range bugChan {
-		sendBugNotification(c)
+		addBugNotification(c)
 	}
 }
 
