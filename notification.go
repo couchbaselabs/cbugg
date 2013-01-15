@@ -94,9 +94,6 @@ func sendEmail(to string, body []byte) error {
 	if err != nil {
 		return err
 	}
-	if err := c.Hello("localhost"); err != nil {
-		return err
-	}
 	if err = c.Mail(*mailFrom); err != nil {
 		return err
 	}
