@@ -195,6 +195,8 @@ function BugCtrl($scope, $routeParams, $http, $rootScope) {
     }
 
     $scope.addTags = function($event) {
+        //hack because typeahead component breaks angular model;
+        $scope.newtag = $("#tagbox").val();
         var newtag = $scope.newtag.split(" ").shift();
         $scope.newtag = '';
         if(!$scope.bug.tags) {
@@ -205,6 +207,14 @@ function BugCtrl($scope, $routeParams, $http, $rootScope) {
         $event.preventDefault();
         updateBug("tags");
     }
+
+    var getTags = function(query, process) {
+        $http.get('/api/tags/').success(function(data) {
+            process(data);
+        });
+    }
+
+    $("#tagbox").typeahead({source: getTags});
 
     $scope.editTitle = function() {
         $scope.editingTitle = true;
