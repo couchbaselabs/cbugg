@@ -73,7 +73,13 @@
       <div class="comment-text" ng-bind-html-unsafe="comment.text | markdownify">
       </div>
     </div>
-    <em class="muted" ng-show="comment.deleted">This comment has been deleted</em>
+    <div ng-show="comment.deleted">
+      <em class="muted">This comment has been deleted</em>
+      <button ng-click="unDeleteComment(comment)" ng-show="comment.mine"
+              class="btn btn-mini pull-right">
+        <i class="icon-eye-open"></i>
+      </button>
+    </div>
   </div>
 </div>
 <button ng-hide="addingcomment" ng-click="startComment()" ng-show="loggedin" class="btn">Add Comment</button>

@@ -72,7 +72,7 @@ func serveCommentList(w http.ResponseWriter, r *http.Request) {
 	mustEncode(w, comments)
 }
 
-func serveDelComment(w http.ResponseWriter, r *http.Request) {
+func updateCommentDeleted(w http.ResponseWriter, r *http.Request, to bool) {
 	email := whoami(r)
 
 	err := db.Update(mux.Vars(r)["commid"], 0, func(current []byte) ([]byte, error) {
@@ -94,7 +94,7 @@ func serveDelComment(w http.ResponseWriter, r *http.Request) {
 			return nil, fmt.Errorf("You can only delete your own comments")
 		}
 
-		comment.Deleted = true
+		comment.Deleted = to
 
 		return json.Marshal(comment)
 	})
@@ -105,4 +105,12 @@ func serveDelComment(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.WriteHeader(204)
+}
+
+func serveDelComment(w http.ResponseWriter, r *http.Request) {
+	updateCommentDeleted(w, r, true)
+}
+
+func serveUnDelComment(w http.ResponseWriter, r *http.Request) {
+	updateCommentDeleted(w, r, false)
 }
