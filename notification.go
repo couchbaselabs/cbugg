@@ -21,10 +21,39 @@ Subject: Comment on [{{.Bug.Id}}] {{.Bug.Title}}
 {{.BaseURL}}{{.Bug.Url}}
 `
 
+const bugChangeNotificationText = `From: CBugg <{{.MailFrom}}>
+To: {{.MailTo}}
+Subject: [{{.Bug.Id}}] {{.Bug.Title}}
+
+The following bits of the bug were changed:
+
+{{range .Fields}}* {{.}}
+{{ end }}
+
+Here's the new state:
+
+Title:  {{.Bug.Title}}
+Status: {{.Bug.Status}}
+Owner:  {{.Bug.Owner}}
+Tags:   {{range .Bug.Tags}}{{.}} {{end}}
+
+{{.Bug.Description}}
+
+
+{{.BaseURL}}{{.Bug.Url}}
+`
+
 var commentNotificationTmpl = template.Must(
 	template.New("").Parse(commentNotificationText))
+var bugNotificationTmpl = template.Must(
+	template.New("").Parse(bugChangeNotificationText))
+
+type bugChange struct {
+	bugid, field string
+}
 
 var commentChan = make(chan Comment, 100)
+var bugChan = make(chan bugChange, 100)
 
 // Email configuration
 
@@ -37,10 +66,15 @@ var baseURL = flag.String("baseurl", "http://localhost:8066",
 
 func init() {
 	go commentNotificationLoop()
+	go bugNotificationLoop()
 }
 
 func notifyComment(c Comment) {
 	commentChan <- c
+}
+
+func notifyBugChange(bugid, field string) {
+	bugChan <- bugChange{bugid, field}
 }
 
 func sendEmail(to string, body []byte) error {
@@ -72,28 +106,20 @@ func sendEmail(to string, body []byte) error {
 	return c.Quit()
 }
 
-func sendCommentNotification(c Comment) {
+func sendNotifications(t *template.Template,
+	subs []string, fields map[string]interface{}) {
 	if *mailServer == "" || *mailFrom == "" {
 		log.Printf("Email not configured.")
 	}
 
-	b, err := getBug(c.BugId)
-	if err != nil {
-		log.Printf("Error getting bug %v for comment notification: %v",
-			c.BugId, err)
-		return
-	}
+	fields["BaseURL"] = *baseURL
+	fields["MailFrom"] = *mailFrom
 
-	for _, to := range b.Subscribers {
+	for _, to := range subs {
 		buf := &bytes.Buffer{}
 
-		err = commentNotificationTmpl.Execute(buf, map[string]interface{}{
-			"BaseURL":  *baseURL,
-			"MailFrom": *mailFrom,
-			"MailTo":   to,
-			"Comment":  c,
-			"Bug":      b,
-		})
+		fields["MailTo"] = to
+		err := t.Execute(buf, fields)
 
 		if err != nil {
 			log.Printf("Error building mail body: %v", err)
@@ -108,9 +134,45 @@ func sendCommentNotification(c Comment) {
 	}
 }
 
+func sendCommentNotification(c Comment) {
+	b, err := getBug(c.BugId)
+	if err != nil {
+		log.Printf("Error getting bug %v for comment notification: %v",
+			c.BugId, err)
+		return
+	}
+
+	sendNotifications(commentNotificationTmpl, b.Subscribers,
+		map[string]interface{}{
+			"Comment": c,
+			"Bug":     b,
+		})
+}
+
+func sendBugNotification(bc bugChange) {
+	b, err := getBug(bc.bugid)
+	if err != nil {
+		log.Printf("Error getting bug %v for bug notification: %v",
+			bc.bugid, err)
+		return
+	}
+
+	sendNotifications(commentNotificationTmpl, b.Subscribers,
+		map[string]interface{}{
+			"Fields": []string{bc.field},
+			"Bug":    b,
+		})
+}
+
 func commentNotificationLoop() {
 	for c := range commentChan {
 		sendCommentNotification(c)
+	}
+}
+
+func bugNotificationLoop() {
+	for c := range bugChan {
+		sendBugNotification(c)
 	}
 }
 

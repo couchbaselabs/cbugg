@@ -123,6 +123,7 @@ func serveBugUpdate(w http.ResponseWriter, r *http.Request) {
 	email := whoami(r)
 
 	id := mux.Vars(r)["bugid"]
+	field := r.FormValue("id")
 	r.ParseForm()
 	val := r.FormValue("value")
 	rval := []byte{}
@@ -148,7 +149,7 @@ func serveBugUpdate(w http.ResponseWriter, r *http.Request) {
 			ModBy:      email,
 		}
 
-		switch r.FormValue("id") {
+		switch field {
 		case "description":
 			history.Description = bug.Description
 			bug.Description = val
@@ -203,6 +204,8 @@ func serveBugUpdate(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		http.Error(w, err.Error(), 400)
 	}
+
+	notifyBugChange(id, field)
 
 	w.Write([]byte(rval))
 }
