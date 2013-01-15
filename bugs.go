@@ -219,6 +219,7 @@ func serveBugList(w http.ResponseWriter, r *http.Request) {
 		u := r.FormValue("user")
 		if r.FormValue("state") != "" {
 			st := r.FormValue("state")
+			args["reduce"] = false
 			args["start_key"] = []interface{}{u, st}
 			args["end_key"] = []interface{}{u, st, map[string]string{}}
 		}
