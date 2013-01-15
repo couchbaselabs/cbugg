@@ -15,8 +15,9 @@ angular.module('cbuggDirectives', [])
                 tElement.html('<div ng-class="{edithide: !isEditMode}">'+
                               '<textarea ui-codemirror="{theme:\'monokai\', '+
                               'mode: {name:\'markdown\'}}" ng-model="markdown">'+
-                              '</textarea><button class="btn pull-right"'+
-                              ' ng-click="switchToPreview()">'+saveText+'</button></div>');
+                              '</textarea>Format with <a href="http://daringfireball.net/projects/markdown/syntax">Markdown</a>'+
+                              '<button class="btn pull-right" ng-click="switchToPreview()">'+
+                              saveText+'</button></div>');
                 var editing = tAttrs["edit"];
                 var previewOuterElement = angular.element(previewTemplate);
                 var previewInnerElement = angular.element('<div></div>');
