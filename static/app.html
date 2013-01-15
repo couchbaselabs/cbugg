@@ -16,7 +16,9 @@
             <div class="navbar-inner">
                 <div class="container" ng-controller="LoginCtrl">
                     <form class="navbar-form pull-right" ng-show="loggedin">
-                        <img ng-src="http://www.gravatar.com/avatar/{{gravatar}}?s=28" class="uimg">
+                        <a href="#/user/{{username}}/open">
+                          <img ng-src="http://www.gravatar.com/avatar/{{gravatar}}?s=28" class="uimg">
+                        </a>
                         <div class="btn-group">
                             <button class="btn dropdown-toggle" data-toggle="dropdown">
                                 {{username}}
