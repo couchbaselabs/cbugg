@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"strings"
 	"time"
 )
 
@@ -38,8 +39,12 @@ type APIComment Comment
 type APIBug Bug
 
 func (u User) MarshalJSON() ([]byte, error) {
+	ushort := string(u)
+	if x := strings.Index(ushort, "@"); x >= 0 {
+		ushort = ushort[:x]
+	}
 	m := map[string]string{
-		"email": string(u),
+		"email": ushort,
 		"md5":   md5string(string(u)),
 	}
 
