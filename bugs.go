@@ -206,13 +206,25 @@ func serveBugList(w http.ResponseWriter, r *http.Request) {
 		"reduce": false,
 	}
 
-	if r.FormValue("state") != "" {
-		st := r.FormValue("state")
-		args["start_key"] = []interface{}{st}
-		args["end_key"] = []interface{}{st, map[string]string{}}
+	viewName := "by_state"
+
+	if r.FormValue("user") == "" {
+		if r.FormValue("state") != "" {
+			st := r.FormValue("state")
+			args["start_key"] = []interface{}{st}
+			args["end_key"] = []interface{}{st, map[string]string{}}
+		}
+	} else {
+		viewName = "users"
+		u := r.FormValue("user")
+		if r.FormValue("state") != "" {
+			st := r.FormValue("state")
+			args["start_key"] = []interface{}{u, st}
+			args["end_key"] = []interface{}{u, st, map[string]string{}}
+		}
 	}
 
-	res, err := db.View("cbugg", "by_state", args)
+	res, err := db.View("cbugg", viewName, args)
 	if err != nil {
 		showError(w, r, err.Error(), 500)
 		return

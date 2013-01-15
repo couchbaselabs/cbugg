@@ -92,6 +92,8 @@ angular.module('cbugg', ['cbuggFilters', 'cbuggDirectives', 'ui']).
                                  controller: 'BugCtrl'}).
             when('/state/:stateId', {templateUrl: 'partials/buglist.html',
                                      controller: 'BugsByStateCtrl'}).
+            when('/user/:userId/:stateId', {templateUrl: 'partials/buglist.html',
+                                     controller: 'BugsByUserStateCtrl'}).
             when('/statecounts', {templateUrl: 'partials/statecounts.html',
                                   controller: 'StatesByCountCtrl'}).
             otherwise({redirectTo: '/statecounts'})
@@ -106,6 +108,13 @@ function StatesByCountCtrl($scope, $http) {
 
 function BugsByStateCtrl($scope, $routeParams, $http) {
     $http.get('/api/bug/?state=' + $routeParams.stateId).success(function(data) {
+        $scope.bugs = data;
+    });
+}
+
+function BugsByUserStateCtrl($scope, $routeParams, $http) {
+    $http.get('/api/bug/?user=' + $routeParams.userId +
+              '&state=' + $routeParams.stateId).success(function(data) {
         $scope.bugs = data;
     });
 }
