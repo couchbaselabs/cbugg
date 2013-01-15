@@ -135,6 +135,7 @@ function BugsBySearchResults($scope, $routeParams, $http) {
     $scope.query = $routeParams.query;
     $http.post('/api/search/?query=' + $routeParams.query).success(function(data) {
         $scope.results = data.hits.hits;
+        $scope.total = data.hits.total;
     });
 }
 
