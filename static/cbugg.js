@@ -1,7 +1,8 @@
 angular.module('cbuggDirectives', [])
     .directive('cbMarkdown', function () {
         var converter = new Showdown.converter();
-        var previewEditIcon = '<i class="icon-pencil hand pull-right" ng-click="switchToEdit()"></i>';
+        var previewEditIcon = '<button class="btn btn-mini pull-right" ng-click="switchToEdit()">'+
+                              'Edit <i class="icon-pencil"></i></button>';
         var previewTemplate = '<div ng-hide="isEditMode" class="well">'+previewEditIcon+'</div>';
         return {
             restrict:'E',
