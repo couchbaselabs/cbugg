@@ -1,4 +1,7 @@
-<h2>Bug List</h2>
+<h2>
+    <span ng-show="listuser">{{listuser}}'s</span>
+    <span ng-hide="listuser">all</span>
+    {{liststate}} bugs</h2>
 <ul class="unstyled">
     <li ng-repeat="bug in bugs">
         <a href="#/bug/{{bug.ID}}">{{bug.ID}} - {{bug.Value}}</a>

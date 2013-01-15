@@ -107,12 +107,15 @@ function StatesByCountCtrl($scope, $http) {
 }
 
 function BugsByStateCtrl($scope, $routeParams, $http) {
+    $scope.liststate = $routeParams.stateId;
     $http.get('/api/bug/?state=' + $routeParams.stateId).success(function(data) {
         $scope.bugs = data;
     });
 }
 
 function BugsByUserStateCtrl($scope, $routeParams, $http) {
+    $scope.listuser = $routeParams.userId;
+    $scope.liststate = $routeParams.stateId;
     $http.get('/api/bug/?user=' + $routeParams.userId +
               '&state=' + $routeParams.stateId).success(function(data) {
         $scope.bugs = data;
