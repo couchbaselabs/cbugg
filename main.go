@@ -77,29 +77,32 @@ func serveHome(w http.ResponseWriter, r *http.Request) {
 }
 
 func serveUserList(w http.ResponseWriter, r *http.Request) {
-	args := map[string]interface{}{
-		"group_level": 1,
-	}
-
-	viewRes := struct {
-		Rows []struct {
-			Key string
-		}
-	}{}
-
-	err := db.ViewCustom("cbugg", "users", args, &viewRes)
-	if err != nil {
-		showError(w, r, err.Error(), 500)
-		return
-	}
-
 	rv := []string{}
-	for _, r := range viewRes.Rows {
-		if strings.Contains(r.Key, "@") {
-			rv = append(rv, r.Key)
+
+	if whoami(r) != "" {
+		args := map[string]interface{}{
+			"group_level": 1,
 		}
+
+		viewRes := struct {
+			Rows []struct {
+				Key string
+			}
+		}{}
+
+		err := db.ViewCustom("cbugg", "users", args, &viewRes)
+		if err != nil {
+			showError(w, r, err.Error(), 500)
+			return
+		}
+
+		for _, r := range viewRes.Rows {
+			if strings.Contains(r.Key, "@") {
+				rv = append(rv, r.Key)
+			}
+		}
+		sort.Strings(rv)
 	}
-	sort.Strings(rv)
 
 	w.Header().Set("Content-type", "application/json")
 	mustEncode(w, rv)
