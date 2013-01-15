@@ -83,6 +83,11 @@ angular.module('cbuggFilters', []).
         return function(dstr) {
             return moment(dstr).fromNow();
         }
+    }).
+    filter('calDate', function() {
+        return function(dstr) {
+            return moment(dstr).calendar();
+        }
     });
 
 angular.module('cbugg', ['cbuggFilters', 'cbuggDirectives', 'ui']).
