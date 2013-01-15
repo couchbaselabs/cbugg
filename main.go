@@ -153,6 +153,12 @@ func main() {
 	r.HandleFunc("/api/bug/{bugid}/comments/{commid}/undel",
 		serveUnDelComment).Methods("POST").MatcherFunc(authRequired)
 	r.HandleFunc("/api/bug/{bugid}/comments/{commid}/undel", notAuthed).Methods("POST")
+	// Bug subscriptions
+	r.HandleFunc("/api/bug/{bugid}/sub/",
+		serveSubscribeBug).Methods("POST").MatcherFunc(authRequired)
+	r.HandleFunc("/api/bug/{bugid}/sub/",
+		serveUnsubscribeBug).Methods("DELETE").MatcherFunc(authRequired)
+	r.HandleFunc("/api/bug/{bugid}/sub/", notAuthed)
 
 	r.HandleFunc("/api/users/", serveUserList).Methods("GET")
 	r.HandleFunc("/api/tags/", serveTagList).Methods("GET")

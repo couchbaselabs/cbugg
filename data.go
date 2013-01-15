@@ -68,9 +68,16 @@ func (b APIBug) MarshalJSON() ([]byte, error) {
 		return nil, err
 	}
 
+	subs := []User{}
+	for _, u := range b.Subscribers {
+		subs = append(subs, User(u))
+	}
+
 	m["creator"] = User(maybenil(m, "creator"))
 	m["owner"] = User(maybenil(m, "owner"))
 	m["modified_by"] = User(maybenil(m, "modified_by"))
+	m["subscribers"] = subs
+
 	return json.Marshal(m)
 }
 

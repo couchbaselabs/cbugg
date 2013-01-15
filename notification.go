@@ -2,7 +2,9 @@ package main
 
 import (
 	"bytes"
+	"encoding/json"
 	"flag"
+	"fmt"
 	"log"
 	"net/smtp"
 	"text/template"
@@ -110,4 +112,40 @@ func commentNotificationLoop() {
 	for c := range commentChan {
 		sendCommentNotification(c)
 	}
+}
+
+func removeFromList(list []string, needle string) []string {
+	rv := []string{}
+	for _, s := range list {
+		if s != needle {
+			rv = append(rv, s)
+		}
+	}
+	return rv
+}
+
+func updateSubscription(bugid, email string, add bool) error {
+	return db.Update(bugid, 0, func(current []byte) ([]byte, error) {
+		if len(current) == 0 {
+			return nil, NotFound
+		}
+		bug := Bug{}
+		err := json.Unmarshal(current, &bug)
+		if err != nil {
+			return nil, err
+		}
+
+		if bug.Type != "bug" {
+			return nil, fmt.Errorf("Expected a bug, got %v",
+				bug.Type)
+		}
+
+		bug.Subscribers = removeFromList(bug.Subscribers, email)
+
+		if add {
+			bug.Subscribers = append(bug.Subscribers, email)
+		}
+
+		return json.Marshal(bug)
+	})
 }

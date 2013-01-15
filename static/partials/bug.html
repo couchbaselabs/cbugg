@@ -9,6 +9,15 @@
     </form>
 </div>
 
+<div class="subs">
+  <a title="Click to stop watching this bug" ng-show="subscribed" ng-click="unsubscribe()">
+    <i class="icon-eye-open"></i>
+  </a>
+  <a title="Click to watch this bug."  ng-hide="subscribed" ng-click="subscribe()">
+    <i class="icon-eye-close"></i>
+  </a>
+</div>
+
 <cb-markdown ng-model="$parent.bug.description">No Description</cb-markdown>
 
 <p>
@@ -16,8 +25,6 @@
   <img ng-src="http://www.gravatar.com/avatar/{{bug.creator.md5}}?s=16">
   {{bug.creator.email}}.
 </p>
-
-
 
 <p>
 <form class="form-inline">

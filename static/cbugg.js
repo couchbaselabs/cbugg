@@ -153,13 +153,14 @@ function BugCtrl($scope, $routeParams, $http, $rootScope) {
             error(function(data, code) {
                 bAlert("Error " + code, "could not update bug: " + data, "error")
             });
+
         }
     }
 
     $scope.allStates = ["new", "open", "resolved", "closed"];
     $scope.comments = [];
     $scope.draftcomment = "";
-
+    $scope.subscribed = false;
 
     $http.get('/api/bug/' + $routeParams.bugId).success(function(data) {
         $scope.bug = data.bug;
@@ -175,7 +176,14 @@ function BugCtrl($scope, $routeParams, $http, $rootScope) {
                 updateBug("status");
             }
         });
+        checkSubscribed();
     });
+
+    var checkSubscribed = function() {
+        _.forEach($scope.bug.subscribers, function(el) {
+            $scope.subscribed |= ($rootScope.loginscope.gravatar == el.md5);
+        });
+    };
 
     var checkComments = function (comments) {
         return _.map(comments, function(comment) {
@@ -192,6 +200,7 @@ function BugCtrl($scope, $routeParams, $http, $rootScope) {
     $rootScope.$watch("loggedin", function(nv, ov) {
         //Update delete button available on loggedinnness change
         $scope.comments = checkComments($scope.comments);
+        checkSubscribed();
     });
 
     $http.get('/api/bug/' + $routeParams.bugId + '/comments/').success(function(data) {
@@ -231,6 +240,18 @@ function BugCtrl($scope, $routeParams, $http, $rootScope) {
     }
 
     $("#tagbox").typeahead({source: getTags});
+
+    $scope.subscribe = function() {
+        $http.post('/api/bug/' + $scope.bug.id + '/sub/');
+        $scope.subscribed = true;
+        return false;
+    }
+
+    $scope.unsubscribe = function() {
+        $http.delete('/api/bug/' + $scope.bug.id + '/sub/');
+        $scope.subscribed = false;
+        return false;
+    }
 
     $scope.editTitle = function() {
         $scope.editingTitle = true;

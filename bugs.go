@@ -244,3 +244,25 @@ func serveBugList(w http.ResponseWriter, r *http.Request) {
 	}
 	w.Write(jres)
 }
+
+func serveSubscribeBug(w http.ResponseWriter, r *http.Request) {
+	err := updateSubscription(mux.Vars(r)["bugid"],
+		whoami(r), true)
+	if err != nil {
+		showError(w, r, err.Error(), 500)
+		return
+	}
+
+	w.WriteHeader(204)
+}
+
+func serveUnsubscribeBug(w http.ResponseWriter, r *http.Request) {
+	err := updateSubscription(mux.Vars(r)["bugid"],
+		whoami(r), false)
+	if err != nil {
+		showError(w, r, err.Error(), 500)
+		return
+	}
+
+	w.WriteHeader(204)
+}
