@@ -96,7 +96,7 @@
 <button ng-hide="addingcomment" ng-click="startComment()" ng-show="loggedin" class="btn">Add Comment</button>
 <div ng-show="addingcomment">
   <cb-markdown modeflag="editingcomment" ng-model="$parent.draftcomment"
-  edit="true" savetext="Preview"></cb-markdown>
+  edit="true" savetext="Preview" clearfn="clearCommentDraft"></cb-markdown>
   <button ng-hide="editingcomment" ng-click="postComment()"
     class="btn btn-success pull-right">Post Comment</button>
 </div>

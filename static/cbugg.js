@@ -12,6 +12,8 @@ angular.module('cbuggDirectives', [])
                 var initial = tElement.text();
                 var saveText = tAttrs["savetext"];
                 var modeflag = tAttrs["modeflag"];
+                //If set, stick a callback on the parent scope to reset our state
+                var clearfn = tAttrs["clearfn"];
                 if(!saveText) { saveText = "Save"; }
                 tElement.html('<div ng-class="{edithide: !isEditMode}">'+
                               '<textarea ui-codemirror="{theme:\'monokai\', '+
@@ -51,11 +53,19 @@ angular.module('cbuggDirectives', [])
                             scope.renderPreview();
                         }
                     });
-                    scope.markdown=initial;
-                    if(editing) {
-                        scope.switchToEdit();
-                    } else {
-                        scope.switchToPreview();
+                    var reset = function() {
+                        console.log("Reset md widg", scope)
+                        scope.markdown = initial;
+                        console.log("Reset md widg", scope)
+                        if(editing) {
+                            scope.switchToEdit();
+                        } else {
+                            scope.switchToPreview();
+                        }
+                    }
+                    reset();
+                    if(clearfn) {
+                        scope.$parent[clearfn] = reset;
                     }
                 };
             }
@@ -274,6 +284,7 @@ function BugCtrl($scope, $routeParams, $http, $rootScope) {
                 $scope.comments.push(data);
                 $scope.draftcomment="";
                 $scope.addingcomment = false;
+                $scope.clearCommentDraft();
                 if (!$scope.subscribed) {
                     $scope.subcount++;
                     $scope.subscribed = true;
