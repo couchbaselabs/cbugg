@@ -276,7 +276,7 @@ function BugCtrl($scope, $routeParams, $http, $rootScope) {
                 $scope.comments.push(data);
                 $scope.draftcomment="";
                 $scope.addingcomment = false;
-                $scope.subscribed = false;
+                $scope.subscribed = true;
             }).
             error(function(data, code) {
                 bAlert("Error " + code, "could not post comment: " + data, "error")
