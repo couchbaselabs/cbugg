@@ -328,6 +328,7 @@ function BugCtrl($scope, $routeParams, $http, $rootScope) {
 
     $scope.setOwnerToMe = function() {
         $scope.bug.owner.email = $scope.username;
+        console.log("Setting owner to", $scope.owner, "from", $scope);
         updateBug("owner", $scope.username);
         $scope.editingowner = false;
         return false;
