@@ -15,7 +15,7 @@ type viewMarker struct {
 }
 
 const ddocKey = "/@cbuggddocVersion"
-const ddocVersion = 7
+const ddocVersion = 9
 const designDoc = `
 {
     "views": {
@@ -25,6 +25,9 @@ const designDoc = `
         "by_state": {
             "map": "function (doc, meta) {\n  if (doc.type === 'bug') {\n    emit([doc.status, doc.created_at], doc.title);\n  }\n}",
             "reduce": "_count"
+        },
+        "changes": {
+            "map": "function (doc, meta) {\n  if (doc.type === 'bughistory') {\n    emit(doc.modified_at, {actor: doc.modified_by, type: \"changed\", bugid: doc.id});\n  } else if (doc.type === 'comment') {\n    emit(doc.created_at, {actor: doc.user, type: \"commented\", bugid: doc.bugId});\n  } else if (doc.type === 'bug') {\n    emit(doc.created_at, {actor: doc.creator, type: \"created\", bugid: doc.id});\n  }\n}"
         },
         "comments": {
             "map": "function (doc, meta) {\n  if (doc.type === \"comment\") {\n    emit([doc.bugId, doc.created_at], null);\n  }\n}"

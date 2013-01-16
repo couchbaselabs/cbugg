@@ -109,6 +109,52 @@ func serveUserList(w http.ResponseWriter, r *http.Request) {
 	mustEncode(w, rv)
 }
 
+func serveRecent(w http.ResponseWriter, r *http.Request) {
+	args := map[string]interface{}{
+		"descending": true,
+		"limit":      20,
+	}
+
+	viewRes := struct {
+		Rows []struct {
+			ID    string
+			Key   string
+			Value struct {
+				Actor string
+				Type  string
+				BugId string
+			}
+		}
+	}{}
+
+	err := db.ViewCustom("cbugg", "changes", args, &viewRes)
+	if err != nil {
+		showError(w, r, err.Error(), 500)
+		return
+	}
+
+	type OutType struct {
+		Time  string `json:"time"`
+		User  User   `json:"user"`
+		Type  string `json:"type"`
+		BugId string `json:"bugid"`
+	}
+
+	output := []OutType{}
+
+	for _, r := range viewRes.Rows {
+		output = append(output,
+			OutType{r.Key,
+				User(r.Value.Actor),
+				r.Value.Type,
+				r.Value.BugId,
+			})
+	}
+
+	w.Header().Set("Content-type", "application/json")
+	mustEncode(w, output)
+}
+
 func authRequired(r *http.Request, rm *mux.RouteMatch) bool {
 	return whoami(r) != ""
 }
@@ -168,6 +214,7 @@ func main() {
 
 	r.HandleFunc("/api/users/", serveUserList).Methods("GET")
 	r.HandleFunc("/api/tags/", serveTagList).Methods("GET")
+	r.HandleFunc("/api/recent/", serveRecent).Methods("GET")
 
 	r.HandleFunc("/api/search/", searchBugs).Methods("POST")
 
