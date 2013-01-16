@@ -29,7 +29,7 @@ angular.module('cbuggDirectives', [])
                     scope.renderPreview = function() {
                         var makeHtml = converter.makeHtml(scope.markdown);
                         previewInnerElement.html(makeHtml);
-                    }
+                    };
                     scope.switchToPreview = function () {
                         model.$setViewValue(scope.markdown);
                         scope.renderPreview();
@@ -37,29 +37,29 @@ angular.module('cbuggDirectives', [])
                         if(modeflag) {
                             scope.$parent[modeflag] = false;
                         }
-                    }
+                    };
                     scope.switchToEdit = function () {
                         scope.isEditMode = true;
                         if(modeflag) {
                             scope.$parent[modeflag] = true;
                         }
-                    }
+                    };
                     scope.$watch(attrs["ngModel"], function() {
                         var up = model.$modelValue;
                         if(up) {
                             scope.markdown = up;
                             scope.renderPreview();
                         }
-                    })
+                    });
                     scope.markdown=initial;
                     if(editing) {
-                        scope.switchToEdit()
+                        scope.switchToEdit();
                     } else {
-                        scope.switchToPreview()
+                        scope.switchToPreview();
                     }
-                }
+                };
             }
-        }
+        };
     });
 
 function bAlert(heading, message, kind) {
@@ -78,18 +78,18 @@ angular.module('cbuggFilters', []).
     filter('markdownify', function() {
         var converter = new Showdown.converter();
         return function(string) {
-            return converter.makeHtml(string)
-        }
+            return converter.makeHtml(string);
+        };
     }).
     filter('relDate', function() {
         return function(dstr) {
             return moment(dstr).fromNow();
-        }
+        };
     }).
     filter('calDate', function() {
         return function(dstr) {
             return moment(dstr).calendar();
-        }
+        };
     });
 
 angular.module('cbugg', ['cbuggFilters', 'cbuggDirectives', 'ui']).
@@ -105,7 +105,7 @@ angular.module('cbugg', ['cbuggFilters', 'cbuggDirectives', 'ui']).
                                          controller: 'SearchResultsCtrl'}).
             when('/statecounts', {templateUrl: 'partials/statecounts.html',
                                   controller: 'StatesByCountCtrl'}).
-            otherwise({redirectTo: '/statecounts'})
+            otherwise({redirectTo: '/statecounts'});
 
     }]);
 
@@ -144,11 +144,11 @@ function BugCtrl($scope, $routeParams, $http, $rootScope) {
                 $scope.bug = data;
             }).
             error(function(data, code) {
-                bAlert("Error " + code, "could not update bug: " + data, "error")
+                bAlert("Error " + code, "could not update bug: " + data, "error");
             });
 
         }
-    }
+    };
 
     $scope.allStates = ["new", "open", "resolved", "closed"];
     $scope.comments = [];
@@ -189,7 +189,7 @@ function BugCtrl($scope, $routeParams, $http, $rootScope) {
             }
             return comment;
         });
-    }
+    };
 
     $rootScope.$watch("loggedin", function(nv, ov) {
         //Update delete button available on loggedinnness change
@@ -206,7 +206,7 @@ function BugCtrl($scope, $routeParams, $http, $rootScope) {
             return t !== kill;
         });
         updateBug("tags");
-    }
+    };
 
     $scope.addTags = function($event) {
         //hack because typeahead component breaks angular model;
@@ -220,7 +220,7 @@ function BugCtrl($scope, $routeParams, $http, $rootScope) {
         $scope.bug.tags = _.uniq($scope.bug.tags);
         $event.preventDefault();
         updateBug("tags");
-    }
+    };
 
     var getTags = function(query, process) {
         $http.get('/api/tags/').success(function(data) {
@@ -231,7 +231,7 @@ function BugCtrl($scope, $routeParams, $http, $rootScope) {
             tags.sort();
             process(tags);
         });
-    }
+    };
 
     $("#tagbox").typeahead({source: getTags});
 
@@ -240,27 +240,27 @@ function BugCtrl($scope, $routeParams, $http, $rootScope) {
         $scope.subscribed = true;
         $scope.subcount++;
         return false;
-    }
+    };
 
     $scope.unsubscribe = function() {
         $http.delete('/api/bug/' + $scope.bug.id + '/sub/');
         $scope.subscribed = false;
         $scope.subcount--;
         return false;
-    }
+    };
 
     $scope.editTitle = function() {
         $scope.editingTitle = true;
-    }
+    };
 
     $scope.submitTitle = function() {
         updateBug("title");
         $scope.editingTitle = false;
-    }
+    };
 
     $scope.startComment = function() {
         $scope.addingcomment = true;
-    }
+    };
 
     $scope.postComment = function() {
         $http.post('/api/bug/' + $routeParams.bugId + '/comments/',
@@ -277,9 +277,9 @@ function BugCtrl($scope, $routeParams, $http, $rootScope) {
                 }
             }).
             error(function(data, code) {
-                bAlert("Error " + code, "could not post comment: " + data, "error")
-            })
-    }
+                bAlert("Error " + code, "could not post comment: " + data, "error");
+            });
+    };
 
     $scope.deleteComment = function(comment) {
         console.log(comment);
@@ -293,9 +293,9 @@ function BugCtrl($scope, $routeParams, $http, $rootScope) {
                 });
             }).
             error(function(data, code) {
-                bAlert("Error " + code, "could not post comment: " + data, "error")
-            })
-    }
+                bAlert("Error " + code, "could not post comment: " + data, "error");
+            });
+    };
 
     $scope.unDeleteComment = function(comment) {
         console.log(comment);
@@ -309,41 +309,41 @@ function BugCtrl($scope, $routeParams, $http, $rootScope) {
                 });
             }).
             error(function(data, code) {
-                bAlert("Error " + code, "could not post comment: " + data, "error")
-            })
-    }
+                bAlert("Error " + code, "could not post comment: " + data, "error");
+            });
+    };
 
     var getUsers = function(query, process) {
         console.log("Getting users..");
         $http.get('/api/users/').success(function(data) {
             process(data);
         });
-    }
+    };
 
     $scope.editOwner = function() {
         $(".ownerbox").typeahead({source: getUsers});
         $scope.editingowner = true;
-    }
+    };
 
     $scope.setOwnerToMe = function() {
         $scope.bug.owner.email = $rootScope.loginscope.username;
         updateBug("owner", $scope.bug.owner.email);
         $scope.editingowner = false;
         return false;
-    }
+    };
 
     $scope.listTag = function(tagname) {
         var query = 'tags:%22' + encodeURIComponent(tagname) +
             '%22%20AND%20(status:open%20OR%20status:new)';
         location.hash = "#/search/" + query;
         return false;
-    }
+    };
 
     $scope.submitOwner = function() {
         $scope.bug.owner.email = $(".ownerbox").val();
         updateBug("owner", $scope.bug.owner.email);
         $scope.editingowner = false;
-    }
+    };
 }
 
 function FakeLoginCtrl($scope) {
@@ -353,11 +353,11 @@ function FakeLoginCtrl($scope) {
         $scope.loggedin = true;
         $scope.username = "Test User";
         $scope.gravatar = "eee3b47a26586bb79e0a832466c066be";
-    }
+    };
     $scope.logout = function() {
         $rootScope.loggedin = false;
         $scope.loggedin = false;
-    }
+    };
 }
 
 function LoginCtrl($scope, $http, $rootScope) {
@@ -394,24 +394,24 @@ function LoginCtrl($scope, $http, $rootScope) {
             bAlert("Error", "Problem logging out.", "error");
             $rootScope.loggedin = false;
             $scope.loggedin = false;
-        })
-    }
+        });
+    };
 
     $scope.login = function() {
         navigator.id.request();
-    }
+    };
 }
 
 function SearchCtrl($scope, $http, $rootScope, $location) {
     $rootScope.loginscope = $scope;
 
     $scope.search = function() {
-         $location.path("/search/" + $scope.query)
-    }
+        $location.path("/search/" + $scope.query);
+    };
 }
 
 function SearchResultsCtrl($scope, $routeParams, $http) {
-    $scope.page = 1
+    $scope.page = 1;
     $scope.rpp = 10;
     $scope.query = $routeParams.query;
     $http.post('/api/search/?query=' + $routeParams.query).success(function(data) {
@@ -421,29 +421,29 @@ function SearchResultsCtrl($scope, $routeParams, $http) {
     });
 
     $scope.jumpToPage = function(pageNum, $event) {
-        $event.preventDefault()
-        $scope.page = pageNum
+        $event.preventDefault();
+        $scope.page = pageNum;
         $http.post('/api/search/?query=' + $routeParams.query + '&from=' + (($scope.page - 1) * $scope.rpp)).success(function(data) {
             $scope.results = data.hits.hits;
             $scope.total = data.hits.total;
             $scope.computeValidPages();
         });
-    }
+    };
 
     $scope.computeValidPages = function() {
         $scope.numPages = Math.ceil($scope.total / $scope.rpp);
-        $scope.validPages = new Array()
+        $scope.validPages = new Array();
         for(i=1;i<=$scope.numPages;i++) {
-            $scope.validPages.push(i)
+            $scope.validPages.push(i);
         }
-        $scope.firstResult = (($scope.page - 1) * $scope.rpp) + 1
+        $scope.firstResult = (($scope.page - 1) * $scope.rpp) + 1;
         if($scope.firstResult > $scope.total) {
-            $scope.firstResult = $scope.total
+            $scope.firstResult = $scope.total;
         }
-        $scope.lastResult = $scope.firstResult + $scope.rpp - 1
+        $scope.lastResult = $scope.firstResult + $scope.rpp - 1;
         if($scope.lastResult > $scope.total) {
-            $scope.lastResult = $scope.total
+            $scope.lastResult = $scope.total;
         }
-    }
+    };
 
 }
