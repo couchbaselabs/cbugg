@@ -15,7 +15,7 @@ type viewMarker struct {
 }
 
 const ddocKey = "/@cbuggddocVersion"
-const ddocVersion = 10
+const ddocVersion = 11
 const designDoc = `
 {
     "views": {
