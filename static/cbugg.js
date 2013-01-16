@@ -326,6 +326,13 @@ function BugCtrl($scope, $routeParams, $http, $rootScope) {
         $scope.editingowner = true;
     }
 
+    $scope.setOwnerToMe = function() {
+        $scope.bug.owner.email = $scope.username;
+        updateBug("owner", $scope.username);
+        $scope.editingowner = false;
+        return false;
+    }
+
     $scope.listTag = function(tagname) {
         var query = 'tags:%22' + encodeURIComponent(tagname) +
             '%22%20AND%20(status:open%20OR%20status:new)';
