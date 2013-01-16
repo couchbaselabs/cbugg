@@ -8,6 +8,7 @@ import (
 	"log"
 	"net/smtp"
 	"sort"
+	"strings"
 	"sync"
 	"text/template"
 	"time"
@@ -46,10 +47,24 @@ Tags:   {{range .Bug.Tags}}{{.}} {{end}}
 {{.BaseURL}}{{.Bug.Url}}
 `
 
+const assignedText = `From: CBugg <{{.MailFrom}}>
+To: {{.MailTo}}
+Subject: [{{.Bug.Id}}] Assigned to you: {{.Bug.Title}}
+
+The bug "{{.Bug.Title}}" was assigned to you.  You were automatically
+subscribed to updates to the bug.
+
+Learn more about it here:
+
+{{.BaseURL}}{{.Bug.Url}}
+`
+
 var commentNotificationTmpl = template.Must(
 	template.New("").Parse(commentNotificationText))
 var bugNotificationTmpl = template.Must(
 	template.New("").Parse(bugChangeNotificationText))
+var assignedTmpl = template.Must(
+	template.New("").Parse(assignedText))
 
 type bugChange struct {
 	bugid  string
@@ -58,6 +73,7 @@ type bugChange struct {
 
 var commentChan = make(chan Comment, 100)
 var bugChan = make(chan bugChange, 100)
+var assignedChan = make(chan string, 100)
 
 var bugNotifyDelays map[string]chan bugChange
 var bugNotifyDelayLock sync.Mutex
@@ -79,6 +95,7 @@ func init() {
 
 	go commentNotificationLoop()
 	go bugNotificationLoop()
+	go bugAssignmentNotificationLoop()
 }
 
 func notifyComment(c Comment) {
@@ -87,6 +104,10 @@ func notifyComment(c Comment) {
 
 func notifyBugChange(bugid, field string) {
 	bugChan <- bugChange{bugid, []string{field}}
+}
+
+func notifyBugAssignment(bugid string) {
+	assignedChan <- bugid
 }
 
 func sendEmail(to string, body []byte) error {
@@ -240,6 +261,29 @@ func removeFromList(list []string, needle string) []string {
 		}
 	}
 	return rv
+}
+
+func sendBugAssignedNotification(bugid string) {
+	b, err := getBug(bugid)
+	if err != nil {
+		log.Printf("Error getting bug %v for assign notification: %v",
+			bugid, err)
+		return
+	}
+
+	if !strings.Contains(b.Owner, "@") {
+		log.Printf("bug %v has no assignee", bugid)
+		return
+	}
+
+	sendNotifications(assignedTmpl, []string{b.Owner},
+		map[string]interface{}{"Bug": b})
+}
+
+func bugAssignmentNotificationLoop() {
+	for bugid := range assignedChan {
+		sendBugAssignedNotification(bugid)
+	}
 }
 
 func updateSubscription(bugid, email string, add bool) error {
