@@ -1,15 +1,15 @@
-<h3>Query: {{query}}</h3>
-
 <div ng-show="searchInProgress">
 
-<div class="progress progress-striped active">
-  <h3>Search for {{query}} in progress...</h3>
-  <div class="bar" style="width: 100%;"></div>
-</div>
+	<h3>Search for {{query}} in progress...</h3>
+	<div class="progress progress-striped active">
+
+		<div class="bar" style="width: 100%;"></div>
+	</div>
 
 </div>
-<h3>Query: {{query}}</h3>
+
 <div ng-hide="searchInProgress">
+	<h3>Query: {{query}}</h3>
 	<div ng-show="searchWarning != null" class="alert alert-error">
 		<span class="label label-important">Warning</span> {{searchWarning}}
 	</div>
