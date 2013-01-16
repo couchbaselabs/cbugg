@@ -414,6 +414,7 @@ function SearchCtrl($scope, $http, $rootScope, $location) {
 }
 
 function SearchResultsCtrl($scope, $routeParams, $http) {
+    $scope.searchInProgress = true;
     $scope.page = 1;
     $scope.rpp = 10;
     $scope.query = $routeParams.query;
@@ -424,6 +425,7 @@ function SearchResultsCtrl($scope, $routeParams, $http) {
         $scope.total = data.hits.total;
         $scope.computeValidPages();
         $scope.verifyAllSearchShards();
+        $scope.searchInProgress = false;
     });
 
     $scope.jumpToPage = function(pageNum, $event) {
@@ -436,6 +438,7 @@ function SearchResultsCtrl($scope, $routeParams, $http) {
             $scope.total = data.hits.total;
             $scope.computeValidPages();
             $scope.verifyAllSearchShards();
+            $scope.searchInProgress = false;
         });
     };
 
