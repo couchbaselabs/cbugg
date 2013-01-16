@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
 	"time"
 
@@ -36,6 +37,12 @@ func serveNewComment(w http.ResponseWriter, r *http.Request) {
 	}
 
 	notifyComment(c)
+
+	err = updateSubscription(bugid, email, true)
+	if err != nil {
+		log.Printf("Error subscribing commenter %v to bug %v: %v",
+			email, bugid, err)
+	}
 
 	mustEncode(w, APIComment(c))
 }

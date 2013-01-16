@@ -32,6 +32,7 @@ func serveNewBug(w http.ResponseWriter, r *http.Request) {
 		Creator:     email,
 		Tags:        r.Form["tag"],
 		Type:        "bug",
+		Subscribers: []string{email},
 		CreatedAt:   time.Now().UTC(),
 	}
 
