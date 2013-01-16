@@ -26,6 +26,10 @@
                             </button>
                             <ul class="dropdown-menu">
                                 <li> <a href="#/user/{{username}}/open">My Open Bugs</a> </li>
+                                <li>
+                                  <a href="#/search/subscribers:{{username}}%20AND%20(status:open%20OR%20status:new)">Open
+                                    Starred Bugs</a>
+                                </li>
                                 <li class="divider"></li>
                                 <li> <a ng-click="logout()">Log Out</a> </li>
                             </ul>
