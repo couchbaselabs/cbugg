@@ -29,27 +29,45 @@ func searchBugs(w http.ResponseWriter, r *http.Request) {
 
 	if r.FormValue("query") != "" {
 
+		filter := map[string]interface{}{
+			"and": []interface{}{
+				map[string]interface{}{
+					"type": map[string]interface{}{
+						"value": "couchbaseDocument",
+					},
+				},
+				map[string]interface{}{
+					"term": map[string]interface{}{
+						"doc.type": "bug",
+					},
+				},
+			},
+		}
+
 		query := map[string]interface{}{
 			"query": map[string]interface{}{
 				"query_string": map[string]interface{}{
 					"query": r.FormValue("query"),
 				},
 			},
-			"filter": map[string]interface{}{
-				"and": []interface{}{
-					map[string]interface{}{
-						"type": map[string]interface{}{
-							"value": "couchbaseDocument",
-						},
+			"filter": filter,
+			"from":   from,
+			"facets": map[string]interface{}{
+				"statuses": map[string]interface{}{
+					"terms": map[string]interface{}{
+						"field": "doc.status",
+						"size":  5,
 					},
-					map[string]interface{}{
-						"term": map[string]interface{}{
-							"doc.type": "bug",
-						},
+					"facet_filter": filter,
+				},
+				"tags": map[string]interface{}{
+					"terms": map[string]interface{}{
+						"field": "doc.tags",
+						"size":  5,
 					},
+					"facet_filter": filter,
 				},
 			},
-			"from": from,
 		}
 
 		searchresponse, err := core.Search(false, *esIndex, "couchbaseDocument", query, "")
@@ -103,11 +121,18 @@ func searchBugs(w http.ResponseWriter, r *http.Request) {
 				hitrecords = append(hitrecords, ourhit)
 			}
 
+			ourfacets := map[string]interface{}{}
+			err = json.Unmarshal(searchresponse.Facets, &ourfacets)
+			if err != nil {
+				log.Printf("Error unmarshalling search result facets: %v", err)
+			}
+
 			ourhits := map[string]interface{}{
 				"total": searchresponse.Hits.Total,
 				"hits":  hitrecords,
 			}
 			ourresponse["hits"] = ourhits
+			ourresponse["facets"] = ourfacets
 
 		}
 
