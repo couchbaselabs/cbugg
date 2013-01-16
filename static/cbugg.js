@@ -330,6 +330,7 @@ function BugCtrl($scope, $routeParams, $http, $rootScope) {
         var url = '/search/tags:%22' + encodeURIComponent(tagname) +
             '%22%20AND%20(status:open%20OR%20status:new)';
         location.hash = "#/search/" + url;
+        return false;
     }
 
     $scope.submitOwner = function() {
