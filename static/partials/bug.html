@@ -36,7 +36,7 @@
     <form class="form-inline">
         Tags:
         <div class="btn-group" ng-repeat="tag in bug.tags">
-            <button class="tag btn btn-mini btn-success">{{tag}}</button>
+            <button class="tag btn btn-mini btn-success" ng-click="listTag(tag)">{{tag}}</button>
             <button class="btn btn-mini btn-danger" ng-click="killTag(tag)">
                 <i class="icon-white icon-remove"></i>
             </button>
