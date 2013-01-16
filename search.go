@@ -3,9 +3,9 @@ package main
 import (
 	"encoding/base64"
 	"encoding/json"
-	"net/http"
-
 	"log"
+	"net/http"
+	"strconv"
 
 	"github.com/mattbaird/elastigo/api"
 	"github.com/mattbaird/elastigo/core"
@@ -16,6 +16,16 @@ func searchBugs(w http.ResponseWriter, r *http.Request) {
 	api.Domain = *esHost
 	api.Port = *esPort
 	api.Protocol = *esScheme
+
+	from := 0
+	var err error
+	if r.FormValue("from") != "" {
+		from, err = strconv.Atoi(r.FormValue("from"))
+		if err != nil {
+			log.Printf("Invalid value for from: %v", r.FormValue("from"))
+			from = 0
+		}
+	}
 
 	if r.FormValue("query") != "" {
 
@@ -39,6 +49,7 @@ func searchBugs(w http.ResponseWriter, r *http.Request) {
 					},
 				},
 			},
+			"from": from,
 		}
 
 		searchresponse, err := core.Search(false, *esIndex, "couchbaseDocument", query, "")
@@ -117,7 +128,7 @@ func combineSearchHitWithDoc(hit core.Hit, doc interface{}) (map[string]interfac
 		"_index": hit.Index,
 		"_type":  hit.Type,
 		"_id":    hit.Id,
-		"score":  hit.Score,
+		"_score": hit.Score,
 	}
 
 	var source map[string]interface{}

@@ -102,7 +102,7 @@ angular.module('cbugg', ['cbuggFilters', 'cbuggDirectives', 'ui']).
             when('/user/:userId/:stateId', {templateUrl: 'partials/buglist.html',
                                      controller: 'BugsByUserStateCtrl'}).
             when('/search/:query', {templateUrl: 'partials/searchresults.html',
-                                         controller: 'BugsBySearchResults'}).
+                                         controller: 'SearchResultsCtrl'}).
             when('/statecounts', {templateUrl: 'partials/statecounts.html',
                                   controller: 'StatesByCountCtrl'}).
             otherwise({redirectTo: '/statecounts'})
@@ -128,14 +128,6 @@ function BugsByUserStateCtrl($scope, $routeParams, $http) {
     $http.get('/api/bug/?user=' + $routeParams.userId +
               '&state=' + $routeParams.stateId).success(function(data) {
         $scope.bugs = data;
-    });
-}
-
-function BugsBySearchResults($scope, $routeParams, $http) {
-    $scope.query = $routeParams.query;
-    $http.post('/api/search/?query=' + $routeParams.query).success(function(data) {
-        $scope.results = data.hits.hits;
-        $scope.total = data.hits.total;
     });
 }
 
@@ -410,4 +402,39 @@ function SearchCtrl($scope, $http, $rootScope, $location) {
     $scope.search = function() {
          $location.path("/search/" + $scope.query)
     }
+}
+
+function SearchResultsCtrl($scope, $routeParams, $http) {
+    $scope.page = 1
+    $scope.rpp = 10;
+    $scope.query = $routeParams.query;
+    $http.post('/api/search/?query=' + $routeParams.query).success(function(data) {
+        $scope.results = data.hits.hits;
+        $scope.total = data.hits.total;
+        $scope.computeValidPages();
+    });
+
+    $scope.jumpToPage = function(pageNum, $event) {
+        $event.preventDefault()
+        $scope.page = pageNum
+        $http.post('/api/search/?query=' + $routeParams.query + '&from=' + (($scope.page - 1) * $scope.rpp)).success(function(data) {
+            $scope.results = data.hits.hits;
+            $scope.total = data.hits.total;
+            $scope.computeValidPages();
+        });
+    }
+
+    $scope.computeValidPages = function() {
+        $scope.numPages = Math.ceil($scope.total / $scope.rpp);
+        $scope.validPages = new Array()
+        for(i=1;i<=$scope.numPages;i++) {
+            $scope.validPages.push(i)
+        }
+        $scope.firstResult = (($scope.page - 1) * $scope.rpp) + 1
+        $scope.lastResult = $scope.firstResult + $scope.rpp - 1
+        if($scope.lastResult > $scope.total) {
+            $scope.lastResult = $scope.total
+        }
+    }
+
 }
