@@ -329,7 +329,7 @@ function BugCtrl($scope, $routeParams, $http, $rootScope) {
     $scope.listTag = function(tagname) {
         var url = '/search/tags:%22' + encodeURIComponent(tagname) +
             '%22%20AND%20(status:open%20OR%20status:new)';
-        $location.path("/search/" + $scope.query);
+        location.hash = "#/search/" + $scope.query;
     }
 
     $scope.submitOwner = function() {
