@@ -2,7 +2,7 @@
 <ul id="history" class="unstyled">
     <li ng-repeat="ob in recent">
       <img ng-src="http://www.gravatar.com/avatar/{{ob.user.md5}}?s=16">
-      {{ob.user.email}} {{ob.type}}
+      {{ob.user.email}} {{ob.action}}
       <a href="/bug/{{ob.bugid}}">{{ob.bugid}} {{ob.time | relDate}}</a>
     </li>
 </ul>

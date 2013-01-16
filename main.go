@@ -120,9 +120,9 @@ func serveRecent(w http.ResponseWriter, r *http.Request) {
 			ID    string
 			Key   string
 			Value struct {
-				Actor string
-				Type  string
-				BugId string
+				Actor  string
+				Action string
+				BugId  string
 			}
 		}
 	}{}
@@ -134,10 +134,10 @@ func serveRecent(w http.ResponseWriter, r *http.Request) {
 	}
 
 	type OutType struct {
-		Time  string `json:"time"`
-		User  User   `json:"user"`
-		Type  string `json:"type"`
-		BugId string `json:"bugid"`
+		Time   string `json:"time"`
+		User   User   `json:"user"`
+		Action string `json:"action"`
+		BugId  string `json:"bugid"`
 	}
 
 	output := []OutType{}
@@ -146,7 +146,7 @@ func serveRecent(w http.ResponseWriter, r *http.Request) {
 		output = append(output,
 			OutType{r.Key,
 				User(r.Value.Actor),
-				r.Value.Type,
+				r.Value.Action,
 				r.Value.BugId,
 			})
 	}
