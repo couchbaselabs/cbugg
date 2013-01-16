@@ -245,7 +245,7 @@ function BugCtrl($scope, $routeParams, $http, $rootScope) {
     $scope.unsubscribe = function() {
         $http.delete('/api/bug/' + $scope.bug.id + '/sub/');
         $scope.subscribed = false;
-                $scope.subcount--;
+        $scope.subcount--;
         return false;
     }
 
@@ -271,7 +271,10 @@ function BugCtrl($scope, $routeParams, $http, $rootScope) {
                 $scope.comments.push(data);
                 $scope.draftcomment="";
                 $scope.addingcomment = false;
-                $scope.subscribed = true;
+                if (!$scope.subscribed) {
+                    $scope.subcount++;
+                    $scope.subscribed = true;
+                }
             }).
             error(function(data, code) {
                 bAlert("Error " + code, "could not post comment: " + data, "error")
