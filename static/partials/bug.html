@@ -47,9 +47,9 @@
 </p>
 
 <p>
-<div ng-click="editOwner()">
+<div>
   <form class="form-horizontal" ng-submit="submitOwner()">
-    <label>Assigned to
+    <label ng-click="editOwner()">Assigned to
 
       <span ng-hide="editingowner">
         <span ng-show="bug.owner">
