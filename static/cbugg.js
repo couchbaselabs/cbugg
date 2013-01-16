@@ -54,9 +54,7 @@ angular.module('cbuggDirectives', [])
                         }
                     });
                     var reset = function() {
-                        console.log("Reset md widg", scope)
                         scope.markdown = initial;
-                        console.log("Reset md widg", scope)
                         if(editing) {
                             scope.switchToEdit();
                         } else {
@@ -296,7 +294,6 @@ function BugCtrl($scope, $routeParams, $http, $rootScope) {
     };
 
     $scope.deleteComment = function(comment) {
-        console.log(comment);
         $http.delete('/api/bug/' + $routeParams.bugId + '/comments/' + comment.id).
             success(function(data) {
                 $scope.comments = _.map($scope.comments, function(check) {
@@ -312,7 +309,6 @@ function BugCtrl($scope, $routeParams, $http, $rootScope) {
     };
 
     $scope.unDeleteComment = function(comment) {
-        console.log(comment);
         $http.post('/api/bug/' + $routeParams.bugId + '/comments/' + comment.id + '/undel').
             success(function(data) {
                 $scope.comments = _.map($scope.comments, function(check) {
@@ -328,7 +324,6 @@ function BugCtrl($scope, $routeParams, $http, $rootScope) {
     };
 
     var getUsers = function(query, process) {
-        console.log("Getting users..");
         $http.get('/api/users/').success(function(data) {
             process(data);
         });
