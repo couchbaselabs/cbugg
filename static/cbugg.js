@@ -142,7 +142,7 @@ function BugsBySearchResults($scope, $routeParams, $http) {
 function BugCtrl($scope, $routeParams, $http, $rootScope) {
     var updateBug = function(field, newValue) {
         var bug = $scope.bug;
-        if (!newValue) {
+        if (newValue === undefined) {
             newValue = bug[field];
         }
         if(bug && newValue) {
