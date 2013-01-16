@@ -11,6 +11,7 @@ import (
 	"os"
 	"sort"
 	"strings"
+	"time"
 
 	"github.com/couchbaselabs/go-couchbase"
 	"github.com/gorilla/mux"
@@ -171,13 +172,16 @@ func main() {
 	r.HandleFunc("/api/state-counts", serveStateCounts)
 	r.HandleFunc("/auth/login", serveLogin).Methods("POST")
 	r.HandleFunc("/auth/logout", serveLogout).Methods("POST")
-	r.PathPrefix("/static/").Handler(http.StripPrefix("/static/",
+	r.PathPrefix("/statsic/").Handler(http.StripPrefix("/static/",
 		http.FileServer(http.Dir(*staticPath))))
 
 	if *quitPath != "" {
 		r.HandleFunc(*quitPath, func(w http.ResponseWriter, r *http.Request) {
-			log.Printf("Quitting per user request.")
-			os.Exit(0)
+			time.AfterFunc(time.Second, func() {
+				log.Printf("Quitting per user request.")
+				os.Exit(0)
+			})
+			w.WriteHeader(202)
 		})
 	}
 
