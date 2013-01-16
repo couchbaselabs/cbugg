@@ -29,7 +29,7 @@ const bugChangeNotificationText = `From: CBugg <{{.MailFrom}}>
 To: {{.MailTo}}
 Subject: [{{.Bug.Id}}] {{.Bug.Title}}
 
-The following bits of the bug were changed:
+The following bits of the bug were changed by {{.ActorsString}}:
 
 {{range .Fields}}* {{.}}
 {{ end }}
@@ -68,6 +68,7 @@ var assignedTmpl = template.Must(
 
 type bugChange struct {
 	bugid     string
+	actor     string
 	fields    []string
 	exception string
 }
@@ -103,13 +104,17 @@ func notifyComment(c Comment) {
 	commentChan <- c
 }
 
-func notifyBugChange(bugid, field string) {
-	bugChan <- bugChange{bugid, []string{field}, ""}
+func notifyBugChange(bugid, field, actor string) {
+	bugChan <- bugChange{
+		bugid:  bugid,
+		actor:  actor,
+		fields: []string{field},
+	}
 }
 
 // Don't send an update to this user in the current batch.
 func exceptBugChange(bugid, email string) {
-	bugChan <- bugChange{bugid, nil, email}
+	bugChan <- bugChange{bugid: bugid, exception: email}
 }
 
 func notifyBugAssignment(bugid, assigned string) {
@@ -186,12 +191,23 @@ func sendCommentNotification(c Comment) {
 		})
 }
 
-func sendBugNotification(bugid string, fields []string, exclude map[string]bool) {
+func sendBugNotification(bugid string, fields []string,
+	actors, exclude map[string]bool) {
+
 	b, err := getBug(bugid)
 	if err != nil {
 		log.Printf("Error getting bug %v for bug notification: %v",
 			bugid, err)
 		return
+	}
+
+	// If there's only one actor, exclude that actor from the
+	// notifications.  Otherwise, more than one person changed the
+	// bugs and everyone should be notified.
+	if len(actors) == 1 {
+		for k := range actors {
+			exclude[k] = true
+		}
 	}
 
 	to := []string{}
@@ -200,11 +216,18 @@ func sendBugNotification(bugid string, fields []string, exclude map[string]bool)
 			to = append(to, e)
 		}
 	}
+	acts := []string{}
+	for k := range actors {
+		acts = append(acts, k)
+	}
+	sort.Strings(acts)
 
 	sendNotifications(bugNotificationTmpl, to,
 		map[string]interface{}{
-			"Fields": fields,
-			"Bug":    b,
+			"Fields":       fields,
+			"Bug":          b,
+			"Actors":       acts,
+			"ActorsString": strings.Join(acts, ", "),
 		})
 }
 
@@ -220,6 +243,7 @@ func bugNotifyDelay(bugid string) chan bugChange {
 	go func() {
 		changes := map[string]bool{}
 		exclude := map[string]bool{}
+		actors := map[string]bool{}
 
 		t := time.NewTimer(*bugDelay)
 
@@ -230,8 +254,12 @@ func bugNotifyDelay(bugid string) chan bugChange {
 			case tc := <-rv:
 				if len(tc.fields) == 1 {
 					changes[tc.fields[0]] = true
-				} else if tc.exception != "" {
+				}
+				if tc.exception != "" {
 					exclude[tc.exception] = true
+				}
+				if tc.actor != "" {
+					actors[tc.actor] = true
 				}
 				t.Stop()
 				t = time.NewTimer(*bugDelay)
@@ -248,7 +276,7 @@ func bugNotifyDelay(bugid string) chan bugChange {
 		}
 		sort.Strings(fields)
 
-		sendBugNotification(bugid, fields, exclude)
+		sendBugNotification(bugid, fields, actors, exclude)
 	}()
 
 	return rv

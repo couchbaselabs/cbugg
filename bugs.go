@@ -211,7 +211,7 @@ func serveBugUpdate(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), 400)
 	}
 
-	notifyBugChange(id, field)
+	notifyBugChange(id, field, email)
 	if field == "owner" {
 		notifyBugAssignment(id, val)
 	}
