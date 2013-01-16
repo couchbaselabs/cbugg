@@ -159,6 +159,7 @@ function BugCtrl($scope, $routeParams, $http, $rootScope) {
         $scope.bug = data.bug;
         $scope.history = data.history;
         $scope.history.reverse();
+        $scope.subcount = data.bug.subscribers.length;
         $scope.$watch('bug.description', function(next, prev) {
             if($scope.bug && next !== prev) {
                 updateBug("description");
@@ -237,12 +238,14 @@ function BugCtrl($scope, $routeParams, $http, $rootScope) {
     $scope.subscribe = function() {
         $http.post('/api/bug/' + $scope.bug.id + '/sub/');
         $scope.subscribed = true;
+        $scope.subcount++;
         return false;
     }
 
     $scope.unsubscribe = function() {
         $http.delete('/api/bug/' + $scope.bug.id + '/sub/');
         $scope.subscribed = false;
+                $scope.subcount--;
         return false;
     }
 
