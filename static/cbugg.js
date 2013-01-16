@@ -431,6 +431,9 @@ function SearchResultsCtrl($scope, $routeParams, $http) {
             $scope.validPages.push(i)
         }
         $scope.firstResult = (($scope.page - 1) * $scope.rpp) + 1
+        if($scope.firstResult > $scope.total) {
+            $scope.firstResult = $scope.total
+        }
         $scope.lastResult = $scope.firstResult + $scope.rpp - 1
         if($scope.lastResult > $scope.total) {
             $scope.lastResult = $scope.total
