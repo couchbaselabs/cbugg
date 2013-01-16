@@ -67,8 +67,9 @@ var assignedTmpl = template.Must(
 	template.New("").Parse(assignedText))
 
 type bugChange struct {
-	bugid  string
-	fields []string
+	bugid     string
+	fields    []string
+	exception string
 }
 
 var commentChan = make(chan Comment, 100)
@@ -103,11 +104,17 @@ func notifyComment(c Comment) {
 }
 
 func notifyBugChange(bugid, field string) {
-	bugChan <- bugChange{bugid, []string{field}}
+	bugChan <- bugChange{bugid, []string{field}, ""}
 }
 
-func notifyBugAssignment(bugid string) {
+// Don't send an update to this user in the current batch.
+func exceptBugChange(bugid, email string) {
+	bugChan <- bugChange{bugid, nil, email}
+}
+
+func notifyBugAssignment(bugid, assigned string) {
 	assignedChan <- bugid
+	exceptBugChange(bugid, assigned)
 }
 
 func sendEmail(to string, body []byte) error {
@@ -179,7 +186,7 @@ func sendCommentNotification(c Comment) {
 		})
 }
 
-func sendBugNotification(bugid string, fields []string) {
+func sendBugNotification(bugid string, fields []string, exclude map[string]bool) {
 	b, err := getBug(bugid)
 	if err != nil {
 		log.Printf("Error getting bug %v for bug notification: %v",
@@ -187,7 +194,14 @@ func sendBugNotification(bugid string, fields []string) {
 		return
 	}
 
-	sendNotifications(bugNotificationTmpl, b.Subscribers,
+	to := []string{}
+	for _, e := range b.Subscribers {
+		if !exclude[e] {
+			to = append(to, e)
+		}
+	}
+
+	sendNotifications(bugNotificationTmpl, to,
 		map[string]interface{}{
 			"Fields": fields,
 			"Bug":    b,
@@ -205,6 +219,7 @@ func bugNotifyDelay(bugid string) chan bugChange {
 
 	go func() {
 		changes := map[string]bool{}
+		exclude := map[string]bool{}
 
 		t := time.NewTimer(*bugDelay)
 
@@ -213,7 +228,11 @@ func bugNotifyDelay(bugid string) chan bugChange {
 			case <-t.C:
 				t = nil
 			case tc := <-rv:
-				changes[tc.fields[0]] = true
+				if len(tc.fields) == 1 {
+					changes[tc.fields[0]] = true
+				} else if tc.exception != "" {
+					exclude[tc.exception] = true
+				}
 				t.Stop()
 				t = time.NewTimer(*bugDelay)
 			}
@@ -229,7 +248,7 @@ func bugNotifyDelay(bugid string) chan bugChange {
 		}
 		sort.Strings(fields)
 
-		sendBugNotification(bugid, fields)
+		sendBugNotification(bugid, fields, exclude)
 	}()
 
 	return rv

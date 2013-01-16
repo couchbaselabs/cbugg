@@ -208,7 +208,7 @@ func serveBugUpdate(w http.ResponseWriter, r *http.Request) {
 
 	notifyBugChange(id, field)
 	if field == "owner" {
-		notifyBugAssignment(id)
+		notifyBugAssignment(id, val)
 	}
 
 	w.Write([]byte(rval))
