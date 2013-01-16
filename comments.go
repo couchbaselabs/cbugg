@@ -116,6 +116,33 @@ func updateCommentDeleted(w http.ResponseWriter, r *http.Request, to bool) {
 	w.WriteHeader(204)
 }
 
+func serveCommentUpdate(w http.ResponseWriter, r *http.Request) {
+	email := whoami(r)
+	commid := mux.Vars(r)["commid"]
+
+	c := Comment{}
+	err := db.Get(commid, &c)
+	if err != nil {
+		showError(w, r, err.Error(), 500)
+		return
+	}
+
+	if c.Type != "comment" || c.User != email {
+		showError(w, r, "You can't change this comment", 403)
+		return
+	}
+
+	c.Text = r.FormValue("body")
+
+	err = db.Set(commid, 0, &c)
+	if err != nil {
+		showError(w, r, err.Error(), 500)
+		return
+	}
+
+	w.WriteHeader(204)
+}
+
 func serveDelComment(w http.ResponseWriter, r *http.Request) {
 	updateCommentDeleted(w, r, true)
 }
