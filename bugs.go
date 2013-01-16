@@ -15,6 +15,11 @@ func newBugId() (uint64, error) {
 	return db.Incr(".bugid", 1, 0, 0)
 }
 
+func serveBugRedirect(w http.ResponseWriter, r *http.Request) {
+	http.Redirect(w, r, "/static/app.html#/bug/"+mux.Vars(r)["bugid"],
+		http.StatusFound)
+}
+
 func serveNewBug(w http.ResponseWriter, r *http.Request) {
 	email := whoami(r)
 

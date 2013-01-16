@@ -143,6 +143,8 @@ func main() {
 	r.HandleFunc("/api/bug/{bugid}",
 		serveBugUpdate).Methods("POST").MatcherFunc(authRequired)
 	r.HandleFunc("/api/bug/{bugid}", notAuthed).Methods("POST")
+	// short url for bug
+	r.HandleFunc("/bug/{bugid}", serveBugRedirect).Methods("GET")
 
 	// comments
 	r.HandleFunc("/api/bug/{bugid}/comments/", serveCommentList).Methods("GET")

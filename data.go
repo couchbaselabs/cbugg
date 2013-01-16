@@ -97,5 +97,5 @@ func (c APIComment) MarshalJSON() ([]byte, error) {
 }
 
 func (b Bug) Url() string {
-	return "/static/app.html#/bug/" + b.Id
+	return "/bug/" + b.Id
 }
