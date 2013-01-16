@@ -113,6 +113,9 @@ function StatesByCountCtrl($scope, $http) {
     $http.get('/api/state-counts').success(function(data) {
         $scope.states = data.states;
     });
+    $http.get('/api/recent/').success(function(data) {
+        $scope.recent = _.first(data, 10);
+    });
 }
 
 function BugsByStateCtrl($scope, $routeParams, $http) {
