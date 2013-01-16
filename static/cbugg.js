@@ -418,22 +418,32 @@ function SearchResultsCtrl($scope, $routeParams, $http) {
     $scope.rpp = 10;
     $scope.query = $routeParams.query;
     $http.post('/api/search/?query=' + $routeParams.query).success(function(data) {
+        $scope.shards = data._shards;
         $scope.results = data.hits.hits;
         $scope.facets = data.facets;
         $scope.total = data.hits.total;
         $scope.computeValidPages();
+        $scope.verifyAllSearchShards();
     });
 
     $scope.jumpToPage = function(pageNum, $event) {
         $event.preventDefault();
         $scope.page = pageNum;
         $http.post('/api/search/?query=' + $routeParams.query + '&from=' + (($scope.page - 1) * $scope.rpp)).success(function(data) {
+            $scope.shards = data._shards;
             $scope.results = data.hits.hits;
             $scope.facets = data.facets;
             $scope.total = data.hits.total;
             $scope.computeValidPages();
+            $scope.verifyAllSearchShards();
         });
     };
+
+    $scope.verifyAllSearchShards = function() {
+        if($scope.shards.total != $scope.shards.successful) {
+            $scope.searchWarning = "Search only contains results from " + $scope.shards.successful + " of " + $scope.shards.total + " shards";
+        }
+    }
 
     $scope.computeValidPages = function() {
         $scope.numPages = Math.ceil($scope.total / $scope.rpp);

@@ -1,5 +1,9 @@
 <h3>Query: {{query}}</h3>
 
+<div ng-show="searchWarning != null" class="alert alert-error">
+    <span class="label label-important">Warning</span> {{searchWarning}}
+</div>
+
 <!-- no results -->
 <div ng-hide="total > 0" id="searchResultContainer" class="clearfix">
 	<h5>No bugs match this query</h5>
