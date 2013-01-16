@@ -416,6 +416,7 @@ function SearchResultsCtrl($scope, $routeParams, $http) {
     $scope.query = $routeParams.query;
     $http.post('/api/search/?query=' + $routeParams.query).success(function(data) {
         $scope.results = data.hits.hits;
+        $scope.facets = data.facets;
         $scope.total = data.hits.total;
         $scope.computeValidPages();
     });
@@ -425,6 +426,7 @@ function SearchResultsCtrl($scope, $routeParams, $http) {
         $scope.page = pageNum;
         $http.post('/api/search/?query=' + $routeParams.query + '&from=' + (($scope.page - 1) * $scope.rpp)).success(function(data) {
             $scope.results = data.hits.hits;
+            $scope.facets = data.facets;
             $scope.total = data.hits.total;
             $scope.computeValidPages();
         });
