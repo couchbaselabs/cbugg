@@ -149,13 +149,36 @@ function BugCtrl($scope, $routeParams, $http, $rootScope) {
     };
 
     $scope.allStates = null;
+    $scope.availableStates = [];
     $scope.comments = [];
     $scope.draftcomment = "";
     $scope.subscribed = false;
 
     $http.get("/api/states/").success(function(data) {
-        $scope.allStates = _.map(data, function(x) { return x.name; });
+        $scope.allStates = data;
     });
+
+    var updateAvailableStates = function(current) {
+        var scopeMap = _.object(_.map($scope.allStates,
+                                      function(e) {
+                                          return e.name;
+                                      }),
+                                $scope.allStates);
+
+        $scope.availableStates = [current];
+        var cur = scopeMap[current];
+        var targets = cur.targets;
+        if (!targets) {
+            targets = _.filter(_.keys(scopeMap), _.without(current));
+        }
+        $scope.availableStates = $scope.availableStates.concat(targets);
+
+        $scope.availableStates = _.sortBy($scope.availableStates,
+                                          function(e) {
+                                              return scopeMap[e].order;
+                                          });
+
+    };
 
     $http.get('/api/bug/' + $routeParams.bugId).success(function(data) {
         $scope.bug = data.bug;
@@ -168,6 +191,7 @@ function BugCtrl($scope, $routeParams, $http, $rootScope) {
             }
         });
         $scope.$watch('bug.status', function(next, prev) {
+            updateAvailableStates(next);
             if($scope.bug && next !== prev) {
                 updateBug("status");
             }
