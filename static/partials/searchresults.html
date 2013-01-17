@@ -1,6 +1,6 @@
 <div ng-show="searchInProgress">
 
-	<h3>Search for {{query}} in progress...</h3>
+	<h3>Search for "{{query}}" in progress...</h3>
 	<div class="progress progress-striped active">
 
 		<div class="bar" style="width: 100%;"></div>
@@ -8,7 +8,11 @@
 
 </div>
 
-<div ng-hide="searchInProgress">
+<div ng-show="searchError && searchWarning != null" class="alert alert-error">
+        <span class="label label-important">Error</span> {{searchWarning}}
+    </div>
+
+<div ng-hide="searchError || searchInProgress">
 	<h3>Query: {{query}}</h3>
 	<div ng-show="searchWarning != null" class="alert alert-error">
 		<span class="label label-important">Warning</span> {{searchWarning}}

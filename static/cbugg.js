@@ -440,22 +440,16 @@ function SearchCtrl($scope, $http, $rootScope, $location) {
 }
 
 function SearchResultsCtrl($scope, $routeParams, $http) {
+
     $scope.searchInProgress = true;
+    $scope.searchError = false;
     $scope.page = 1;
     $scope.rpp = 10;
-    $scope.query = $routeParams.query;
-    $http.post('/api/search/?query=' + $routeParams.query).success(function(data) {
-        $scope.shards = data._shards;
-        $scope.results = data.hits.hits;
-        $scope.facets = data.facets;
-        $scope.total = data.hits.total;
-        $scope.computeValidPages();
-        $scope.verifyAllSearchShards();
-        $scope.searchInProgress = false;
-    });
 
     $scope.jumpToPage = function(pageNum, $event) {
-        $event.preventDefault();
+        if($event != null) {
+            $event.preventDefault();
+        }
         $scope.page = pageNum;
         $http.post('/api/search/?query=' + $routeParams.query + '&from=' + (($scope.page - 1) * $scope.rpp)).success(function(data) {
             $scope.shards = data._shards;
@@ -464,6 +458,10 @@ function SearchResultsCtrl($scope, $routeParams, $http) {
             $scope.total = data.hits.total;
             $scope.computeValidPages();
             $scope.verifyAllSearchShards();
+            $scope.searchInProgress = false;
+        }).error(function(data, status, headers, config){
+            $scope.searchWarning = data;
+            $scope.searchError = true;
             $scope.searchInProgress = false;
         });
     };
@@ -489,5 +487,8 @@ function SearchResultsCtrl($scope, $routeParams, $http) {
             $scope.lastResult = $scope.total;
         }
     };
+
+    $scope.query = $routeParams.query;
+    $scope.jumpToPage(1, null);
 
 }
