@@ -195,6 +195,9 @@ function BugCtrl($scope, $routeParams, $http, $rootScope) {
                 updateBug("status");
             }
         });
+        if(!$scope.bug.description) {
+            $scope.editDesc();
+        }
         checkSubscribed();
     });
 
