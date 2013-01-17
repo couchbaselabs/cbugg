@@ -7,11 +7,14 @@ import (
 	"fmt"
 	"log"
 	"net/smtp"
+	"os"
 	"sort"
 	"strings"
 	"sync"
 	"text/template"
 	"time"
+
+	"github.com/dustin/go-humanize"
 )
 
 const commentNotificationText = `From: CBugg <{{.MailFrom}}>
@@ -59,8 +62,27 @@ Learn more about it here:
 {{.BaseURL}}{{.Bug.Url}}
 `
 
+const attachmentNotificationText = `From: CBugg <{{.MailFrom}}>
+To: {{.MailTo}}
+Subject: Attachment on [{{.Bug.Id}}] {{.Bug.Title}}
+
+There's a new attachment on "{{.Bug.Title}}"
+
+Its name is {{.Att.Filename}} and it's {{.Att.Size | bytes }}
+
+You can grab it here:  {{.BaseURL}}{{.Att.DownloadUrl}}
+
+{{.BaseURL}}{{.Bug.Url}}
+`
+
 var commentNotificationTmpl = template.Must(
 	template.New("").Parse(commentNotificationText))
+var attachmentNotificationTmpl = template.Must(
+	template.New("").Funcs(map[string]interface{}{
+		"bytes": func(i int64) string {
+			return humanize.Bytes(uint64(i))
+		},
+	}).Parse(attachmentNotificationText))
 var bugNotificationTmpl = template.Must(
 	template.New("").Parse(bugChangeNotificationText))
 var assignedTmpl = template.Must(
@@ -74,6 +96,7 @@ type bugChange struct {
 }
 
 var commentChan = make(chan Comment, 100)
+var attachmentChan = make(chan Attachment, 100)
 var bugChan = make(chan bugChange, 100)
 var assignedChan = make(chan string, 100)
 
@@ -96,12 +119,17 @@ func init() {
 	bugNotifyDelays = make(map[string]chan bugChange)
 
 	go commentNotificationLoop()
+	go attachmentNotificationLoop()
 	go bugNotificationLoop()
 	go bugAssignmentNotificationLoop()
 }
 
 func notifyComment(c Comment) {
 	commentChan <- c
+}
+
+func notifyAttachment(a Attachment) {
+	attachmentChan <- a
 }
 
 func notifyBugChange(bugid, field, actor string) {
@@ -150,12 +178,17 @@ func sendEmail(to string, body []byte) error {
 
 func sendNotifications(t *template.Template,
 	subs []string, fields map[string]interface{}) {
-	if *mailServer == "" || *mailFrom == "" {
-		log.Printf("Email not configured.")
-	}
 
 	fields["BaseURL"] = *baseURL
 	fields["MailFrom"] = *mailFrom
+
+	if *mailServer == "" || *mailFrom == "" {
+		log.Printf("Email not configured, would have sent this:")
+		fields["MailTo"] = "someone@example.com"
+		t.Execute(os.Stderr, fields)
+
+		return
+	}
 
 	for _, to := range subs {
 		buf := &bytes.Buffer{}
@@ -173,6 +206,27 @@ func sendNotifications(t *template.Template,
 		if err != nil {
 			log.Printf("Error sending email: %v", err)
 		}
+	}
+}
+
+func sendAttachmentNotification(a Attachment) {
+	b, err := getBug(a.BugId)
+	if err != nil {
+		log.Printf("Error getting bug %v for attachment notification: %v",
+			a.BugId, err)
+		return
+	}
+
+	sendNotifications(attachmentNotificationTmpl, b.Subscribers,
+		map[string]interface{}{
+			"Att": a,
+			"Bug": b,
+		})
+}
+
+func attachmentNotificationLoop() {
+	for a := range attachmentChan {
+		sendAttachmentNotification(a)
 	}
 }
 

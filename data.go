@@ -117,3 +117,8 @@ func (c APIComment) MarshalJSON() ([]byte, error) {
 func (b Bug) Url() string {
 	return "/bug/" + b.Id
 }
+
+func (a Attachment) DownloadUrl() string {
+	return "/api/bug/" + a.BugId + "/attachments/att-" +
+		a.Id + "/" + a.Filename
+}

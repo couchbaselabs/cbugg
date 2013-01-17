@@ -106,6 +106,8 @@ func serveFileUpload(w http.ResponseWriter, r *http.Request) {
 
 	log.Printf("Attached %v -> %v", attid, dest)
 
+	notifyAttachment(att)
+
 	w.WriteHeader(200)
 	mustEncode(w, map[string]interface{}{
 		"id":           "att-" + att.Id,
