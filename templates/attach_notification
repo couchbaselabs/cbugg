@@ -1,5 +1,6 @@
 From: CBugg <{{.MailFrom}}>
 To: {{.MailTo}}
+In-Reply-To: <{{.Bug.Id}}.cbugg.hq.couchbase.com>
 Subject: Attachment on [{{.Bug.Id}}] {{.Bug.Title}}
 
 There's a new attachment from {{.Att.User}} on "{{.Bug.Title}}"

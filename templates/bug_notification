@@ -1,5 +1,6 @@
 From: CBugg <{{.MailFrom}}>
 To: {{.MailTo}}
+In-Reply-To: <{{.Bug.Id}}.cbugg.hq.couchbase.com>
 Subject: [{{.Bug.Id}}] {{.Bug.Title}}
 
 The following bits of the bug were changed by {{.ActorsString}}:

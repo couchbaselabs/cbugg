@@ -1,5 +1,6 @@
 From: CBugg <{{.MailFrom}}>
 To: {{.MailTo}}
+In-Reply-To: <{{.Bug.Id}}.cbugg.hq.couchbase.com>
 Subject: Comment on [{{.Bug.Id}}] {{.Bug.Title}}
 
 {{.Comment.User}} wrote a new comment on "{{.Bug.Title}}":

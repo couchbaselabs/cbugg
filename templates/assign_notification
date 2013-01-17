@@ -1,5 +1,6 @@
 From: CBugg <{{.MailFrom}}>
 To: {{.MailTo}}
+In-Reply-To: <{{.Bug.Id}}.cbugg.hq.couchbase.com>
 Subject: [{{.Bug.Id}}] Assigned to you: {{.Bug.Title}}
 
 The bug "{{.Bug.Title}}" was assigned to you.  You were automatically
