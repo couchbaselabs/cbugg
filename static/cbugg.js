@@ -1,69 +1,55 @@
 angular.module('cbuggDirectives', [])
-    .directive('cbMarkdown', function () {
-        var converter = new Showdown.converter();
-        var previewEditIcon = '<button class="btn btn-mini pull-right" ng-click="switchToEdit()">'+
-                              '<i class="icon-edit"></i> Edit</button>';
-        var previewTemplate = '<div ng-hide="isEditMode" class="well">'+previewEditIcon+'</div>';
+    .directive('cbMirror', ['$timeout', function ($timeout) {
         return {
-            restrict:'E',
-            scope:{},
-            require:'ngModel',
-            compile:function (tElement, tAttrs, transclude) {
-                var initial = tElement.text();
-                var saveText = tAttrs["savetext"];
-                var modeflag = tAttrs["modeflag"];
-                //If set, stick a callback on the parent scope to reset our state
-                var clearfn = tAttrs["clearfn"];
-                if(!saveText) { saveText = "Save"; }
-                tElement.html('<div ng-class="{edithide: !isEditMode}">'+
-                              '<textarea ui-codemirror="{theme:\'cb\', '+
-                              'mode: {name:\'markdown\'}, lineWrapping: true}" ng-model="markdown">'+
-                              '</textarea>Format with <a href="http://daringfireball.net/projects/markdown/syntax">Markdown</a>'+
-                              '<button class="btn pull-right" ng-click="switchToPreview()">'+
-                              saveText+'</button></div>');
-                var editing = tAttrs["edit"];
-                var previewOuterElement = angular.element(previewTemplate);
-                var previewInnerElement = angular.element('<div></div>');
-                tElement.append(previewOuterElement);
-                previewOuterElement.append(previewInnerElement);
-
-                return function (scope, element, attrs, model) {
-                    scope.renderPreview = function() {
-                        var makeHtml = converter.makeHtml(scope.markdown);
-                        previewInnerElement.html(makeHtml);
-                    };
-                    scope.switchToPreview = function () {
-                        model.$setViewValue(scope.markdown);
-                        scope.renderPreview();
-                        scope.isEditMode = false;
-                        if(modeflag) {
-                            scope.$parent[modeflag] = false;
-                        }
-                    };
-                    scope.switchToEdit = function () {
-                        scope.isEditMode = true;
-                        if(modeflag) {
-                            scope.$parent[modeflag] = true;
-                        }
-                    };
-                    scope.$watch(attrs["ngModel"], function() {
-                        var up = model.$modelValue;
-                        if(up) {
-                            scope.markdown = up;
-                            scope.renderPreview();
-                        }
+            restrict: 'A',
+            require: 'ngModel',
+            link: function(scope, el, attrs, ngModel) {
+                scope.setupMirror = function() {
+                    scope.codeMirror = CodeMirror.fromTextArea(el[0], {
+                        theme: 'cb',
+                        mode: {name: 'markdown'},
+                        lineWrapping: true
                     });
-                    var reset = function() {
-                        scope.markdown = initial;
-                        if(editing) {
-                            scope.switchToEdit();
-                        } else {
-                            scope.switchToPreview();
-                        }
+                    if(scope.live) {
+                        scope.codeMirror.on("change", function(cm, change) {
+                            var val = cm.getValue();
+                            if(val !== ngModel.$viewValue) {
+                                ngModel.$setViewValue(val);
+                                scope.$apply();
+                            }
+                        });
                     }
-                    reset();
-                    if(clearfn) {
-                        scope.$parent[clearfn] = reset;
+                    ngModel.$render = function() {
+                        scope.codeMirror.setValue(ngModel.$viewValue);
+                    }
+                }
+                $timeout(scope.setupMirror);
+            }
+        }
+    }])
+    .directive('cbEditor', function () {
+        var editortpl = '<div ng-class="{edithide: !editing}"><textarea ng-model="source" '+
+                        'cb-mirror></textarea></div>';
+        var converter = new Showdown.converter();
+        return {
+            restrict: 'E',
+            scope: {
+                source: '=',
+                editing: '=',
+                editfn: '=',
+                live: '@'
+            },
+            compile: function(tElem, tAttrs) {
+                tElem.prepend(editortpl);
+                return {
+                    post: function(scope, el, attrs) {
+                        scope.editfn = function() {
+                            scope.editing = true;
+                        }
+                        scope.save = function() {
+                            scope.editing = false;
+                            scope.source = scope.codeMirror.getValue();
+                        }
                     }
                 };
             }
@@ -86,6 +72,7 @@ angular.module('cbuggFilters', []).
     filter('markdownify', function() {
         var converter = new Showdown.converter();
         return function(string) {
+            if(!string) { return ""; }
             return converter.makeHtml(string);
         };
     }).
@@ -275,6 +262,7 @@ function BugCtrl($scope, $routeParams, $http, $rootScope) {
 
     $scope.startComment = function() {
         $scope.addingcomment = true;
+        $scope.editComment();
     };
 
     $scope.postComment = function() {
@@ -286,7 +274,6 @@ function BugCtrl($scope, $routeParams, $http, $rootScope) {
                 $scope.comments.push(data);
                 $scope.draftcomment="";
                 $scope.addingcomment = false;
-                $scope.clearCommentDraft();
                 if (!$scope.subscribed) {
                     $scope.subcount++;
                     $scope.subscribed = true;

@@ -18,7 +18,19 @@
   </div>
 </div>
 
-<cb-markdown ng-model="$parent.bug.description">No Description</cb-markdown>
+<cb-editor editing="editingDesc" editfn="editDesc" source="bug.description">
+<div ng-show="editing" class="clearfix">
+  <button ng-click="save()" class="btn pull-right">Save</button>
+</div>
+</cb-editor>
+<div class="description" ng-hide="editingDesc">
+  <button class="btn btn-mini pull-right" ng-click="editDesc()">
+    <i class="icon-edit"></i> Edit
+  </button>
+  <div ng-bind-html-unsafe="bug.description | markdownify"></div>
+</div>
+
+<hr>
 
 <p>
   Filed {{bug.created_at | calDate}} by
@@ -76,7 +88,7 @@
         <img ng-src="http://www.gravatar.com/avatar/{{comment.user.md5}}?s=16">
         {{comment.user.email}} commented {{comment.created_at | relDate}}
         <button ng-click="deleteComment(comment)" ng-show="comment.mine" 
-                class="btn btn-mini pull-right">
+          class="btn btn-mini pull-right">
           <i class="icon-trash"></i>
         </button>
       </div>
@@ -86,18 +98,30 @@
     <div ng-show="comment.deleted">
       <em class="muted">This comment has been deleted</em>
       <button ng-click="unDeleteComment(comment)" ng-show="comment.mine"
-              class="btn btn-mini pull-right">
+        class="btn btn-mini pull-right">
         <i class="icon-undo"></i>
       </button>
     </div>
   </div>
 </div>
+
 <button ng-hide="addingcomment" ng-click="startComment()" ng-show="loggedin" class="btn">Add Comment</button>
-<div ng-show="addingcomment">
-  <cb-markdown modeflag="editingcomment" ng-model="$parent.draftcomment"
-  edit="true" savetext="Preview" clearfn="clearCommentDraft"></cb-markdown>
-  <button ng-hide="editingcomment" ng-click="postComment()"
-    class="btn btn-success pull-right">Post Comment</button>
+<div ng-show="addingcomment" class="clearfix">
+  <cb-editor editing="editingComment" editfn="editComment" source="draftcomment">
+  <div ng-show="editing">
+    <button ng-click="save()" class="btn pull-right">Preview</button>
+  </div>
+  </cb-editor>
+  <div class="comment-preview well well-small" ng-hide="editingComment">
+    <em class="muted">Draft Comment</em>
+    <button class="btn btn-mini pull-right" ng-click="editComment()">
+      <i class="icon-edit"></i> Edit
+    </button>
+    <div ng-bind-html-unsafe="draftcomment | markdownify"></div>
+  </div>
+  <button ng-hide="editingComment" ng-click="postComment()" class="btn pull-right btn-success">
+    Post Comment
+  </button>
 </div>
 
 <h3>History</h3>
