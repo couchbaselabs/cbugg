@@ -176,9 +176,11 @@ function BugCtrl($scope, $routeParams, $http, $rootScope) {
     });
 
     var checkSubscribed = function() {
-        _.forEach($scope.bug.subscribers, function(el) {
-            $scope.subscribed |= ($rootScope.loginscope.gravatar == el.md5);
-        });
+        if($scope.bug) {
+            _.forEach($scope.bug.subscribers, function(el) {
+                $scope.subscribed |= ($rootScope.loginscope.gravatar == el.md5);
+            });
+        }
     };
 
     var checkComments = function (comments) {
