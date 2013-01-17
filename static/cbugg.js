@@ -16,7 +16,7 @@ angular.module('cbuggDirectives', [])
                 var clearfn = tAttrs["clearfn"];
                 if(!saveText) { saveText = "Save"; }
                 tElement.html('<div ng-class="{edithide: !isEditMode}">'+
-                              '<textarea ui-codemirror="{theme:\'monokai\', '+
+                              '<textarea ui-codemirror="{theme:\'cb\', '+
                               'mode: {name:\'markdown\'}, lineWrapping: true}" ng-model="markdown">'+
                               '</textarea>Format with <a href="http://daringfireball.net/projects/markdown/syntax">Markdown</a>'+
                               '<button class="btn pull-right" ng-click="switchToPreview()">'+

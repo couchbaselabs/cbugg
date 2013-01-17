@@ -1,0 +1,10 @@
+.cm-s-cb span.cm-header {color: #111; font-weight: bold; font-size: 1.2em;}
+.cm-s-cb span.cm-link {color: #55b;}
+.cm-s-cb span.cm-string, span.cm-comment {color: #811;}
+.cm-s-cb span.cm-quote {color: #700; background-color: #eee;}
+.cm-s-cb span.cm-tag {color: #75b;}
+
+.cm-s-cb.CodeMirror {background: #f9f9f9; border-radius: 3px; border: 1px solid #999;}
+
+.cm-s-cb .CodeMirror-cursor {border-left: 1px solid #000 !important;}
+

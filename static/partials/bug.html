@@ -1,5 +1,5 @@
-<div class="titlearea">
-    <form ng-submit="submitTitle()" class="form-inline">
+<div class="titlearea clearfix">
+    <form ng-submit="submitTitle()" class="titletext form-inline pull-left">
         {{bug.id}} -
         <span class="title" ng-hide="editingTitle" ng-click="editTitle()">{{bug.title}}
             <i class="sup icon-edit"></i>
@@ -7,16 +7,15 @@
         <input class="title-input" ng-show="editingTitle" name="titleInput" ng-model="bug.title">
         <input class="btn btn-medium" ng-show="editingTitle" type="submit" value="OK">
     </form>
-</div>
-
-<div class="subs">
-  <a title="Click to stop watching this bug" ng-show="subscribed" ng-click="unsubscribe()">
-    <i class="icon-star starred"></i>
-  </a>
-  <a title="Click to watch this bug."  ng-hide="subscribed" ng-click="subscribe()">
-    <i class="icon-star-empty muted"></i>
-  </a>
-  ({{subcount}})
+  <div class="subs pull-right">
+    <a title="Click to stop watching this bug" ng-show="subscribed" ng-click="unsubscribe()">
+      <i class="icon-star starred"></i>
+    </a>
+    <a title="Click to watch this bug."  ng-hide="subscribed" ng-click="subscribe()">
+      <i class="icon-star-empty muted"></i>
+    </a>
+    ({{subcount}})
+  </div>
 </div>
 
 <cb-markdown ng-model="$parent.bug.description">No Description</cb-markdown>
