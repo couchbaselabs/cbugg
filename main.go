@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"errors"
 	"flag"
-	"html/template"
 	"io"
 	"log"
 	"net/http"
@@ -17,7 +16,6 @@ import (
 	"github.com/gorilla/mux"
 )
 
-var templates *template.Template
 var db *couchbase.Bucket
 var esHost = flag.String("elasticsearchHost", "localhost", "ElasticSearch hostname")
 var esPort = flag.String("elasticsearchPort", "9200", "ElasticSearch port")
@@ -73,20 +71,6 @@ func serveStates(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-type", "application/json")
 	mustEncode(w, rv)
-}
-
-func serveHome(w http.ResponseWriter, r *http.Request) {
-	args := map[string]interface{}{"group_level": 1, "stale": false}
-	states, err := db.View("cbugg", "by_state", args)
-	if err != nil {
-		showError(w, r, err.Error(), 500)
-		return
-	}
-
-	templates.ExecuteTemplate(w, "index.html",
-		map[string]interface{}{
-			"states": states,
-		})
 }
 
 func serveUserList(w http.ResponseWriter, r *http.Request) {

@@ -1,0 +1,9 @@
+From: CBugg <{{.MailFrom}}>
+To: {{.MailTo}}
+Subject: Comment on [{{.Bug.Id}}] {{.Bug.Title}}
+
+{{.Comment.User}} wrote a new comment on "{{.Bug.Title}}":
+
+{{.Comment.Text}}
+
+{{.BaseURL}}{{.Bug.Url}}

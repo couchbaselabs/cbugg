@@ -17,76 +17,7 @@ import (
 	"github.com/dustin/go-humanize"
 )
 
-const commentNotificationText = `From: CBugg <{{.MailFrom}}>
-To: {{.MailTo}}
-Subject: Comment on [{{.Bug.Id}}] {{.Bug.Title}}
-
-{{.Comment.User}} wrote a new comment on "{{.Bug.Title}}":
-
-{{.Comment.Text}}
-
-{{.BaseURL}}{{.Bug.Url}}
-`
-
-const bugChangeNotificationText = `From: CBugg <{{.MailFrom}}>
-To: {{.MailTo}}
-Subject: [{{.Bug.Id}}] {{.Bug.Title}}
-
-The following bits of the bug were changed by {{.ActorsString}}:
-
-{{range .Fields}}* {{.}}
-{{ end }}
-
-Here's the new state:
-
-Title:  {{.Bug.Title}}
-Status: {{.Bug.Status}}
-Owner:  {{.Bug.Owner}}
-Tags:   {{range .Bug.Tags}}{{.}} {{end}}
-
-{{.Bug.Description}}
-
-
-{{.BaseURL}}{{.Bug.Url}}
-`
-
-const assignedText = `From: CBugg <{{.MailFrom}}>
-To: {{.MailTo}}
-Subject: [{{.Bug.Id}}] Assigned to you: {{.Bug.Title}}
-
-The bug "{{.Bug.Title}}" was assigned to you.  You were automatically
-subscribed to updates to the bug.
-
-Learn more about it here:
-
-{{.BaseURL}}{{.Bug.Url}}
-`
-
-const attachmentNotificationText = `From: CBugg <{{.MailFrom}}>
-To: {{.MailTo}}
-Subject: Attachment on [{{.Bug.Id}}] {{.Bug.Title}}
-
-There's a new attachment from {{.Att.User}} on "{{.Bug.Title}}"
-
-Its name is {{.Att.Filename}} and it's {{.Att.Size | bytes }}
-
-You can grab it here:  {{.BaseURL}}{{.Att.DownloadUrl}}
-
-{{.BaseURL}}{{.Bug.Url}}
-`
-
-var commentNotificationTmpl = template.Must(
-	template.New("").Parse(commentNotificationText))
-var attachmentNotificationTmpl = template.Must(
-	template.New("").Funcs(map[string]interface{}{
-		"bytes": func(i int64) string {
-			return humanize.Bytes(uint64(i))
-		},
-	}).Parse(attachmentNotificationText))
-var bugNotificationTmpl = template.Must(
-	template.New("").Parse(bugChangeNotificationText))
-var assignedTmpl = template.Must(
-	template.New("").Parse(assignedText))
+var templates *template.Template
 
 type bugChange struct {
 	bugid     string
@@ -116,6 +47,13 @@ var bugDelay = flag.Duration("notificationDelay",
 	"bug change stabilization delay timer")
 
 func init() {
+	t := template.New("").Funcs(map[string]interface{}{
+		"bytes": func(i int64) string {
+			return humanize.Bytes(uint64(i))
+		},
+	})
+
+	templates = template.Must(t.ParseGlob("templates/*"))
 	bugNotifyDelays = make(map[string]chan bugChange)
 
 	go commentNotificationLoop()
@@ -176,8 +114,8 @@ func sendEmail(to string, body []byte) error {
 	return c.Quit()
 }
 
-func sendNotifications(t *template.Template,
-	subs []string, fields map[string]interface{}) {
+func sendNotifications(tmplName string, subs []string,
+	fields map[string]interface{}) {
 
 	fields["BaseURL"] = *baseURL
 	fields["MailFrom"] = *mailFrom
@@ -185,7 +123,7 @@ func sendNotifications(t *template.Template,
 	if *mailServer == "" || *mailFrom == "" {
 		log.Printf("Email not configured, would have sent this:")
 		fields["MailTo"] = "someone@example.com"
-		t.Execute(os.Stderr, fields)
+		templates.ExecuteTemplate(os.Stderr, tmplName, fields)
 
 		return
 	}
@@ -194,7 +132,7 @@ func sendNotifications(t *template.Template,
 		buf := &bytes.Buffer{}
 
 		fields["MailTo"] = to
-		err := t.Execute(buf, fields)
+		err := templates.ExecuteTemplate(buf, tmplName, fields)
 
 		if err != nil {
 			log.Printf("Error building mail body: %v", err)
@@ -219,7 +157,7 @@ func sendAttachmentNotification(a Attachment) {
 
 	to := removeFromList(b.Subscribers, a.User)
 
-	sendNotifications(attachmentNotificationTmpl, to,
+	sendNotifications("attach_notification", to,
 		map[string]interface{}{
 			"Att": a,
 			"Bug": b,
@@ -240,7 +178,7 @@ func sendCommentNotification(c Comment) {
 		return
 	}
 
-	sendNotifications(commentNotificationTmpl, b.Subscribers,
+	sendNotifications("comment_notification", b.Subscribers,
 		map[string]interface{}{
 			"Comment": c,
 			"Bug":     b,
@@ -278,7 +216,7 @@ func sendBugNotification(bugid string, fields []string,
 	}
 	sort.Strings(acts)
 
-	sendNotifications(bugNotificationTmpl, to,
+	sendNotifications("bug_notification", to,
 		map[string]interface{}{
 			"Fields":       fields,
 			"Bug":          b,
@@ -379,7 +317,7 @@ func sendBugAssignedNotification(bugid string) {
 		return
 	}
 
-	sendNotifications(assignedTmpl, []string{b.Owner},
+	sendNotifications("assign_notification", []string{b.Owner},
 		map[string]interface{}{"Bug": b})
 }
 

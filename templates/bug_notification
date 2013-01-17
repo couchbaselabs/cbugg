@@ -1,0 +1,20 @@
+From: CBugg <{{.MailFrom}}>
+To: {{.MailTo}}
+Subject: [{{.Bug.Id}}] {{.Bug.Title}}
+
+The following bits of the bug were changed by {{.ActorsString}}:
+
+{{range .Fields}}* {{.}}
+{{ end }}
+
+Here's the new state:
+
+Title:  {{.Bug.Title}}
+Status: {{.Bug.Status}}
+Owner:  {{.Bug.Owner}}
+Tags:   {{range .Bug.Tags}}{{.}} {{end}}
+
+{{.Bug.Description}}
+
+
+{{.BaseURL}}{{.Bug.Url}}

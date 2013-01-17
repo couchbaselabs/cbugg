@@ -1,0 +1,10 @@
+From: CBugg <{{.MailFrom}}>
+To: {{.MailTo}}
+Subject: [{{.Bug.Id}}] Assigned to you: {{.Bug.Title}}
+
+The bug "{{.Bug.Title}}" was assigned to you.  You were automatically
+subscribed to updates to the bug.
+
+Learn more about it here:
+
+{{.BaseURL}}{{.Bug.Url}}
