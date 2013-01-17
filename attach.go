@@ -197,3 +197,52 @@ func serveAttachment(w http.ResponseWriter, r *http.Request) {
 		log.Printf("Error sending attachment: %v", err)
 	}
 }
+
+func serveDeleteAttachment(w http.ResponseWriter, r *http.Request) {
+	attid := mux.Vars(r)["attid"]
+	email := whoami(r)
+
+	att := Attachment{}
+	err := db.Get(attid, &att)
+	if err != nil {
+		showError(w, r, err.Error(), 500)
+		return
+	}
+
+	if att.Type != "attachment" {
+		showError(w, r, "not an attachment", 500)
+		return
+	}
+
+	if att.User != email {
+		showError(w, r, "not your attachment", 400)
+		return
+	}
+
+	// First, kill the reference in cbugg
+	err = db.Delete(attid)
+	if err != nil {
+		showError(w, r, err.Error(), 400)
+		return
+	}
+
+	// Nothing below is fatal.
+	w.WriteHeader(204)
+
+	// Then delete it from CBFS
+	req, err := http.NewRequest("DELETE", att.Url, nil)
+	if err != nil {
+		log.Printf("Error creating DELETE request: %v", err)
+		return
+	}
+
+	res, err := http.DefaultClient.Do(req)
+	if err != nil {
+		log.Printf("Error sending DELETE request to cbfs: %v", err)
+		return
+	}
+	defer res.Body.Close()
+	if res.StatusCode != 204 {
+		log.Printf("Deletion failed: %v", res.Status)
+	}
+}

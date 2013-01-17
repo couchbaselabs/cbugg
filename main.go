@@ -211,6 +211,10 @@ func main() {
 		serveAttachmentList).Methods("GET")
 	r.HandleFunc("/api/bug/{bugid}/attachments/{attid}/{fn}",
 		serveAttachment).Methods("GET")
+	r.HandleFunc("/api/bug/{bugid}/attachments/{attid}/",
+		serveDeleteAttachment).Methods("DELETE").MatcherFunc(authRequired)
+	r.HandleFunc("/api/bug/{bugid}/attachments/{attid}/",
+		notAuthed).Methods("DELETE")
 
 	// comments
 	r.HandleFunc("/api/bug/{bugid}/comments/", serveCommentList).Methods("GET")

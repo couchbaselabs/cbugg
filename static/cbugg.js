@@ -302,13 +302,13 @@ function BugCtrl($scope, $routeParams, $http, $rootScope) {
         }
     };
 
-    var checkComments = function (comments) {
-        return _.map(comments, function(comment) {
+    var checkOwnership = function (objects) {
+        return _.map(objects, function(ob) {
             if($rootScope.loggedin &&
                $rootScope.loginscope.gravatar == comment.user.md5) {
-                comment.mine = true;
+                ob.mine = true;
             } else {
-                comment.mine = false;
+                ob.mine = false;
             }
             return comment;
         });
@@ -316,16 +316,17 @@ function BugCtrl($scope, $routeParams, $http, $rootScope) {
 
     $rootScope.$watch("loggedin", function(nv, ov) {
         //Update delete button available on loggedinnness change
-        $scope.comments = checkComments($scope.comments);
+        $scope.comments = checkOwnership($scope.comments);
+        $scope.attachments = checkOwnership($scope.attachments);
         checkSubscribed();
     });
 
     $http.get('/api/bug/' + $routeParams.bugId + '/comments/').success(function(data) {
-        $scope.comments = checkComments(data);
+        $scope.comments = checkOwnership(data);
     });
 
     $http.get('/api/bug/' + $routeParams.bugId + '/attachments/').success(function(data) {
-        $scope.attachments = data;
+        $scope.attachments = checkOwnership(data);
     });
 
     $scope.killTag = function(kill) {
@@ -406,6 +407,18 @@ function BugCtrl($scope, $routeParams, $http, $rootScope) {
             }).
             error(function(data, code) {
                 bAlert("Error " + code, "could not post comment: " + data, "error");
+            });
+    };
+
+    $scope.deleteAttachment = function(att) {
+        $http.delete('/api/bug/' + $routeParams.bugId + '/attachments/' + att.id + "/").
+            success(function(data) {
+                $scope.attachments = _.filter($scope.attachments, function(check) {
+                    return check.id != att.id;
+                });
+            }).
+            error(function(data, code) {
+                bAlert("Error " + code, "could not delete attachment: " + data, "error");
             });
     };
 

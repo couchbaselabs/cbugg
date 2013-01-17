@@ -104,6 +104,10 @@
     <a href="/api/bug/{{bug.id}}/attachments/{{att.id}}/{{att.filename}}">
       {{att.filename}} ({{att.content_type}})
     </a>
+    <button ng-click="deleteAttachment(att)" ng-show="att.mine"
+            class="btn btn-mini right">
+      <i class="icon-trash"></i>
+    </button>
   </div>
 </div>
 
