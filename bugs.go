@@ -174,6 +174,12 @@ func serveBugUpdate(w http.ResponseWriter, r *http.Request) {
 			oldval = bug.Owner
 			history.Owner = bug.Owner
 			bug.Owner = val
+
+			// Ensure the owner is subscribed
+			if strings.Contains(val, "@") {
+				bug.Subscribers = removeFromList(bug.Subscribers, val)
+				bug.Subscribers = append(bug.Subscribers, val)
+			}
 		case "tags":
 			history.Tags = bug.Tags
 			bug.Tags = strings.FieldsFunc(val,
@@ -225,7 +231,6 @@ func serveBugUpdate(w http.ResponseWriter, r *http.Request) {
 	case nil:
 		notifyBugChange(id, field, email)
 		if field == "owner" {
-			go updateSubscription(id, val, strings.Contains(val, "@"))
 			if val != email {
 				notifyBugAssignment(id, val)
 			}
