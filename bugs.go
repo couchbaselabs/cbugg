@@ -213,6 +213,7 @@ func serveBugUpdate(w http.ResponseWriter, r *http.Request) {
 
 	notifyBugChange(id, field, email)
 	if field == "owner" {
+		go updateSubscription(id, val, strings.Contains(val, "@"))
 		notifyBugAssignment(id, val)
 	}
 
