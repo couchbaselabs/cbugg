@@ -217,7 +217,9 @@ func sendAttachmentNotification(a Attachment) {
 		return
 	}
 
-	sendNotifications(attachmentNotificationTmpl, b.Subscribers,
+	to := removeFromList(bug.Subscribers, a.User)
+
+	sendNotifications(attachmentNotificationTmpl, to,
 		map[string]interface{}{
 			"Att": a,
 			"Bug": b,
