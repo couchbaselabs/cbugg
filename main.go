@@ -67,8 +67,8 @@ func serveStates(w http.ResponseWriter, r *http.Request) {
 	rv := []BugState{
 		{"new", 10, nil},
 		{"open", 20, []string{"resolved", "closed"}},
-		{"resolved", 30, []string{"opened", "closed"}},
-		{"closed", 40, []string{"opened"}},
+		{"resolved", 30, []string{"open", "closed"}},
+		{"closed", 40, []string{"open"}},
 	}
 
 	w.Header().Set("Content-type", "application/json")
