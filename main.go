@@ -63,6 +63,18 @@ func serveStateCounts(w http.ResponseWriter, r *http.Request) {
 	w.Write(jres)
 }
 
+func serveStates(w http.ResponseWriter, r *http.Request) {
+	rv := []BugState{
+		{"new", 10, nil},
+		{"open", 20, []string{"resolved", "closed"}},
+		{"resolved", 30, []string{"opened", "closed"}},
+		{"closed", 40, []string{"opened"}},
+	}
+
+	w.Header().Set("Content-type", "application/json")
+	mustEncode(w, rv)
+}
+
 func serveHome(w http.ResponseWriter, r *http.Request) {
 	args := map[string]interface{}{"group_level": 1, "stale": false}
 	states, err := db.View("cbugg", "by_state", args)
@@ -215,6 +227,7 @@ func main() {
 	r.HandleFunc("/api/users/", serveUserList).Methods("GET")
 	r.HandleFunc("/api/tags/", serveTagList).Methods("GET")
 	r.HandleFunc("/api/recent/", serveRecent).Methods("GET")
+	r.HandleFunc("/api/states/", serveStates).Methods("GET")
 
 	r.HandleFunc("/api/search/", searchBugs).Methods("POST")
 

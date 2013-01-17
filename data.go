@@ -35,6 +35,12 @@ type Comment struct {
 	CreatedAt time.Time `json:"created_at"`
 }
 
+type BugState struct {
+	Name    string   `json:"name"`
+	Order   int      `json:"order"`
+	Targets []string `json:"targets,omitempty"`
+}
+
 type APIComment Comment
 
 type APIBug Bug

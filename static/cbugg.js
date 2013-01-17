@@ -161,10 +161,14 @@ function BugCtrl($scope, $routeParams, $http, $rootScope) {
         }
     };
 
-    $scope.allStates = ["new", "open", "resolved", "closed"];
+    $scope.allStates = null;
     $scope.comments = [];
     $scope.draftcomment = "";
     $scope.subscribed = false;
+
+    $http.get("/api/states/").success(function(data) {
+        $scope.allStates = _.map(data, function(x) { return x.name; });
+    });
 
     $http.get('/api/bug/' + $routeParams.bugId).success(function(data) {
         $scope.bug = data.bug;
