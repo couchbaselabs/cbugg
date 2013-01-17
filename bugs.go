@@ -8,6 +8,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/couchbaselabs/go-couchbase"
 	"github.com/gorilla/mux"
 )
 
@@ -155,17 +156,22 @@ func serveBugUpdate(w http.ResponseWriter, r *http.Request) {
 			ModBy:      email,
 		}
 
+		var oldval string
 		switch field {
 		case "description":
+			oldval = bug.Description
 			history.Description = bug.Description
 			bug.Description = val
 		case "title":
+			oldval = bug.Title
 			history.Title = bug.Title
 			bug.Title = val
 		case "status":
+			oldval = bug.Title
 			history.Status = bug.Status
 			bug.Status = val
 		case "owner":
+			oldval = bug.Owner
 			history.Owner = bug.Owner
 			bug.Owner = val
 		case "tags":
@@ -181,6 +187,11 @@ func serveBugUpdate(w http.ResponseWriter, r *http.Request) {
 		default:
 			return nil, fmt.Errorf("Unhandled id: %v",
 				r.FormValue("id"))
+		}
+
+		if oldval == val {
+			log.Printf("Ignoring identical update of %v", field)
+			return nil, couchbase.UpdateCancel
 		}
 
 		// This is a side-effect in a CAS operation.  It's is
