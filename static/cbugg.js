@@ -310,7 +310,7 @@ function BugCtrl($scope, $routeParams, $http, $rootScope) {
             } else {
                 ob.mine = false;
             }
-            return comment;
+            return ob;
         });
     };
 
