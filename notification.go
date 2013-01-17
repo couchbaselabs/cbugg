@@ -66,7 +66,7 @@ const attachmentNotificationText = `From: CBugg <{{.MailFrom}}>
 To: {{.MailTo}}
 Subject: Attachment on [{{.Bug.Id}}] {{.Bug.Title}}
 
-There's a new attachment on "{{.Bug.Title}}"
+There's a new attachment from {{.Att.User}} on "{{.Bug.Title}}"
 
 Its name is {{.Att.Filename}} and it's {{.Att.Size | bytes }}
 
