@@ -41,6 +41,7 @@ type Attachment struct {
 	Type        string    `json:"type"`
 	Url         string    `json:"url"`
 	ContentType string    `json:"content_type"`
+	Size        int64     `json:"size"`
 	Filename    string    `json:"filename"`
 	User        string    `json:"user"`
 	CreatedAt   time.Time `json:"created_at"`

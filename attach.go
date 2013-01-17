@@ -80,11 +80,18 @@ func serveFileUpload(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	fileLen, err := f.Seek(0, 1)
+	if err != nil {
+		showError(w, r, res.Status, 500)
+		return
+	}
+
 	att := Attachment{
 		Id:          bugid + "-" + attid,
 		BugId:       bugid,
 		Type:        "attachment",
 		Url:         dest,
+		Size:        fileLen,
 		ContentType: fh.Header.Get("Content-Type"),
 		Filename:    fh.Filename,
 		User:        whoami(r),
@@ -106,6 +113,7 @@ func serveFileUpload(w http.ResponseWriter, r *http.Request) {
 		"filename":     att.Filename,
 		"content_type": att.ContentType,
 		"created_at":   att.CreatedAt,
+		"size":         att.Size,
 	})
 }
 
@@ -128,6 +136,7 @@ func serveAttachmentList(w http.ResponseWriter, r *http.Request) {
 					Filename    string
 					ContentType string `json:"content_type"`
 					User        User
+					Size        int64
 				}
 			}
 		}
@@ -144,6 +153,7 @@ func serveAttachmentList(w http.ResponseWriter, r *http.Request) {
 		User        User   `json:"user"`
 		Filename    string `json:"filename"`
 		ContentType string `json:"content_type"`
+		Size        int64  `json:"size"`
 		Timestamp   string `json:"created_at"`
 	}
 
@@ -155,6 +165,7 @@ func serveAttachmentList(w http.ResponseWriter, r *http.Request) {
 			r.Doc.Json.User,
 			r.Doc.Json.Filename,
 			r.Doc.Json.ContentType,
+			r.Doc.Json.Size,
 			r.Key[1],
 		})
 	}
