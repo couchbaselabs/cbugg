@@ -242,6 +242,7 @@ function BugCtrl($scope, $routeParams, $http, $rootScope) {
         var j = JSON.parse(evt.currentTarget.responseText);
         $scope.progressVisible = false;
         $scope.files = [];
+        j.mine = true;
         $scope.attachments.push(j);
         $scope.$apply();
     }
