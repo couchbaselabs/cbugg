@@ -190,7 +190,6 @@ func serveBugUpdate(w http.ResponseWriter, r *http.Request) {
 		}
 
 		if oldval == val {
-			log.Printf("Ignoring identical update of %v", field)
 			return nil, couchbase.UpdateCancel
 		}
 
@@ -218,14 +217,18 @@ func serveBugUpdate(w http.ResponseWriter, r *http.Request) {
 		return dbval, err
 	})
 
-	if err != nil {
+	switch err {
+	case nil:
+		notifyBugChange(id, field, email)
+		if field == "owner" {
+			go updateSubscription(id, val, strings.Contains(val, "@"))
+			notifyBugAssignment(id, val)
+		}
+	case couchbase.UpdateCancel:
+		log.Printf("Ignoring identical update of %v", field)
+	default:
 		http.Error(w, err.Error(), 400)
-	}
-
-	notifyBugChange(id, field, email)
-	if field == "owner" {
-		go updateSubscription(id, val, strings.Contains(val, "@"))
-		notifyBugAssignment(id, val)
+		return
 	}
 
 	w.Write([]byte(rval))
