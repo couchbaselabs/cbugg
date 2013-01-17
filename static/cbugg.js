@@ -105,9 +105,15 @@ angular.module('cbugg', ['cbuggFilters', 'cbuggDirectives', 'ui']).
     }]);
 
 function StatesByCountCtrl($scope, $http) {
-    $http.get('/api/state-counts').success(function(data) {
-        $scope.states = data.states;
-    });
+    $http.get('/api/state-counts').success(function(stateCounts) {
+        $http.get("/api/states/").success(function(allstates) {
+            var scopeMap = _.object(_.pluck(allstates, 'name'), allstates);
+            $scope.states = _.sortBy(_.pairs(stateCounts.states),
+                                     function(n) {
+                                         return scopeMap[n[0]].order;
+                                     });
+        });
+            });
     $http.get('/api/recent/').success(function(data) {
         $scope.recent = _.first(data, 10);
     });
@@ -159,18 +165,11 @@ function BugCtrl($scope, $routeParams, $http, $rootScope) {
     });
 
     var updateAvailableStates = function(current) {
-        var scopeMap = _.object(_.map($scope.allStates,
-                                      function(e) {
-                                          return e.name;
-                                      }),
-                                $scope.allStates);
+        var scopeMap = _.object(_.pluck($scope.allStates, 'name'), $scope.allStates);
 
         $scope.availableStates = [current];
         var cur = scopeMap[current];
-        var targets = cur.targets;
-        if (!targets) {
-            targets = _.without(_.keys(scopeMap), current);
-        }
+        var targets = cur.targets ||  _.without(_.keys(scopeMap), current);
         $scope.availableStates = $scope.availableStates.concat(targets);
 
         $scope.availableStates = _.sortBy($scope.availableStates,
