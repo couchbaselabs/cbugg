@@ -190,7 +190,11 @@ func serveBugUpdate(w http.ResponseWriter, r *http.Request) {
 		}
 
 		if oldval == val {
-			return nil, couchbase.UpdateCancel
+			rval, err = json.Marshal(APIBug(bug))
+			if err != nil {
+				return rval, err
+			}
+			return rval, couchbase.UpdateCancel
 		}
 
 		// This is a side-effect in a CAS operation.  It's is
