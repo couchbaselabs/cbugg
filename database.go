@@ -15,10 +15,13 @@ type viewMarker struct {
 }
 
 const ddocKey = "/@cbuggddocVersion"
-const ddocVersion = 12
+const ddocVersion = 13
 const designDoc = `
 {
     "views": {
+        "attachments": {
+            "map": "function (doc, meta) {\n  if (doc.type === \"attachment\") {\n    emit([doc.bugId, doc.created_at], {url: doc.url,\n                                       type: doc.content_type,\n                                       user: doc.user});\n  }\n}"
+        },
         "bug_history": {
             "map": "function (doc, meta) {\n  if (doc.type === 'bughistory') {\n    emit([doc.id, doc.modified_at], {\"type\": doc.modify_type, \"by\": doc.modified_by});\n  }\n}"
         },

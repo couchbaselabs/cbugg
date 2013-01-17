@@ -158,12 +158,104 @@ function BugCtrl($scope, $routeParams, $http, $rootScope) {
     $scope.allStates = null;
     $scope.availableStates = [];
     $scope.comments = [];
+    $scope.attachments = [];
     $scope.draftcomment = "";
     $scope.subscribed = false;
 
     $http.get("/api/states/").success(function(data) {
         $scope.allStates = data;
     });
+
+    //============== DRAG & DROP =============
+    // http://www.webappers.com/2011/09/28/drag-drop-file-upload-with-html5-javascript/
+    var dropbox = document.getElementById("dropbox");
+    $scope.dropText = 'Drop files here...';
+
+    // init event handlers
+    function dragEnterLeave(evt) {
+        evt.stopPropagation();
+        evt.preventDefault();
+        $scope.$apply(function(){
+            $scope.dropText = 'Drop files here...';
+            $scope.dropClass = '';
+        });
+    }
+    dropbox.addEventListener("dragenter", dragEnterLeave, false);
+    dropbox.addEventListener("dragleave", dragEnterLeave, false);
+    dropbox.addEventListener("dragover", function(evt) {
+        evt.stopPropagation();
+        evt.preventDefault();
+        var clazz = 'not-available';
+        var ok = evt.dataTransfer && evt.dataTransfer.types && evt.dataTransfer.types.indexOf('Files') >= 0;
+        $scope.$apply(function(){
+            $scope.dropText = ok ? 'Drop files here...' : 'Only files are allowed!';
+            $scope.dropClass = ok ? 'over' : 'not-available';
+        });
+    }, false);
+    dropbox.addEventListener("drop", function(evt) {
+        console.log('drop evt:', JSON.parse(JSON.stringify(evt.dataTransfer)));
+        evt.stopPropagation();
+        evt.preventDefault();
+        $scope.$apply(function(){
+            $scope.dropText = 'Drop files here...';
+            $scope.dropClass = '';
+        });
+        var files = evt.dataTransfer.files;
+        if (files.length > 0) {
+            $scope.$apply(function(){
+                $scope.files = [];
+                for (var i = 0; i < files.length; i++) {
+                    $scope.files.push(files[i]);
+                }
+            });
+            $scope.uploadFile();
+        };
+    }, false);
+    //============== DRAG & DROP =============
+
+    $scope.uploadFile = function() {
+        var fd = new FormData();
+        for (var i in $scope.files) {
+            fd.append("uploadedFile", $scope.files[i]);
+        }
+        var xhr = new XMLHttpRequest();
+        xhr.upload.addEventListener("progress", uploadProgress, false);
+        xhr.addEventListener("load", uploadComplete, false);
+        xhr.addEventListener("error", uploadFailed, false);
+        xhr.addEventListener("abort", uploadCanceled, false);
+        xhr.open("POST", "/api/bug/" + $scope.bug.id + "/attachments/");
+        $scope.progressVisible = true;
+        xhr.send(fd);
+    };
+
+    function uploadProgress(evt) {
+        $scope.$apply(function(){
+            if (evt.lengthComputable) {
+                $scope.progress = Math.round(evt.loaded * 100 / evt.total);
+            } else {
+                $scope.progress = 'unable to compute';
+            }
+        });
+    }
+
+    function uploadComplete(evt) {
+        var j = JSON.parse(evt.currentTarget.responseText);
+        $scope.progressVisible = false;
+        $scope.files = [];
+        $scope.attachments.push(j);
+        $scope.$apply();
+    }
+
+    function uploadFailed(evt) {
+        alert("There was an error attempting to upload the file.");
+    }
+
+    function uploadCanceled(evt) {
+        $scope.$apply(function(){
+            $scope.progressVisible = false;
+        });
+        alert("The upload has been canceled by the user or the browser dropped the connection.");
+    }
 
     var updateAvailableStates = function(current) {
         var scopeMap = _.object(_.pluck($scope.allStates, 'name'), $scope.allStates);
@@ -230,6 +322,10 @@ function BugCtrl($scope, $routeParams, $http, $rootScope) {
 
     $http.get('/api/bug/' + $routeParams.bugId + '/comments/').success(function(data) {
         $scope.comments = checkComments(data);
+    });
+
+    $http.get('/api/bug/' + $routeParams.bugId + '/attachments/').success(function(data) {
+        $scope.attachments = data;
     });
 
     $scope.killTag = function(kill) {

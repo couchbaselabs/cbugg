@@ -204,6 +204,13 @@ func main() {
 	// short url for bug
 	r.HandleFunc("/bug/{bugid}", serveBugRedirect).Methods("GET")
 
+	r.HandleFunc("/api/bug/{bugid}/attachments/",
+		serveFileUpload).Methods("POST")
+	r.HandleFunc("/api/bug/{bugid}/attachments/",
+		serveAttachmentList).Methods("GET")
+	r.HandleFunc("/api/bug/{bugid}/attachments/{attid}/{fn}",
+		serveAttachment).Methods("GET")
+
 	// comments
 	r.HandleFunc("/api/bug/{bugid}/comments/", serveCommentList).Methods("GET")
 	r.HandleFunc("/api/bug/{bugid}/comments/",

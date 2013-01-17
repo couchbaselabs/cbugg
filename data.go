@@ -35,6 +35,17 @@ type Comment struct {
 	CreatedAt time.Time `json:"created_at"`
 }
 
+type Attachment struct {
+	Id          string    `json:"id"`
+	BugId       string    `json:"bugId"`
+	Type        string    `json:"type"`
+	Url         string    `json:"url"`
+	ContentType string    `json:"content_type"`
+	Filename    string    `json:"filename"`
+	User        string    `json:"user"`
+	CreatedAt   time.Time `json:"created_at"`
+}
+
 type BugState struct {
 	Name    string   `json:"name"`
 	Order   int      `json:"order"`
