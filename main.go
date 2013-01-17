@@ -205,7 +205,8 @@ func main() {
 	r.HandleFunc("/bug/{bugid}", serveBugRedirect).Methods("GET")
 
 	r.HandleFunc("/api/bug/{bugid}/attachments/",
-		serveFileUpload).Methods("POST")
+		serveFileUpload).Methods("POST").MatcherFunc(authRequired)
+	r.HandleFunc("/api/bug/{bugid}/attachments/", notAuthed).Methods("POST")
 	r.HandleFunc("/api/bug/{bugid}/attachments/",
 		serveAttachmentList).Methods("GET")
 	r.HandleFunc("/api/bug/{bugid}/attachments/{attid}/{fn}",
