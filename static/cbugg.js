@@ -117,7 +117,8 @@ angular.module('cbugg', ['cbuggFilters', 'cbuggDirectives', 'ui']).
 
     }]);
 
-function StatesByCountCtrl($scope, $http) {
+function StatesByCountCtrl($scope, $http, $rootScope) {
+    $rootScope.title = "Home"
     $http.get('/api/state-counts').success(function(stateCounts) {
         $http.get("/api/states/").success(function(allstates) {
             var scopeMap = _.object(_.pluck(allstates, 'name'), allstates);
@@ -132,14 +133,16 @@ function StatesByCountCtrl($scope, $http) {
     });
 }
 
-function BugsByStateCtrl($scope, $routeParams, $http) {
+function BugsByStateCtrl($scope, $routeParams, $http, $rootScope) {
+    $rootScope.title = "State " + $routeParams.stateId;
     $scope.liststate = $routeParams.stateId;
     $http.get('/api/bug/?state=' + $routeParams.stateId).success(function(data) {
         $scope.bugs = data;
     });
 }
 
-function BugsByUserStateCtrl($scope, $routeParams, $http) {
+function BugsByUserStateCtrl($scope, $routeParams, $http, $rootScope) {
+    $rootScope.title = "User " + $routeParams.userId + " State " + $routeParams.stateId;
     $scope.listuser = $routeParams.userId;
     $scope.liststate = $routeParams.stateId;
     $http.get('/api/bug/?user=' + $routeParams.userId +
@@ -178,7 +181,7 @@ function BugCtrl($scope, $routeParams, $http, $rootScope) {
         $scope.allStates = data;
     });
 
-    //============== DRAG & DROP =============
+    // ============== DRAG & DROP =============
     // http://www.webappers.com/2011/09/28/drag-drop-file-upload-with-html5-javascript/
     var dropbox = document.getElementById("dropbox");
     $scope.dropText = 'Drop files here...';
@@ -223,7 +226,7 @@ function BugCtrl($scope, $routeParams, $http, $rootScope) {
             $scope.uploadFile();
         };
     }, false);
-    //============== DRAG & DROP =============
+    // ============== DRAG & DROP =============
 
     $scope.uploadFile = function() {
         var fd = new FormData();
@@ -285,6 +288,8 @@ function BugCtrl($scope, $routeParams, $http, $rootScope) {
 
     };
 
+    $rootScope.title = $routeParams.bugId
+
     $http.get('/api/bug/' + $routeParams.bugId).success(function(data) {
         $scope.bug = data.bug;
         $scope.history = data.history;
@@ -327,7 +332,7 @@ function BugCtrl($scope, $routeParams, $http, $rootScope) {
     };
 
     $rootScope.$watch("loggedin", function(nv, ov) {
-        //Update delete button available on loggedinnness change
+        // Update delete button available on loggedinnness change
         $scope.comments = checkOwnership($scope.comments);
         $scope.attachments = checkOwnership($scope.attachments);
         checkSubscribed();
@@ -349,7 +354,7 @@ function BugCtrl($scope, $routeParams, $http, $rootScope) {
     };
 
     $scope.addTags = function($event) {
-        //hack because typeahead component breaks angular model;
+        // hack because typeahead component breaks angular model;
         $scope.newtag = $("#tagbox").val();
         var newtag = $scope.newtag.split(" ").shift();
         $scope.newtag = '';
@@ -560,12 +565,13 @@ function SearchCtrl($scope, $http, $rootScope, $location) {
     };
 }
 
-function SearchResultsCtrl($scope, $routeParams, $http) {
+function SearchResultsCtrl($scope, $routeParams, $http, $rootScope) {
 
     $scope.searchInProgress = true;
     $scope.searchError = false;
     $scope.page = 1;
     $scope.rpp = 10;
+    $rootScope.title = "Search"
 
     $scope.jumpToPage = function(pageNum, $event) {
         if($event != null) {
