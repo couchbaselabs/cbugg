@@ -248,6 +248,17 @@ func serveBugList(w http.ResponseWriter, r *http.Request) {
 
 	viewName := "by_state"
 
+	viewRes := struct {
+		Rows []struct {
+			ID    string
+			Key   []string
+			Value struct {
+				Title string
+				Owner User
+			}
+		}
+	}{}
+
 	if r.FormValue("user") == "" {
 		if r.FormValue("state") != "" {
 			st := r.FormValue("state")
@@ -264,13 +275,13 @@ func serveBugList(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	res, err := db.View("cbugg", viewName, args)
+	err := db.ViewCustom("cbugg", viewName, args, &viewRes)
 	if err != nil {
 		showError(w, r, err.Error(), 500)
 		return
 	}
 
-	jres, err := json.Marshal(res.Rows)
+	jres, err := json.Marshal(viewRes.Rows)
 	if err != nil {
 		showError(w, r, err.Error(), 500)
 		return

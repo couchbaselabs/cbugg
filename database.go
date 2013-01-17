@@ -15,7 +15,7 @@ type viewMarker struct {
 }
 
 const ddocKey = "/@cbuggddocVersion"
-const ddocVersion = 11
+const ddocVersion = 12
 const designDoc = `
 {
     "views": {
@@ -23,7 +23,7 @@ const designDoc = `
             "map": "function (doc, meta) {\n  if (doc.type === 'bughistory') {\n    emit([doc.id, doc.modified_at], {\"type\": doc.modify_type, \"by\": doc.modified_by});\n  }\n}"
         },
         "by_state": {
-            "map": "function (doc, meta) {\n  if (doc.type === 'bug') {\n    emit([doc.status, doc.created_at], doc.title);\n  }\n}",
+            "map": "function (doc, meta) {\n  if (doc.type === 'bug') {\n    emit([doc.status, doc.created_at], {title: doc.title, owner: doc.owner});\n  }\n}",
             "reduce": "_count"
         },
         "changes": {
@@ -33,7 +33,7 @@ const designDoc = `
             "map": "function (doc, meta) {\n  if (doc.type === \"comment\") {\n    emit([doc.bugId, doc.created_at], null);\n  }\n}"
         },
         "owners": {
-            "map": "function (doc, meta) {\n  if (doc.type === 'bug' && doc.owner) {\n    emit([doc.owner, doc.status, doc.created_at], doc.title);\n  }\n}",
+            "map": "function (doc, meta) {\n  if (doc.type === 'bug' && doc.owner) {\n    emit([doc.owner, doc.status, doc.created_at], {title: doc.title, owner: doc.owner});\n  }\n}",
             "reduce": "_count"
         },
         "tags": {
