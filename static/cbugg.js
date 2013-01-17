@@ -169,7 +169,7 @@ function BugCtrl($scope, $routeParams, $http, $rootScope) {
         var cur = scopeMap[current];
         var targets = cur.targets;
         if (!targets) {
-            targets = _.filter(_.keys(scopeMap), _.without(current));
+            targets = _.without(_.keys(scopeMap), current);
         }
         $scope.availableStates = $scope.availableStates.concat(targets);
 
