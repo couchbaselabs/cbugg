@@ -29,7 +29,8 @@ angular.module('cbuggDirectives', [])
     }])
     .directive('cbEditor', function () {
         var editortpl = '<div ng-class="{edithide: !editing}"><textarea ng-model="source" '+
-                        'cb-mirror></textarea></div>';
+                        'cb-mirror></textarea>Format with <a href="http://daringfireball.net'+
+                        '/projects/markdown/syntax">Markdown</a></div>';
         var converter = new Showdown.converter();
         return {
             restrict: 'E',
