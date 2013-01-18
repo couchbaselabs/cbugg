@@ -114,7 +114,6 @@ angular.module('cbugg', ['cbuggFilters', 'cbuggDirectives', 'ui']).
             when('/statecounts', {templateUrl: 'partials/statecounts.html',
                                   controller: 'StatesByCountCtrl'}).
             otherwise({redirectTo: '/statecounts'});
-
     }]);
 
 function StatesByCountCtrl($scope, $http, $rootScope) {
@@ -133,15 +132,15 @@ function StatesByCountCtrl($scope, $http, $rootScope) {
     });
 }
 
+function bugListDataPrep(data) {
+    return  _.groupBy(data, function(e) { return e.Value.Owner.md5; });
+}
+
 function BugsByStateCtrl($scope, $routeParams, $http, $rootScope) {
     $rootScope.title = "State " + $routeParams.stateId;
     $scope.liststate = $routeParams.stateId;
     $http.get('/api/bug/?state=' + $routeParams.stateId).success(function(data) {
-        $scope.bugs = data;
-        $scope.grouped_bugs = _.groupBy(data,
-                                        function(e) {
-                                            return e.Value.Owner.md5;
-                                        });
+        $scope.grouped_bugs = bugListDataPrep(data);
     });
 }
 
@@ -151,11 +150,7 @@ function BugsByUserStateCtrl($scope, $routeParams, $http, $rootScope) {
     $scope.liststate = $routeParams.stateId;
     $http.get('/api/bug/?user=' + $routeParams.userId +
               '&state=' + $routeParams.stateId).success(function(data) {
-                  $scope.bugs = data;
-                  $scope.grouped_bugs = _.groupBy(data,
-                                                  function(e) {
-                                                      return e.Value.Owner.md5;
-                                                  });
+                  $scope.grouped_bugs = bugListDataPrep(data);
     });
 }
 
