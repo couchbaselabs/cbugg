@@ -126,15 +126,9 @@ func getBugHistory(id string) ([]BugHistoryItem, error) {
 	return histitems, nil
 }
 
-func serveBugUpdate(w http.ResponseWriter, r *http.Request) {
-	email := whoami(r)
-
-	id := mux.Vars(r)["bugid"]
-	field := r.FormValue("id")
-	r.ParseForm()
-	val := r.FormValue("value")
-	rval := []byte{}
+func updateBug(id, field, val, who string) ([]byte, error) {
 	now := time.Now().UTC()
+	rval := []byte{}
 
 	historyKey := id + "-" + now.Format(time.RFC3339Nano)
 
@@ -152,8 +146,8 @@ func serveBugUpdate(w http.ResponseWriter, r *http.Request) {
 			Id:         id,
 			Type:       "bughistory",
 			ModifiedAt: now,
-			ModType:    r.FormValue("id"),
-			ModBy:      email,
+			ModType:    field,
+			ModBy:      who,
 		}
 
 		var oldval string
@@ -191,8 +185,7 @@ func serveBugUpdate(w http.ResponseWriter, r *http.Request) {
 					return false
 				})
 		default:
-			return nil, fmt.Errorf("Unhandled id: %v",
-				r.FormValue("id"))
+			return nil, fmt.Errorf("Unhandled id: %v", field)
 		}
 
 		if (field == "description" || field == "owner") &&
@@ -234,16 +227,29 @@ func serveBugUpdate(w http.ResponseWriter, r *http.Request) {
 
 	switch err {
 	case nil:
-		notifyBugChange(id, field, email)
+		notifyBugChange(id, field, who)
 		if field == "owner" {
-			if val != email {
+			if val != who {
 				notifyBugAssignment(id, val)
 			}
 		}
 	case couchbase.UpdateCancel:
 		log.Printf("Ignoring identical update of %v", field)
 	default:
-		http.Error(w, err.Error(), 400)
+		return nil, err
+	}
+
+	return rval, nil
+}
+
+func serveBugUpdate(w http.ResponseWriter, r *http.Request) {
+	rval, err := updateBug(mux.Vars(r)["bugid"],
+		r.FormValue("id"),
+		r.FormValue("value"),
+		whoami(r))
+
+	if err != nil {
+		showError(w, r, err.Error(), 500)
 		return
 	}
 
