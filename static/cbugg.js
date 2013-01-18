@@ -138,6 +138,10 @@ function BugsByStateCtrl($scope, $routeParams, $http, $rootScope) {
     $scope.liststate = $routeParams.stateId;
     $http.get('/api/bug/?state=' + $routeParams.stateId).success(function(data) {
         $scope.bugs = data;
+        $scope.grouped_bugs = _.groupBy(data,
+                                        function(e) {
+                                            return e.Value.Owner.md5;
+                                        });
     });
 }
 

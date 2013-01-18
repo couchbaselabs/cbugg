@@ -2,13 +2,16 @@
     <span ng-show="listuser">{{listuser}}'s</span>
     <span ng-hide="listuser">all</span>
     {{liststate}} bugs</h2>
-<ul class="unstyled">
+<div ng-repeat="(owner, bugs) in grouped_bugs">
+  <h3>{{bugs[0].Value.Owner.email}}
+    <img ng-src="http://www.gravatar.com/avatar/{{owner}}?s=24">
+  </h3>
+  <ul class="unstyled">
     <li ng-repeat="bug in bugs">
-      <img title="{{bug.Value.Owner.email}}"
-           ng-src="http://www.gravatar.com/avatar/{{bug.Value.Owner.md5}}?s=16">
       <a href="#/bug/{{bug.ID}}">{{bug.ID}} - {{bug.Value.Title}}</a>
     </li>
-</ul>
+  </ul>
+</div>
 <hr/>
 <div ng-controller="SimilarBugCtrl">
 <form action="/api/bug/" id="newbug" method="POST">
