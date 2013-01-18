@@ -195,6 +195,11 @@ func serveBugUpdate(w http.ResponseWriter, r *http.Request) {
 				r.FormValue("id"))
 		}
 
+		if (field == "description" || field == "owner") &&
+			bug.Status == "inbox" {
+			bug.Status = "new"
+		}
+
 		if oldval == val {
 			rval, err = json.Marshal(APIBug(bug))
 			if err != nil {
