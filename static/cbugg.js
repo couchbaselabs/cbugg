@@ -151,7 +151,11 @@ function BugsByUserStateCtrl($scope, $routeParams, $http, $rootScope) {
     $scope.liststate = $routeParams.stateId;
     $http.get('/api/bug/?user=' + $routeParams.userId +
               '&state=' + $routeParams.stateId).success(function(data) {
-        $scope.bugs = data;
+                  $scope.bugs = data;
+                  $scope.grouped_bugs = _.groupBy(data,
+                                                  function(e) {
+                                                      return e.Value.Owner.md5;
+                                                  });
     });
 }
 
