@@ -25,6 +25,13 @@ var NotFound = errors.New("not found")
 
 var staticPath = flag.String("static", "static", "Path to the static content")
 
+var bugStates = []BugState{
+	{"new", 10, nil},
+	{"open", 20, []string{"resolved", "closed"}},
+	{"resolved", 30, []string{"open", "closed"}},
+	{"closed", 40, []string{"open"}},
+}
+
 func showError(w http.ResponseWriter, r *http.Request,
 	msg string, code int) {
 	log.Printf("Reporting error %v/%v", code, msg)
@@ -62,15 +69,8 @@ func serveStateCounts(w http.ResponseWriter, r *http.Request) {
 }
 
 func serveStates(w http.ResponseWriter, r *http.Request) {
-	rv := []BugState{
-		{"new", 10, nil},
-		{"open", 20, []string{"resolved", "closed"}},
-		{"resolved", 30, []string{"open", "closed"}},
-		{"closed", 40, []string{"open"}},
-	}
-
 	w.Header().Set("Content-type", "application/json")
-	mustEncode(w, rv)
+	mustEncode(w, bugStates)
 }
 
 func serveUserList(w http.ResponseWriter, r *http.Request) {
