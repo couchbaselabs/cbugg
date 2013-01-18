@@ -64,11 +64,11 @@
     <label ng-click="editOwner()">Assigned to
 
       <span ng-hide="editingowner">
-        <span ng-show="bug.owner">
-          <img ng-src="http://www.gravatar.com/avatar/{{bug.owner.md5}}?s=16">
+        <span ng-show="bug.owner.email">
+          <img ng-src="http://www.gravatar.com/avatar/{{bug.owner.md5}}?s=16" />
           {{bug.owner.email}}
         </span>
-        <span ng-hide="bug.owner"><em>nobody</em></span>
+        <span ng-hide="bug.owner.email"><i class="icon-user"></i> <em>nobody</em></span>
         <i class="icon-edit"></i>
       </span>
 
