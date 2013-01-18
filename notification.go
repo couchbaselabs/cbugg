@@ -154,9 +154,10 @@ func sendNotifications(tmplName string, subs []string,
 		}
 
 		err = sendEmail(to, buf.Bytes())
-
 		if err != nil {
 			log.Printf("Error sending email: %v", err)
+		} else {
+			log.Printf("Sent %v to %v", tmplName, to)
 		}
 	}
 }
