@@ -3,8 +3,9 @@
     <span ng-hide="listuser">all</span>
     {{liststate}} bugs</h2>
 <div ng-repeat="(owner, bugs) in grouped_bugs">
-  <h3>{{bugs[0].Value.Owner.email}}
+  <h3>
     <img ng-src="http://www.gravatar.com/avatar/{{owner}}?s=24">
+    {{bugs[0].Value.Owner.email}}
   </h3>
   <ul class="unstyled">
     <li ng-repeat="bug in bugs">
