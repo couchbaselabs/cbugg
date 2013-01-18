@@ -328,7 +328,7 @@ function BugCtrl($scope, $routeParams, $http, $rootScope) {
 
     var checkOwnership = function (objects) {
         return _.map(objects, function(ob) {
-            if($rootScope.loggedin && $rootScope.loginscope.gravatar == ob.user.md5) {
+            if(ob.user && $rootScope.loggedin && $rootScope.loginscope.gravatar == ob.user.md5) {
                 ob.mine = true;
             } else {
                 ob.mine = false;
