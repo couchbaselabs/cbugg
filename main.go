@@ -26,7 +26,8 @@ var NotFound = errors.New("not found")
 var staticPath = flag.String("static", "static", "Path to the static content")
 
 var bugStates = []BugState{
-	{"new", 10, nil},
+	{"inbox", 5, nil},
+	{"new", 10, []string{"open", "resolved", "closed"}},
 	{"open", 20, []string{"resolved", "closed"}},
 	{"resolved", 30, []string{"open", "closed"}},
 	{"closed", 40, []string{"open"}},

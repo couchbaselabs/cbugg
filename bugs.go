@@ -34,7 +34,7 @@ func serveNewBug(w http.ResponseWriter, r *http.Request) {
 		Id:          fmt.Sprintf("bug-%v", id),
 		Title:       r.FormValue("title"),
 		Description: r.FormValue("description"),
-		Status:      "new",
+		Status:      "inbox",
 		Creator:     email,
 		Tags:        r.Form["tag"],
 		Type:        "bug",
