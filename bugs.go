@@ -161,7 +161,7 @@ func updateBug(id, field, val, who string) ([]byte, error) {
 			history.Title = bug.Title
 			bug.Title = val
 		case "status":
-			oldval = bug.Title
+			oldval = bug.Status
 			history.Status = bug.Status
 			bug.Status = val
 		case "owner":
