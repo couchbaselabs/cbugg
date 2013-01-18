@@ -221,6 +221,12 @@ func main() {
 		serveUnsubscribeBug).Methods("DELETE").MatcherFunc(authRequired)
 	r.HandleFunc("/api/bug/{bugid}/sub/", notAuthed)
 
+	// Bug Pinging
+	r.HandleFunc("/api/bug/{bugid}/ping/",
+		serveBugPing).Methods("POST").MatcherFunc(authRequired)
+	r.HandleFunc("/api/bug/{bugid}/ping/",
+		notAuthed).Methods("POST")
+
 	r.HandleFunc("/api/users/", serveUserList).Methods("GET")
 	r.HandleFunc("/api/tags/", serveTagList).Methods("GET")
 	r.HandleFunc("/api/recent/", serveRecent).Methods("GET")

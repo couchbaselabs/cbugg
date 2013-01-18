@@ -57,13 +57,17 @@ type APIComment Comment
 
 type APIBug Bug
 
-func (u User) MarshalJSON() ([]byte, error) {
+func (u User) shortEmail() string {
 	ushort := string(u)
 	if x := strings.Index(ushort, "@"); x >= 0 {
 		ushort = ushort[:x]
 	}
+	return ushort
+}
+
+func (u User) MarshalJSON() ([]byte, error) {
 	m := map[string]string{
-		"email": ushort,
+		"email": u.shortEmail(),
 		"md5":   md5string(string(u)),
 	}
 

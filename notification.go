@@ -26,10 +26,16 @@ type bugChange struct {
 	exception string
 }
 
+type bugPing struct {
+	bug      Bug
+	from, to string
+}
+
 var commentChan = make(chan Comment, 100)
 var attachmentChan = make(chan Attachment, 100)
 var bugChan = make(chan bugChange, 100)
 var assignedChan = make(chan string, 100)
+var pingChan = make(chan bugPing, 100)
 
 var bugNotifyDelays map[string]chan bugChange
 var bugNotifyDelayLock sync.Mutex
@@ -51,6 +57,9 @@ func init() {
 		"bytes": func(i int64) string {
 			return humanize.Bytes(uint64(i))
 		},
+		"shortName": func(s string) string {
+			return User(s).shortEmail()
+		},
 	})
 
 	templates = template.Must(t.ParseGlob("templates/*"))
@@ -60,6 +69,7 @@ func init() {
 	go attachmentNotificationLoop()
 	go bugNotificationLoop()
 	go bugAssignmentNotificationLoop()
+	go bugPingLoop()
 }
 
 func notifyComment(c Comment) {
@@ -68,6 +78,10 @@ func notifyComment(c Comment) {
 
 func notifyAttachment(a Attachment) {
 	attachmentChan <- a
+}
+
+func notifyBugPing(b Bug, from, to string) {
+	pingChan <- bugPing{b, from, to}
 }
 
 func notifyBugChange(bugid, field, actor string) {
@@ -324,6 +338,20 @@ func sendBugAssignedNotification(bugid string) {
 func bugAssignmentNotificationLoop() {
 	for bugid := range assignedChan {
 		sendBugAssignedNotification(bugid)
+	}
+}
+
+func sendBugPingNotification(bp bugPing) {
+	sendNotifications("bug_ping", []string{bp.to},
+		map[string]interface{}{
+			"Bug":       bp.bug,
+			"Requester": bp.from,
+		})
+}
+
+func bugPingLoop() {
+	for bp := range pingChan {
+		sendBugPingNotification(bp)
 	}
 }
 

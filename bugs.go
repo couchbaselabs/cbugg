@@ -320,3 +320,22 @@ func serveUnsubscribeBug(w http.ResponseWriter, r *http.Request) {
 
 	w.WriteHeader(204)
 }
+
+func serveBugPing(w http.ResponseWriter, r *http.Request) {
+	id := mux.Vars(r)["bugid"]
+	bug, err := getBug(id)
+	if err != nil {
+		showError(w, r, err.Error(), 404)
+		return
+	}
+
+	to := r.FormValue("to")
+	if !strings.Contains(to, "@") {
+		showError(w, r, "Invalid 'to' parameter", 400)
+		return
+	}
+
+	notifyBugPing(bug, whoami(r), to)
+
+	w.WriteHeader(202)
+}
