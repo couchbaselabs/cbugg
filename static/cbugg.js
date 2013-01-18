@@ -619,3 +619,22 @@ function SearchResultsCtrl($scope, $routeParams, $http, $rootScope) {
     $scope.jumpToPage(1, null);
 
 }
+
+function SimilarBugCtrl($scope, $http, $rootScope, $location) {
+
+    $scope.debouncedLookupSimilar = _.debounce(function(){$scope.lookupSimilar()}, 500);
+
+    $scope.lookupSimilar = function() {
+        if($scope.bugTitle != "") {
+            $http.post('/api/search/?query=' + $scope.bugTitle).success(function(data) {
+                $scope.similarBugs = data.hits.hits;
+            }).error(function(data, status, headers, config){
+                // in this case we remove anything that might be in the variable
+                $scope.similarBugs = [];
+            });
+        } else {
+            $scope.similarBugs = [];
+        }
+
+    }
+}

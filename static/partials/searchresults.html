@@ -8,9 +8,10 @@
 
 </div>
 
-<div ng-show="searchError && searchWarning != null" class="alert alert-error">
-        <span class="label label-important">Error</span> {{searchWarning}}
-    </div>
+<div ng-show="searchError && searchWarning != null"
+	class="alert alert-error">
+	<span class="label label-important">Error</span> {{searchWarning}}
+</div>
 
 <div ng-hide="searchError || searchInProgress">
 	<h3>Query: {{query}}</h3>
@@ -84,8 +85,17 @@
 
 	<!-- file new bug -->
 	<hr />
-	<form action="/api/bug/" id="newbug" method="POST">
-		Briefly describe your new problem: <input name="title" />
-	</form>
+	<div ng-controller="SimilarBugCtrl">
+		<form action="/api/bug/" id="newbug" method="POST">
+			Briefly describe your new problem: <input ng-model="bugTitle"
+				ng-change="debouncedLookupSimilar()" name="title" autocomplete="off" />
+		</form>
+		<div ng-show="similarBugs.length > 0">
+			<h5>Existing bugs that appear similar to your problem</h5>
+			<ul>
+				<li ng-repeat="bug in similarBugs"><a target="_blank"
+					href="#/bug/{{bug._id}}">{{bug._id}} - {{bug.source.doc.title}}</a></li>
+			</ul>
+		</div>
 
-</div>
+	</div>
