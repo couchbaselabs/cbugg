@@ -8,6 +8,10 @@ import (
 
 type User string
 
+type Typed struct {
+	Type string `json:"type"`
+}
+
 type Bug struct {
 	Id          string    `json:"id"`
 	Type        string    `json:"type"`
@@ -47,6 +51,14 @@ type Attachment struct {
 	CreatedAt   time.Time `json:"created_at"`
 }
 
+type Ping struct {
+	BugId     string    `json:"bugId"`
+	Type      string    `json:"type"`
+	CreatedAt time.Time `json:"created_at"`
+	From      string    `json:"from"`
+	To        string    `json:"to"`
+}
+
 type BugState struct {
 	Name    string   `json:"name"`
 	Order   int      `json:"order"`
@@ -56,6 +68,8 @@ type BugState struct {
 type APIComment Comment
 
 type APIBug Bug
+
+type APIPing Ping
 
 func (u User) shortEmail() string {
 	ushort := string(u)
@@ -116,6 +130,15 @@ func (c APIComment) MarshalJSON() ([]byte, error) {
 
 	m["user"] = User(maybenil(m, "user"))
 	return json.Marshal(m)
+}
+
+func (p APIPing) MarshalJSON() ([]byte, error) {
+	return json.Marshal(map[string]interface{}{
+		"type":       p.Type,
+		"created_at": p.CreatedAt,
+		"from":       User(p.From),
+		"to":         User(p.To),
+	})
 }
 
 func (b Bug) Url() string {

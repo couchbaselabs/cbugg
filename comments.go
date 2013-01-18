@@ -59,8 +59,9 @@ func serveCommentList(w http.ResponseWriter, r *http.Request) {
 
 	viewRes := struct {
 		Rows []struct {
-			Doc struct {
-				Json APIComment
+			Value string
+			Doc   struct {
+				Json *json.RawMessage
 			}
 		}
 	}{}
@@ -71,14 +72,40 @@ func serveCommentList(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	comments := []APIComment{}
+	// Below we mix comments and pings together for the "comment"
+	// UI, but we can't just pass the document body straight to
+	// the client because we want gravatars calculated and
+	// usernames obscured, so we do a first pass parse to detect
+	// the type and then parse it into the correct target type.
+	rv := []interface{}{}
+	for _, row := range viewRes.Rows {
+		t := Typed{}
+		err := json.Unmarshal([]byte(*row.Doc.Json), &t)
+		if err != nil {
+			showError(w, r, err.Error(), 500)
+			return
+		}
 
-	for _, r := range viewRes.Rows {
-		comments = append(comments, r.Doc.Json)
+		var parseTo interface{}
+
+		switch t.Type {
+		case "comment":
+			parseTo = &APIComment{}
+		case "ping":
+			parseTo = &APIPing{}
+		}
+
+		err = json.Unmarshal([]byte(*row.Doc.Json), parseTo)
+		if err != nil {
+			showError(w, r, err.Error(), 500)
+			return
+		}
+
+		rv = append(rv, parseTo)
 	}
 
 	w.Header().Set("Content-type", "application/json")
-	mustEncode(w, comments)
+	mustEncode(w, rv)
 }
 
 func updateCommentDeleted(w http.ResponseWriter, r *http.Request, to bool) {

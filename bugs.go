@@ -329,13 +329,21 @@ func serveBugPing(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	from := whoami(r)
 	to := r.FormValue("to")
 	if !strings.Contains(to, "@") {
 		showError(w, r, "Invalid 'to' parameter", 400)
 		return
 	}
 
-	notifyBugPing(bug, whoami(r), to)
+	notifyBugPing(bug, from, to)
+
+	now := time.Now().UTC()
+	pingid := "ping-" + id + "-" + now.Format(time.RFC3339Nano)
+	err = db.Set(pingid, 0, &Ping{id, "ping", now, from, to})
+	if err != nil {
+		log.Printf("Failed to record ping notification: %v", err)
+	}
 
 	w.WriteHeader(202)
 }

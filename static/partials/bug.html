@@ -114,24 +114,33 @@
 <h3>Comments</h3>
 <div class="comments">
   <div class="comment well well-small" ng-repeat="comment in comments">
-    <div ng-hide="comment.deleted">
-      <div class="author">
-        <img ng-src="http://www.gravatar.com/avatar/{{comment.user.md5}}?s=16">
-        {{comment.user.email}} commented {{comment.created_at | relDate}}
-        <button ng-click="deleteComment(comment)" ng-show="comment.mine" 
-          class="btn btn-mini pull-right">
-          <i class="icon-trash"></i>
+    <div ng-show="comment.type == 'comment'">
+      <div ng-hide="comment.deleted">
+        <div class="author">
+          <img ng-src="http://www.gravatar.com/avatar/{{comment.user.md5}}?s=16">
+          {{comment.user.email}} commented {{comment.created_at | relDate}}
+          <button ng-click="deleteComment(comment)" ng-show="comment.mine"
+                  class="btn btn-mini pull-right">
+            <i class="icon-trash"></i>
+          </button>
+        </div>
+        <div class="comment-text" ng-bind-html-unsafe="comment.text | markdownify">
+        </div>
+      </div>
+      <div ng-show="comment.deleted">
+        <em class="muted">This comment has been deleted</em>
+        <button ng-click="unDeleteComment(comment)" ng-show="comment.mine"
+                class="btn btn-mini pull-right">
+          <i class="icon-undo"></i>
         </button>
       </div>
-      <div class="comment-text" ng-bind-html-unsafe="comment.text | markdownify">
-      </div>
     </div>
-    <div ng-show="comment.deleted">
-      <em class="muted">This comment has been deleted</em>
-      <button ng-click="unDeleteComment(comment)" ng-show="comment.mine"
-        class="btn btn-mini pull-right">
-        <i class="icon-undo"></i>
-      </button>
+    <div ng-show="comment.type == 'ping'">
+      <i class="icon-bullhorn"></i>
+      <img ng-src="http://www.gravatar.com/avatar/{{comment.from.md5}}?s=16">
+      {{comment.from.email}} pinged
+      <img ng-src="http://www.gravatar.com/avatar/{{comment.to.md5}}?s=16">
+      {{comment.to.email}} {{comment.created_at | relDate}}
     </div>
   </div>
 </div>
