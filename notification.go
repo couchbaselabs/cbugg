@@ -65,11 +65,7 @@ func init() {
 	templates = template.Must(t.ParseGlob("templates/*"))
 	bugNotifyDelays = make(map[string]chan bugChange)
 
-	go commentNotificationLoop()
-	go attachmentNotificationLoop()
-	go bugNotificationLoop()
-	go bugAssignmentNotificationLoop()
-	go bugPingLoop()
+	go notificationLoop()
 }
 
 func notifyComment(c Comment) {
@@ -178,13 +174,6 @@ func sendAttachmentNotification(a Attachment) {
 			"Bug": b,
 		})
 }
-
-func attachmentNotificationLoop() {
-	for a := range attachmentChan {
-		sendAttachmentNotification(a)
-	}
-}
-
 func sendCommentNotification(c Comment) {
 	b, err := getBug(c.BugId)
 	if err != nil {
@@ -238,12 +227,6 @@ func sendBugNotification(bugid string, fields []string,
 			"Actors":       acts,
 			"ActorsString": strings.Join(acts, ", "),
 		})
-}
-
-func commentNotificationLoop() {
-	for c := range commentChan {
-		sendCommentNotification(c)
-	}
 }
 
 func bugNotifyDelay(bugid string) chan bugChange {
@@ -303,12 +286,6 @@ func addBugNotification(bc bugChange) {
 	c <- bc
 }
 
-func bugNotificationLoop() {
-	for c := range bugChan {
-		addBugNotification(c)
-	}
-}
-
 func removeFromList(list []string, needle string) []string {
 	rv := []string{}
 	for _, s := range list {
@@ -336,24 +313,12 @@ func sendBugAssignedNotification(bugid string) {
 		map[string]interface{}{"Bug": b})
 }
 
-func bugAssignmentNotificationLoop() {
-	for bugid := range assignedChan {
-		sendBugAssignedNotification(bugid)
-	}
-}
-
 func sendBugPingNotification(bp bugPing) {
 	sendNotifications("bug_ping", []string{bp.to},
 		map[string]interface{}{
 			"Bug":       bp.bug,
 			"Requester": bp.from,
 		})
-}
-
-func bugPingLoop() {
-	for bp := range pingChan {
-		sendBugPingNotification(bp)
-	}
 }
 
 func updateSubscription(bugid, email string, add bool) error {
@@ -380,4 +345,21 @@ func updateSubscription(bugid, email string, add bool) error {
 
 		return json.Marshal(bug)
 	})
+}
+
+func notificationLoop() {
+	for {
+		select {
+		case a := <-attachmentChan:
+			sendAttachmentNotification(a)
+		case bp := <-pingChan:
+			sendBugPingNotification(bp)
+		case c := <-commentChan:
+			sendCommentNotification(c)
+		case bugid := <-assignedChan:
+			sendBugAssignedNotification(bugid)
+		case c := <-bugChan:
+			addBugNotification(c)
+		}
+	}
 }
