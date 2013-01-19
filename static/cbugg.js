@@ -157,7 +157,7 @@ function BugsByUserStateCtrl($scope, $routeParams, $http, $rootScope) {
     });
 }
 
-function BugCtrl($scope, $routeParams, $http, $rootScope) {
+function BugCtrl($scope, $routeParams, $http, $rootScope, $timeout) {
     var updateBug = function(field, newValue) {
         var bug = $scope.bug;
         if (newValue === undefined) {
@@ -422,7 +422,7 @@ function BugCtrl($scope, $routeParams, $http, $rootScope) {
                 data.mine = true;
                 $scope.comments.push(data);
                 $scope.draftcomment="";
-                $scope.addingcomment = false;
+                $timeout(function() { $scope.addingcomment = false; })
                 if (!$scope.subscribed) {
                     $scope.subcount++;
                     $scope.subscribed = true;
@@ -655,7 +655,6 @@ function PingCtrl($scope, $rootScope, $http) {
         var user = $(".pinguserinput").val();
         var bug = $scope.$parent.bug;
         if(user) {
-            console.log("Would ping " + user);
             $http.post("/api/bug/" + bug.id + "/ping/", "to=" + encodeURIComponent(user),
                        {headers: {"Content-Type": "application/x-www-form-urlencoded"}})
                 .error(function(data, code) {
