@@ -130,11 +130,25 @@ func serveRecent(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	statuses := map[string]string{}
+
+	for _, r := range viewRes.Rows {
+		statuses[r.Value.BugId] = ""
+	}
+
+	for k := range statuses {
+		b, err := getBug(k)
+		if err == nil {
+			statuses[k] = b.Status
+		}
+	}
+
 	type OutType struct {
 		Time   string `json:"time"`
 		User   Email  `json:"user"`
 		Action string `json:"action"`
 		BugId  string `json:"bugid"`
+		Status string `json:"status"`
 	}
 
 	output := []OutType{}
@@ -145,6 +159,7 @@ func serveRecent(w http.ResponseWriter, r *http.Request) {
 				Email(r.Value.Actor),
 				r.Value.Action,
 				r.Value.BugId,
+				statuses[r.Value.BugId],
 			})
 	}
 
