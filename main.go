@@ -234,6 +234,11 @@ func main() {
 
 	r.HandleFunc("/api/search/", searchBugs).Methods("POST")
 
+	r.HandleFunc("/api/me/", serveMe).Methods("GET")
+	r.HandleFunc("/api/me/prefs/",
+		serveSetMyPrefs).Methods("POST").MatcherFunc(authRequired)
+	r.HandleFunc("/api/me/prefs/", notAuthed).Methods("POST")
+
 	r.HandleFunc("/api/state-counts", serveStateCounts)
 	r.HandleFunc("/auth/login", serveLogin).Methods("POST")
 	r.HandleFunc("/auth/logout", serveLogout).Methods("POST")

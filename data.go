@@ -65,6 +65,13 @@ type BugState struct {
 	Targets []string `json:"targets,omitempty"`
 }
 
+type User struct {
+	Id    string                 `json:"id"`
+	Type  string                 `json:"type"`
+	Admin bool                   `json:"admin"`
+	Prefs map[string]interface{} `json:"prefs"`
+}
+
 type APIComment Comment
 
 type APIBug Bug
