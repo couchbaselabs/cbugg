@@ -655,7 +655,8 @@ function PingCtrl($scope, $http) {
         var bug = $scope.$parent.bug;
         if(user) {
             console.log("Would ping " + user);
-            $http.post("/api/bug/" + bug.id + "/ping/", "to=" + encodeURIComponent(user))
+            $http.post("/api/bug/" + bug.id + "/ping/", "to=" + encodeURIComponent(user),
+                       {headers: {"Content-Type": "application/x-www-form-urlencoded"}})
                 .error(function(data, code) {
                     bAlert("Error " + code, "Couldn't ping " + user + ": " + data, "error");
                 });
