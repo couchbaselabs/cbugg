@@ -31,7 +31,6 @@ angular.module('cbuggDirectives', [])
         var editortpl = '<div ng-class="{edithide: !editing}"><textarea ng-model="source" '+
                         'cb-mirror></textarea>Format with <a href="http://daringfireball.net'+
                         '/projects/markdown/syntax">Markdown</a></div>';
-        var converter = new Showdown.converter();
         return {
             restrict: 'E',
             scope: {
@@ -71,10 +70,9 @@ function bAlert(heading, message, kind) {
 
 angular.module('cbuggFilters', []).
     filter('markdownify', function() {
-        var converter = new Showdown.converter();
         return function(string) {
             if(!string) { return ""; }
-            return converter.makeHtml(string);
+            return marked(string);
         };
     }).
     filter('relDate', function() {
