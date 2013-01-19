@@ -368,7 +368,9 @@ function BugCtrl($scope, $routeParams, $http, $rootScope, $timeout) {
         }
         $scope.bug.tags.push(newtag);
         $scope.bug.tags = _.uniq($scope.bug.tags);
-        $event.preventDefault();
+        if($event) {
+            $event.preventDefault();
+        }
         updateBug("tags");
     };
 
@@ -379,11 +381,17 @@ function BugCtrl($scope, $routeParams, $http, $rootScope, $timeout) {
                 tags.push(k);
             }
             tags.sort();
-            process(tags);
+            process(_.difference(tags, $scope.bug.tags));
         });
     };
 
-    $("#tagbox").typeahead({source: getTags});
+    $("#tagbox").typeahead({
+        source: getTags,
+        updater: function(i) {
+            $timeout($scope.addTags)
+            return i;
+        }
+    });
 
     $scope.subscribe = function() {
         $http.post('/api/bug/' + $scope.bug.id + '/sub/');
