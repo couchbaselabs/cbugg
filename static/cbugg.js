@@ -166,11 +166,11 @@ function BugCtrl($scope, $routeParams, $http, $rootScope, $timeout) {
                        {headers: {"Content-Type": "application/x-www-form-urlencoded"}}).
             success(function(data) {
                 $scope.bug = data;
+                checkSubscribed();
             }).
             error(function(data, code) {
                 bAlert("Error " + code, "could not update bug: " + data, "error");
             });
-
         }
     };
 
@@ -318,6 +318,7 @@ function BugCtrl($scope, $routeParams, $http, $rootScope, $timeout) {
 
     var checkSubscribed = function() {
         if($scope.bug) {
+            $scope.subcount = $scope.bug.subscribers.length;
             _.forEach($scope.bug.subscribers, function(el) {
                 $scope.subscribed |= ($rootScope.loginscope.gravatar == el.md5);
             });
