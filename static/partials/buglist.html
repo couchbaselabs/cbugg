@@ -11,7 +11,7 @@
     <i class="icon-user"></i> Unassigned Bugs
   </h3>
   <ul class="unstyled">
-    <li ng-repeat="bug in ob[1]">
+    <li class="status-{{bug.Value.Status}}" ng-repeat="bug in ob[1]">
       <a href="#/bug/{{bug.ID}}">{{bug.ID}} - {{bug.Value.Title}}</a>
     </li>
   </ul>
@@ -24,6 +24,9 @@
 <div ng-show="similarBugs.length > 0">
 <h5>Existing bugs that appear similar to your problem</h5>
   <ul>
-    <li ng-repeat="bug in similarBugs"><a target="_blank" href="#/bug/{{bug._id}}">{{bug._id}} - {{bug.source.doc.title}}</a></li>
+    <li class="status-{{bug.source.doc.status}}" ng-repeat="bug in similarBugs">
+      <a target="_blank" href="#/bug/{{bug._id}}">{{bug._id}} -
+        {{bug.source.doc.title}}</a>
+    </li>
   </ul>
 </div>

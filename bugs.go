@@ -269,8 +269,9 @@ func serveBugList(w http.ResponseWriter, r *http.Request) {
 			ID    string
 			Key   []string
 			Value struct {
-				Title string
-				Owner Email
+				Title  string
+				Owner  Email
+				Status string
 			}
 		}
 	}{}
