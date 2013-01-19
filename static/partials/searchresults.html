@@ -54,8 +54,9 @@
 							</tr>
 						</thead>
 						<tbody>
-							<tr class="status-{{result.source.doc.status}}" ng-repeat="result in results">
-								<td><a href="#/bug/{{result._id}}">{{result._id}}</a></td>
+							<tr ng-repeat="result in results">
+								<td><a class="status-{{result.source.doc.status}}"
+                       href="#/bug/{{result._id}}">{{result._id}}</a></td>
 								<td>{{result.source.doc.title}}</td>
 								<td>{{result._score}}</td>
 							</tr>
