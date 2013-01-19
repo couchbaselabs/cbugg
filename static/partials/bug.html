@@ -38,47 +38,49 @@
   {{bug.creator.email}}.
 </p>
 
-<p>
-<form class="form-inline">
+<div class="form-inline">
+  <form>
     Status:
     <select class="status" ng-model="bug.status" ng-options="state for state in availableStates">
     </select>
-</form>
-<div class="tags">
-    <form class="form-inline">
+  </form>
+
+  <div class="tags">
+    <form>
         Tags:
         <div class="btn-group" ng-repeat="tag in bug.tags">
-            <button class="tag btn btn-mini btn-success" ng-click="listTag(tag)">{{tag}}</button>
-            <button class="btn btn-mini btn-danger" ng-click="killTag(tag)">
-                <i class="icon-white icon-remove"></i>
-            </button>
+          <button class="tag btn btn-mini btn-success" ng-click="listTag(tag)">{{tag}}</button>
+          <button class="btn btn-mini btn-danger" ng-click="killTag(tag)">
+            <i class="icon-white icon-remove"></i>
+          </button>
         </div>
         <input type="text" id="tagbox" ui-keypress="{'enter space':'addTags($event)'}" ng-model="newtag" class="input-small"/>
     </form>
-</div>
-</p>
+  </div>
 
-<p>
-<div>
-  <form class="form-horizontal" ng-submit="submitOwner()">
-    <label ng-click="editOwner()">Assigned to
-
-      <span ng-hide="editingowner">
-        <span ng-show="bug.owner.email">
-          <img ng-src="http://www.gravatar.com/avatar/{{bug.owner.md5}}?s=16" />
-          {{bug.owner.email}}
+  <div>
+    <div class="btn-group pull-right">
+      <button class="btn btn-small" ng-click="setOwnerToMe()">Assign to me</button>
+      <button class="btn btn-small" data-placement="left" data-title="Ping User"
+        bs-popover="'partials/ping.html'"><i class="icon-bullhorn"></i> Ping</button>
+    </div>
+    <form ng-submit="submitOwner()">
+      <label ng-click="editOwner()">Assigned to
+        <span ng-hide="editingowner">
+          <span ng-show="bug.owner.email">
+            <img ng-src="http://www.gravatar.com/avatar/{{bug.owner.md5}}?s=16" />
+            {{bug.owner.email}}
+          </span>
+          <span ng-hide="bug.owner.email"><i class="icon-user"></i> <em>nobody</em></span>
+          <i class="icon-edit"></i>
         </span>
-        <span ng-hide="bug.owner.email"><i class="icon-user"></i> <em>nobody</em></span>
-        <i class="icon-edit"></i>
-      </span>
 
-      <input ng-show="editingowner" type="text" ng-model-instant="bug.owner.email" class="ownerbox input-medium">
-      <button ng-show="editingowner" type="submit" class="btn">Save</button>
-    </label>
-  </form>
-  <a ng-click="setOwnerToMe()">Assign to me</a>
+        <input ng-show="editingowner" type="text" ng-model-instant="bug.owner.email" class="ownerbox input-medium">
+        <button ng-show="editingowner" type="submit" class="btn">Save</button>
+      </label>
+    </form>
+  </div>
 </div>
-</p>
 
 <h3>Attachments</h3>
 <div id="dropbox" class="dropbox" ng-class="dropClass"><span>{{dropText}}</span></div>

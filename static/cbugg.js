@@ -100,7 +100,7 @@ angular.module('cbuggFilters', []).
         };
     });
 
-angular.module('cbugg', ['cbuggFilters', 'cbuggDirectives', 'ui']).
+angular.module('cbugg', ['cbuggFilters', 'cbuggDirectives', 'ui', '$strap.directives']).
     config(['$routeProvider', function($routeProvider) {
         $routeProvider.
             when('/bug/:bugId', {templateUrl: 'partials/bug.html',
@@ -475,14 +475,14 @@ function BugCtrl($scope, $routeParams, $http, $rootScope) {
             });
     };
 
-    var getUsers = function(query, process) {
+    $scope.getUsers = function(query, process) {
         $http.get('/api/users/').success(function(data) {
             process(data);
         });
     };
 
     $scope.editOwner = function() {
-        $(".ownerbox").typeahead({source: getUsers});
+        $(".ownerbox").typeahead({source: $scope.getUsers});
         $scope.editingowner = true;
     };
 
@@ -642,5 +642,24 @@ function SimilarBugCtrl($scope, $http, $rootScope, $location) {
             $scope.similarBugs = [];
         }
 
+    }
+}
+
+function PingCtrl($scope, $http) {
+    $(".pinguserinput").focus();
+    //Should actually factor getUsers out into a service instead of do this
+    //hacky parent scope thing..
+    $(".pinguserinput").typeahead({source: $scope.$parent.getUsers});
+    $scope.pingUser = function() {
+        var user = $(".pinguserinput").val();
+        var bug = $scope.$parent.bug;
+        if(user) {
+            console.log("Would ping " + user);
+            $http.post("/api/bug/" + bug.id + "/ping/", "to=" + encodeURIComponent(user))
+                .error(function(data, code) {
+                    bAlert("Error " + code, "Couldn't ping " + user + ": " + data, "error");
+                });
+        }
+        $scope.dismiss();
     }
 }
