@@ -645,7 +645,8 @@ function SimilarBugCtrl($scope, $http, $rootScope, $location) {
     }
 }
 
-function PingCtrl($scope, $http) {
+function PingCtrl($scope, $rootScope, $http) {
+    var loginscope = $rootScope.loginscope;
     $(".pinguserinput").focus();
     //Should actually factor getUsers out into a service instead of do this
     //hacky parent scope thing..
@@ -659,6 +660,14 @@ function PingCtrl($scope, $http) {
                        {headers: {"Content-Type": "application/x-www-form-urlencoded"}})
                 .error(function(data, code) {
                     bAlert("Error " + code, "Couldn't ping " + user + ": " + data, "error");
+                })
+                .success(function(data) {
+                    $scope.$parent.comments.push({
+                        type: 'ping',
+                        from: {md5: loginscope.gravatar,
+                               email: loginscope.username.match(/[^@]+/)[0]},
+                        to: data
+                    });
                 });
         }
         $scope.dismiss();
