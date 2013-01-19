@@ -109,7 +109,7 @@ func getBugHistory(id string) ([]BugHistoryItem, error) {
 	for _, r := range res.Rows {
 		h := r.Value.(map[string]interface{})
 		if s, ok := h["by"].(string); ok && s != "" {
-			h["by"] = User(s)
+			h["by"] = Email(s)
 		}
 		t, err := time.Parse(time.RFC3339, r.Key.([]interface{})[1].(string))
 		if err != nil {
@@ -270,7 +270,7 @@ func serveBugList(w http.ResponseWriter, r *http.Request) {
 			Key   []string
 			Value struct {
 				Title string
-				Owner User
+				Owner Email
 			}
 		}
 	}{}
@@ -352,5 +352,5 @@ func serveBugPing(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	mustEncode(w, User(to))
+	mustEncode(w, Email(to))
 }

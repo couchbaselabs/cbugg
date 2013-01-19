@@ -58,7 +58,7 @@ func init() {
 			return humanize.Bytes(uint64(i))
 		},
 		"shortName": func(s string) string {
-			return User(s).shortEmail()
+			return Email(s).shortEmail()
 		},
 	})
 

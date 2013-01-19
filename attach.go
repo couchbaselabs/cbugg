@@ -111,7 +111,7 @@ func serveFileUpload(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(200)
 	mustEncode(w, map[string]interface{}{
 		"id":           "att-" + att.Id,
-		"user":         User(att.User),
+		"user":         Email(att.User),
 		"filename":     att.Filename,
 		"content_type": att.ContentType,
 		"created_at":   att.CreatedAt,
@@ -137,7 +137,7 @@ func serveAttachmentList(w http.ResponseWriter, r *http.Request) {
 				Json struct {
 					Filename    string
 					ContentType string `json:"content_type"`
-					User        User
+					User        Email
 					Size        int64
 				}
 			}
@@ -152,7 +152,7 @@ func serveAttachmentList(w http.ResponseWriter, r *http.Request) {
 
 	type outT struct {
 		Id          string `json:"id"`
-		User        User   `json:"user"`
+		User        Email  `json:"user"`
 		Filename    string `json:"filename"`
 		ContentType string `json:"content_type"`
 		Size        int64  `json:"size"`

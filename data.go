@@ -6,7 +6,7 @@ import (
 	"time"
 )
 
-type User string
+type Email string
 
 type Typed struct {
 	Type string `json:"type"`
@@ -71,7 +71,7 @@ type APIBug Bug
 
 type APIPing Ping
 
-func (u User) shortEmail() string {
+func (u Email) shortEmail() string {
 	ushort := string(u)
 	if x := strings.Index(ushort, "@"); x >= 0 {
 		ushort = ushort[:x]
@@ -79,7 +79,7 @@ func (u User) shortEmail() string {
 	return ushort
 }
 
-func (u User) MarshalJSON() ([]byte, error) {
+func (u Email) MarshalJSON() ([]byte, error) {
 	m := map[string]string{
 		"email": u.shortEmail(),
 		"md5":   md5string(string(u)),
@@ -104,14 +104,14 @@ func (b APIBug) MarshalJSON() ([]byte, error) {
 		return nil, err
 	}
 
-	subs := []User{}
+	subs := []Email{}
 	for _, u := range b.Subscribers {
-		subs = append(subs, User(u))
+		subs = append(subs, Email(u))
 	}
 
-	m["creator"] = User(maybenil(m, "creator"))
-	m["owner"] = User(maybenil(m, "owner"))
-	m["modified_by"] = User(maybenil(m, "modified_by"))
+	m["creator"] = Email(maybenil(m, "creator"))
+	m["owner"] = Email(maybenil(m, "owner"))
+	m["modified_by"] = Email(maybenil(m, "modified_by"))
 	m["subscribers"] = subs
 
 	return json.Marshal(m)
@@ -128,7 +128,7 @@ func (c APIComment) MarshalJSON() ([]byte, error) {
 		return nil, err
 	}
 
-	m["user"] = User(maybenil(m, "user"))
+	m["user"] = Email(maybenil(m, "user"))
 	return json.Marshal(m)
 }
 
@@ -136,8 +136,8 @@ func (p APIPing) MarshalJSON() ([]byte, error) {
 	return json.Marshal(map[string]interface{}{
 		"type":       p.Type,
 		"created_at": p.CreatedAt,
-		"from":       User(p.From),
-		"to":         User(p.To),
+		"from":       Email(p.From),
+		"to":         Email(p.To),
 	})
 }
 

@@ -132,7 +132,7 @@ func serveRecent(w http.ResponseWriter, r *http.Request) {
 
 	type OutType struct {
 		Time   string `json:"time"`
-		User   User   `json:"user"`
+		User   Email  `json:"user"`
 		Action string `json:"action"`
 		BugId  string `json:"bugid"`
 	}
@@ -142,7 +142,7 @@ func serveRecent(w http.ResponseWriter, r *http.Request) {
 	for _, r := range viewRes.Rows {
 		output = append(output,
 			OutType{r.Key,
-				User(r.Value.Actor),
+				Email(r.Value.Actor),
 				r.Value.Action,
 				r.Value.BugId,
 			})
