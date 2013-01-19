@@ -149,19 +149,13 @@
 
 <button ng-hide="addingcomment" ng-click="startComment()" ng-show="loggedin" class="btn">Add Comment</button>
 <div ng-show="addingcomment" class="clearfix">
-  <cb-editor editing="editingComment" editfn="editComment" source="draftcomment">
-  <div ng-show="editing">
-    <button ng-click="save()" class="btn pull-right">Preview</button>
-  </div>
+  <cb-editor live="1" editing="editingComment" editfn="editComment" source="draftcomment">
   </cb-editor>
-  <div class="comment-preview well well-small" ng-hide="editingComment">
+  <div class="comment-preview well well-small">
     <em class="muted">Draft Comment</em>
-    <button class="btn btn-mini pull-right" ng-click="editComment()">
-      <i class="icon-edit"></i> Edit
-    </button>
     <div ng-bind-html-unsafe="draftcomment | markdownify"></div>
   </div>
-  <button ng-hide="editingComment" ng-click="postComment()" class="btn pull-right btn-success">
+  <button ng-click="postComment()" class="btn pull-right btn-success">
     Post Comment
   </button>
 </div>
