@@ -130,16 +130,16 @@ func serveRecent(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	statuses := map[string]string{}
+	bugs := map[string]Bug{}
 
 	for _, r := range viewRes.Rows {
-		statuses[r.Value.BugId] = ""
+		bugs[r.Value.BugId] = Bug{}
 	}
 
-	for k := range statuses {
+	for k := range bugs {
 		b, err := getBug(k)
 		if err == nil {
-			statuses[k] = b.Status
+			bugs[k] = b
 		}
 	}
 
@@ -149,6 +149,7 @@ func serveRecent(w http.ResponseWriter, r *http.Request) {
 		Action string `json:"action"`
 		BugId  string `json:"bugid"`
 		Status string `json:"status"`
+		Title  string `json:"title"`
 	}
 
 	output := []OutType{}
@@ -159,7 +160,8 @@ func serveRecent(w http.ResponseWriter, r *http.Request) {
 				Email(r.Value.Actor),
 				r.Value.Action,
 				r.Value.BugId,
-				statuses[r.Value.BugId],
+				bugs[r.Value.BugId].Status,
+				bugs[r.Value.BugId].Title,
 			})
 	}
 

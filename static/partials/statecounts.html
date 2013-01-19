@@ -3,7 +3,8 @@
     <li ng-repeat="ob in recent">
       <img ng-src="http://www.gravatar.com/avatar/{{ob.user.md5}}?s=16">
       {{ob.user.email}} {{ob.action}}
-      <a class="status-{{ob.status}}" href="/bug/{{ob.bugid}}">{{ob.bugid}}</a> {{ob.time | relDate}}
+      <a class="status-{{ob.status}}"
+         title="{{ob.title}}" href="/bug/{{ob.bugid}}">{{ob.bugid}}</a> {{ob.time | relDate}}
     </li>
 </ul>
 <ul class="unstyled"> 
