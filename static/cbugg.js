@@ -7,7 +7,7 @@ angular.module('cbuggDirectives', [])
                 scope.setupMirror = function() {
                     scope.codeMirror = CodeMirror.fromTextArea(el[0], {
                         theme: 'cb',
-                        mode: {name: 'markdown'},
+                        mode: {name: 'gfm'},
                         lineWrapping: true
                     });
                     if(scope.live) {
