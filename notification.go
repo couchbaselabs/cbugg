@@ -140,6 +140,7 @@ func sendNotifications(tmplName string, subs []string,
 
 	for _, to := range subs {
 		buf := &bytes.Buffer{}
+		buf.WriteString("Content-Type: text/plain; charset=utf-8\n")
 
 		fields["MailTo"] = to
 		err := templates.ExecuteTemplate(buf, tmplName, fields)
