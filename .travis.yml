@@ -1,1 +1,5 @@
 language: go
+
+notifications:
+  email:
+    - dustin@couchbase.com
