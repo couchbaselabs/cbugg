@@ -79,6 +79,7 @@ func sendNotifications(tmplName string, subs []string,
 
 	fields["BaseURL"] = *baseURL
 	fields["MailFrom"] = *mailFrom
+	fields["InReplyToDom"] = *replyToDom
 
 	if *mailServer == "" || *mailFrom == "" {
 		log.Printf("Email not configured, would have sent this:")

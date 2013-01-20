@@ -24,11 +24,13 @@ var mailFrom = flag.String("mailfrom", "",
 	"cbugg email address for notifications")
 var baseURL = flag.String("baseurl", "http://localhost:8066",
 	"base URL of cbugg service")
+var replyToDom = flag.String("ird", "cbugg.hq.couchbase.com",
+	"In-Reply-To domain to use (arbitrary string)")
 
 var defaultHeaders = mail.Header{
 	"Content-Type": []string{"text/plain; charset=utf-8"},
 	"From":         []string{"CBugg <{{.MailFrom}}>"},
-	"In-Reply-To":  []string{"<{{.Bug.Id}}.cbugg.hq.couchbase.com>"},
+	"In-Reply-To":  []string{"<{{.Bug.Id}}.{{.InReplyToDom}}>"},
 	"To":           []string{"{{.MailTo}}"},
 }
 
