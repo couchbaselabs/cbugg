@@ -6,18 +6,12 @@ import (
 	"flag"
 	"fmt"
 	"log"
-	"net/smtp"
 	"os"
 	"sort"
 	"strings"
 	"sync"
-	"text/template"
 	"time"
-
-	"github.com/dustin/go-humanize"
 )
-
-var templates *template.Template
 
 type bugChange struct {
 	bugid     string
@@ -40,29 +34,11 @@ var pingChan = make(chan bugPing, 100)
 var bugNotifyDelays map[string]chan bugChange
 var bugNotifyDelayLock sync.Mutex
 
-// Email configuration
-
-var mailServer = flag.String("smtpserver", "",
-	"mail server through which to send notifications")
-var mailFrom = flag.String("mailfrom", "",
-	"cbugg email address for notifications")
-var baseURL = flag.String("baseurl", "http://localhost:8066",
-	"base URL of cbugg service")
 var bugDelay = flag.Duration("notificationDelay",
 	time.Duration(10*time.Second),
 	"bug change stabilization delay timer")
 
 func init() {
-	t := template.New("").Funcs(map[string]interface{}{
-		"bytes": func(i int64) string {
-			return humanize.Bytes(uint64(i))
-		},
-		"shortName": func(s string) string {
-			return Email(s).shortEmail()
-		},
-	})
-
-	templates = template.Must(t.ParseGlob("templates/*"))
 	bugNotifyDelays = make(map[string]chan bugChange)
 
 	go notificationLoop()
@@ -96,32 +72,6 @@ func exceptBugChange(bugid, email string) {
 func notifyBugAssignment(bugid, assigned string) {
 	assignedChan <- bugid
 	exceptBugChange(bugid, assigned)
-}
-
-func sendEmail(to string, body []byte) error {
-	c, err := smtp.Dial(*mailServer)
-	if err != nil {
-		return err
-	}
-	if err = c.Mail(*mailFrom); err != nil {
-		return err
-	}
-	if err = c.Rcpt(to); err != nil {
-		return err
-	}
-	w, err := c.Data()
-	if err != nil {
-		return err
-	}
-	_, err = w.Write(body)
-	if err != nil {
-		return err
-	}
-	err = w.Close()
-	if err != nil {
-		return err
-	}
-	return c.Quit()
 }
 
 func sendNotifications(tmplName string, subs []string,
