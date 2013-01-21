@@ -3,10 +3,12 @@ package main
 import (
 	"bytes"
 	"crypto/md5"
+	"encoding/base64"
 	"encoding/hex"
 	"encoding/json"
 	"log"
 	"net/http"
+	"strings"
 
 	"github.com/gorilla/securecookie"
 )
@@ -37,6 +39,26 @@ func whoami(r *http.Request) string {
 		if err = secureCookie.Decode("user", cookie.Value, &val); err == nil {
 			// TODO: Check expiration
 			return val.Email
+		}
+	}
+	if ahdr := r.Header.Get("Authorization"); ahdr != "" {
+		parts := strings.Split(ahdr, " ")
+		if len(parts) < 2 {
+			return ""
+		}
+		decoded, err := base64.StdEncoding.DecodeString(parts[1])
+		if err != nil {
+			return ""
+		}
+		userpass := strings.SplitN(string(decoded), ":", 2)
+
+		user, err := getUser(userpass[0])
+		if err != nil {
+			return ""
+		}
+
+		if user.AuthToken == userpass[1] {
+			return userpass[0]
 		}
 	}
 	return ""

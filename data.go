@@ -66,10 +66,11 @@ type BugState struct {
 }
 
 type User struct {
-	Id    string                 `json:"id"`
-	Type  string                 `json:"type"`
-	Admin bool                   `json:"admin"`
-	Prefs map[string]interface{} `json:"prefs"`
+	Id        string                 `json:"id"`
+	Type      string                 `json:"type"`
+	Admin     bool                   `json:"admin"`
+	AuthToken string                 `json:"auth_token,omitmepty"`
+	Prefs     map[string]interface{} `json:"prefs"`
 }
 
 type APIComment Comment

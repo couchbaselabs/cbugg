@@ -34,6 +34,7 @@ func serveMe(w http.ResponseWriter, r *http.Request) {
 		}
 		rv.Id = me
 		rv.Type = "user"
+		rv.AuthToken = ""
 	}
 
 	w.Header().Set("Content-type", "application/json")
@@ -83,4 +84,60 @@ func serveSetMyPrefs(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-type", "application/json")
 	mustEncode(w, user)
+}
+
+func serveUserAuthToken(w http.ResponseWriter, r *http.Request) {
+	var rv User
+	var err error
+
+	me := whoami(r)
+	if me != "" {
+		rv, err = getUser(me)
+		if !(err == nil || gomemcached.IsNotFound(err)) {
+			showError(w, r, err.Error(), 500)
+			return
+		}
+		rv.Id = me
+		rv.Type = "user"
+	}
+
+	// If the user doesn't have an auth token, make one.
+	if rv.AuthToken == "" {
+		serveUpdateUserAuthToken(w, r)
+		return
+	}
+
+	w.Header().Set("Content-type", "application/json")
+	mustEncode(w, map[string]string{"token": rv.AuthToken})
+}
+
+func serveUpdateUserAuthToken(w http.ResponseWriter, r *http.Request) {
+	me := whoami(r)
+	key := "u-" + me
+	user := User{}
+
+	err := db.Update(key, 0, func(current []byte) ([]byte, error) {
+		if len(current) > 0 {
+			err := json.Unmarshal(current, &user)
+			if err != nil {
+				return nil, err
+			}
+		}
+
+		// Common fields
+		user.Id = me
+		user.Type = "user"
+
+		user.AuthToken = randstring(16)
+
+		return json.Marshal(user)
+	})
+
+	if err != nil {
+		showError(w, r, err.Error(), 500)
+		return
+	}
+
+	w.Header().Set("Content-type", "application/json")
+	mustEncode(w, map[string]string{"token": user.AuthToken})
 }

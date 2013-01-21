@@ -255,6 +255,11 @@ func main() {
 	r.HandleFunc("/api/me/prefs/",
 		serveSetMyPrefs).Methods("POST").MatcherFunc(authRequired)
 	r.HandleFunc("/api/me/prefs/", notAuthed).Methods("POST")
+	r.HandleFunc("/api/me/token/",
+		serveUserAuthToken).Methods("GET").MatcherFunc(authRequired)
+	r.HandleFunc("/api/me/token/",
+		serveUpdateUserAuthToken).Methods("POST").MatcherFunc(authRequired)
+	r.HandleFunc("/api/me/token/", notAuthed)
 
 	r.HandleFunc("/api/state-counts", serveStateCounts)
 	r.HandleFunc("/auth/login", serveLogin).Methods("POST")
