@@ -17,7 +17,7 @@
             <div class="navbar-inner">
                 <div class="container" ng-controller="LoginCtrl">
                     <form class="navbar-form pull-right" ng-show="loggedin">
-                        <a href="#/user/{{username}}/open">
+                        <a href="#/user/{{username}}/new,open">
                           <img ng-src="http://www.gravatar.com/avatar/{{gravatar}}?s=28" class="uimg">
                         </a>
                         <div class="btn-group">
@@ -26,7 +26,7 @@
                                 <span class="caret"></span>
                             </button>
                             <ul class="dropdown-menu">
-                                <li> <a href="#/user/{{username}}/open">My Open Bugs</a> </li>
+                                <li> <a href="#/user/{{username}}/new,open">My Open Bugs</a> </li>
                                 <li>
                                   <a href="#/search/subscribers:{{username}}%20AND%20(status:open%20OR%20status:new)">Open
                                     Starred Bugs</a>
