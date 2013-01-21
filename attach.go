@@ -27,13 +27,13 @@ func init() {
 	}
 }
 
-func randstring() string {
-	stuff := make([]byte, 8)
+func randstring(l int) string {
+	stuff := make([]byte, l)
 	bytesread, err := rand.Read(stuff)
 	if err != nil {
 		panic(err)
 	}
-	if bytesread != 8 {
+	if bytesread != l {
 		panic("short read")
 	}
 
@@ -58,7 +58,7 @@ func serveFileUpload(w http.ResponseWriter, r *http.Request) {
 	}
 	defer f.Close()
 
-	attid := randstring()
+	attid := randstring(8)
 	dest := *cbfsUrl + bugid + "/" + attid + "/" + fh.Filename
 
 	req, err := http.NewRequest("PUT", dest, f)
