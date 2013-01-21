@@ -47,26 +47,35 @@ func serveSetMyPrefs(w http.ResponseWriter, r *http.Request) {
 	}
 
 	me := whoami(r)
-	user, err := getUser(me)
-	if err != nil {
-		if !gomemcached.IsNotFound(err) {
-			showError(w, r, err.Error(), 500)
-			return
-		}
-		user.Id = me
-		user.Type = "user"
-	}
+	key := "u-" + me
+	user := User{}
+
+	parsedPrefs := user.Prefs
 
 	d := json.NewDecoder(r.Body)
-	err = d.Decode(&user.Prefs)
-
+	err := d.Decode(&parsedPrefs)
 	if err != nil {
-		showError(w, r, err.Error(), 500)
+		showError(w, r, err.Error(), 400)
 		return
 	}
 
-	k := "u-" + me
-	err = db.Set(k, 0, user)
+	err = db.Update(key, 0, func(current []byte) ([]byte, error) {
+		if len(current) > 0 {
+			err := json.Unmarshal(current, &user)
+			if err != nil {
+				return nil, err
+			}
+		}
+
+		// Common fields
+		user.Id = me
+		user.Type = "user"
+
+		user.Prefs = parsedPrefs
+
+		return json.Marshal(user)
+	})
+
 	if err != nil {
 		showError(w, r, err.Error(), 500)
 		return
