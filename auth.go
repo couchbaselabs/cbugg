@@ -139,7 +139,6 @@ func performAuth(w http.ResponseWriter, r *http.Request) {
 
 	log.Printf("Logged in %v", resdata.Email)
 
-	w.Header().Set("Content-Type", "application/json")
 	mustEncode(w, map[string]string{
 		"email":    resdata.Email,
 		"emailmd5": md5string(resdata.Email),
@@ -153,7 +152,6 @@ func serveLogin(w http.ResponseWriter, r *http.Request) {
 		performAuth(w, r)
 	} else {
 		log.Printf("Reusing existing thing: %v", email)
-		w.Header().Set("Content-Type", "application/json")
 		mustEncode(w, map[string]string{
 			"email":    email,
 			"emailmd5": md5string(email),

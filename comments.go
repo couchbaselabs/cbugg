@@ -104,7 +104,6 @@ func serveCommentList(w http.ResponseWriter, r *http.Request) {
 		rv = append(rv, parseTo)
 	}
 
-	w.Header().Set("Content-type", "application/json")
 	mustEncode(w, rv)
 }
 

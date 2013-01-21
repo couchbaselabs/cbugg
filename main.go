@@ -40,6 +40,10 @@ func showError(w http.ResponseWriter, r *http.Request,
 }
 
 func mustEncode(w io.Writer, i interface{}) {
+	if headered, ok := w.(http.ResponseWriter); ok {
+		headered.Header().Set("Content-type", "application/json")
+	}
+
 	e := json.NewEncoder(w)
 	if err := e.Encode(i); err != nil {
 		panic(err)
@@ -70,7 +74,6 @@ func serveStateCounts(w http.ResponseWriter, r *http.Request) {
 }
 
 func serveStates(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-type", "application/json")
 	mustEncode(w, bugStates)
 }
 
@@ -102,7 +105,6 @@ func serveUserList(w http.ResponseWriter, r *http.Request) {
 		sort.Strings(rv)
 	}
 
-	w.Header().Set("Content-type", "application/json")
 	mustEncode(w, rv)
 }
 
@@ -165,7 +167,6 @@ func serveRecent(w http.ResponseWriter, r *http.Request) {
 			})
 	}
 
-	w.Header().Set("Content-type", "application/json")
 	mustEncode(w, output)
 }
 

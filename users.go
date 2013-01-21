@@ -37,7 +37,6 @@ func serveMe(w http.ResponseWriter, r *http.Request) {
 		rv.AuthToken = ""
 	}
 
-	w.Header().Set("Content-type", "application/json")
 	mustEncode(w, rv)
 }
 
@@ -82,7 +81,6 @@ func serveSetMyPrefs(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	w.Header().Set("Content-type", "application/json")
 	mustEncode(w, user)
 }
 
@@ -107,7 +105,6 @@ func serveUserAuthToken(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	w.Header().Set("Content-type", "application/json")
 	mustEncode(w, map[string]string{"token": rv.AuthToken})
 }
 
@@ -138,6 +135,5 @@ func serveUpdateUserAuthToken(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	w.Header().Set("Content-type", "application/json")
 	mustEncode(w, map[string]string{"token": user.AuthToken})
 }

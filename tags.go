@@ -27,6 +27,5 @@ func serveTagList(w http.ResponseWriter, r *http.Request) {
 		rv[r.Key] = r.Value
 	}
 
-	w.Header().Set("Content-type", "application/json")
 	mustEncode(w, rv)
 }

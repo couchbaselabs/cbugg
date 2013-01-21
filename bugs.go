@@ -352,6 +352,5 @@ func serveBugPing(w http.ResponseWriter, r *http.Request) {
 		log.Printf("Failed to record ping notification: %v", err)
 	}
 
-	w.Header().Set("Content-Type", "application/json")
 	mustEncode(w, Email(to))
 }

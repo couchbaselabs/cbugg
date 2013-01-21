@@ -172,7 +172,6 @@ func serveAttachmentList(w http.ResponseWriter, r *http.Request) {
 		})
 	}
 
-	w.Header().Set("Content-type", "application/json")
 	mustEncode(w, out)
 }
 
