@@ -82,7 +82,7 @@ func serveBug(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if !checkLastModified(w, r, bug.ModifiedAt) {
-		mustEncode(w, bug)
+		mustEncode(w, APIBug(bug))
 	}
 }
 
