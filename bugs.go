@@ -62,6 +62,18 @@ func getBug(bugid string) (Bug, error) {
 	return bug, err
 }
 
+func serveBugHistory(w http.ResponseWriter, r *http.Request) {
+	id := mux.Vars(r)["bugid"]
+
+	hist, err := getBugHistory(id)
+	if err != nil {
+		showError(w, r, err.Error(), 404)
+		return
+	}
+
+	mustEncode(w, hist)
+}
+
 func serveBug(w http.ResponseWriter, r *http.Request) {
 	id := mux.Vars(r)["bugid"]
 	bug, err := getBug(id)
@@ -70,20 +82,7 @@ func serveBug(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	hist, err := getBugHistory(id)
-	if err != nil {
-		showError(w, r, err.Error(), 404)
-		return
-	}
-	robj, err := json.Marshal(map[string]interface{}{
-		"bug":     APIBug(bug),
-		"history": hist,
-	})
-	if err != nil {
-		showError(w, r, err.Error(), 404)
-		return
-	}
-	w.Write(robj)
+	mustEncode(w, bug)
 }
 
 type BugHistoryItem struct {

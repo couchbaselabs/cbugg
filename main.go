@@ -200,6 +200,8 @@ func main() {
 	r.HandleFunc("/api/bug/", notAuthed).Methods("POST")
 	r.HandleFunc("/api/bug/", serveBugList).Methods("GET")
 
+	r.HandleFunc("/api/bug/{bugid}/history/", serveBugHistory).Methods("GET")
+
 	r.HandleFunc("/api/bug/{bugid}", serveBug).Methods("GET")
 	r.HandleFunc("/api/bug/{bugid}",
 		serveBugUpdate).Methods("POST").MatcherFunc(authRequired)

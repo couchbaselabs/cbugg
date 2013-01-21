@@ -292,13 +292,11 @@ function BugCtrl($scope, $routeParams, $http, $rootScope, $timeout) {
 
     };
 
-    $rootScope.title = $routeParams.bugId
+    $rootScope.title = $routeParams.bugId;
 
     $http.get('/api/bug/' + $routeParams.bugId).success(function(data) {
-        $scope.bug = data.bug;
-        $scope.history = data.history;
-        $scope.history.reverse();
-        $scope.subcount = data.bug.subscribers.length;
+        $scope.bug = data;
+        $scope.subcount = data.subscribers.length;
         $scope.$watch('bug.description', function(next, prev) {
             if($scope.bug && next !== prev) {
                 updateBug("description");
@@ -314,6 +312,11 @@ function BugCtrl($scope, $routeParams, $http, $rootScope, $timeout) {
             $scope.editDesc();
         }
         checkSubscribed();
+    });
+
+    $http.get("/api/bug/" + $routeParams.bugId + "/history/").success(function(data) {
+        $scope.history = data;
+        $scope.history.reverse();
     });
 
     var checkSubscribed = function() {
