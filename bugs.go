@@ -164,6 +164,12 @@ func updateBug(id, field, val, who string) ([]byte, error) {
 			oldval = bug.Status
 			history.Status = bug.Status
 			bug.Status = val
+
+			// This smells of some kind of business logic
+			// engine that needs to exist.
+			if val == "resolved" || val == "closed" {
+				bug.Owner = ""
+			}
 		case "owner":
 			oldval = bug.Owner
 			history.Owner = bug.Owner
