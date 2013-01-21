@@ -75,14 +75,15 @@ func serveBugHistory(w http.ResponseWriter, r *http.Request) {
 }
 
 func serveBug(w http.ResponseWriter, r *http.Request) {
-	id := mux.Vars(r)["bugid"]
-	bug, err := getBug(id)
+	bug, err := getBug(mux.Vars(r)["bugid"])
 	if err != nil {
 		showError(w, r, err.Error(), 404)
 		return
 	}
 
-	mustEncode(w, bug)
+	if !checkLastModified(w, r, bug.ModifiedAt) {
+		mustEncode(w, bug)
+	}
 }
 
 type BugHistoryItem struct {

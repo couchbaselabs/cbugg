@@ -33,6 +33,26 @@ var bugStates = []BugState{
 	{"closed", 40, []string{"open"}},
 }
 
+func checkLastModified(w http.ResponseWriter, r *http.Request, modtime time.Time) bool {
+	if modtime.IsZero() {
+		return false
+	}
+
+	// The Date-Modified header truncates sub-second precision, so
+	// use mtime < t+1s instead of mtime <= t to check for unmodified.
+	if t, err := time.Parse(http.TimeFormat,
+		r.Header.Get("If-Modified-Since")); err == nil &&
+		modtime.Before(t.Add(time.Second)) {
+
+		h := w.Header()
+		delete(h, "Content-Type")
+		delete(h, "Content-Length")
+		w.WriteHeader(http.StatusNotModified)
+		return true
+	}
+	w.Header().Set("Last-Modified", modtime.UTC().Format(http.TimeFormat))
+	return false
+}
 func showError(w http.ResponseWriter, r *http.Request,
 	msg string, code int) {
 	log.Printf("Reporting error %v/%v", code, msg)
