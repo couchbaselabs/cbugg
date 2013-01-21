@@ -530,6 +530,8 @@ function FakeLoginCtrl($scope) {
 
 function LoginCtrl($scope, $http, $rootScope) {
     $rootScope.loginscope = $scope;
+    $scope.authtoken = null;
+
     navigator.id.watch({
         onlogin: function(assertion) {
             $http.post('/auth/login', "assertion="+assertion+"&audience=" +
@@ -539,6 +541,7 @@ function LoginCtrl($scope, $http, $rootScope) {
                     $scope.loggedin = true;
                     $scope.username = res.email;
                     $scope.gravatar = res.emailmd5;
+                    $scope.authtoken = "";
                     $rootScope.loggedin = true;
                 }).
                 error(function(res, err) {
@@ -548,8 +551,16 @@ function LoginCtrl($scope, $http, $rootScope) {
         onlogout: function() {
             $rootScope.loggedin = false;
             $scope.loggedin = false;
+            $scope.authtoken = "";
         }
     });
+
+    $scope.getAuthToken = function() {
+        $http.get("/api/me/token/").
+            success(function(res) {
+                $scope.authtoken = res.token;
+            });
+    };
 
     $scope.logout = function() {
         navigator.id.logout();

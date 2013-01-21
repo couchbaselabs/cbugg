@@ -32,6 +32,10 @@
                                     Starred Bugs</a>
                                 </li>
                                 <li class="divider"></li>
+                                <li ng-show="authtoken">{{authtoken}}</li>
+                                <li ng-hide="authtoken">
+                                  <a ng-click="getAuthToken()">click for auth token</a>
+                                </li>
                                 <li> <a ng-click="logout()">Log Out</a> </li>
                             </ul>
                         </div>
