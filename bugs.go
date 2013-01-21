@@ -22,6 +22,11 @@ func serveBugRedirect(w http.ResponseWriter, r *http.Request) {
 }
 
 func serveNewBug(w http.ResponseWriter, r *http.Request) {
+	if len(r.FormValue("title")) < 4 {
+		showError(w, r, "Title is too short", 400)
+		return
+	}
+
 	email := whoami(r)
 
 	id, err := newBugId()
