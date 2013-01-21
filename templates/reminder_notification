@@ -1,0 +1,6 @@
+Subject: Your reminder to look at [{{.Bug.Id}}]: {{.Bug.Title}}
+
+You asked to be reminded to look at "{{.Bug.Title}}" around now, so
+I'm following through on your request.
+
+{{.BaseURL}}{{.Bug.Url}}

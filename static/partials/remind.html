@@ -1,0 +1,12 @@
+<form ng-controller="RemindCtrl" ng-submit="remindMe()">
+  <label>
+    <i class="icon-calendar"></i>
+    <input class="input-medium remindmeinput"
+           value="tomorrow at 9am" />
+  </label>
+  <div class="form-actions">
+    <button class="btn" type="button" ng-click="dismiss()">Cancel</button>
+    <button class="btn btn-primary"
+            type="submit"><i class="icon-calendar"></i> Schedule</button>
+  </div>
+</form>

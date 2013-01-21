@@ -693,3 +693,20 @@ function PingCtrl($scope, $rootScope, $http) {
         $scope.dismiss();
     }
 }
+
+function RemindCtrl($scope, $rootScope, $http) {
+    var loginscope = $rootScope.loginscope;
+    $(".remindmeinput").focus();
+    $scope.remindMe = function() {
+        var user = $(".remindmeinput").val();
+        var bug = $scope.$parent.bug;
+        if(user) {
+            $http.post("/api/bug/" + bug.id + "/remindme/", "when=" + encodeURIComponent(user),
+                       {headers: {"Content-Type": "application/x-www-form-urlencoded"}})
+                .error(function(data, code) {
+                    bAlert("Error " + code, "Failed to schedule your reminder.");
+                });
+        }
+        $scope.dismiss();
+    };
+}

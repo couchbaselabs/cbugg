@@ -266,6 +266,11 @@ func main() {
 		serveBugPing).Methods("POST").MatcherFunc(authRequired)
 	r.HandleFunc("/api/bug/{bugid}/ping/",
 		notAuthed).Methods("POST")
+	// Or yourself, later.
+	r.HandleFunc("/api/bug/{bugid}/remindme/",
+		serveNewReminder).Methods("POST").MatcherFunc(authRequired)
+	r.HandleFunc("/api/bug/{bugid}/remindme/",
+		notAuthed).Methods("POST")
 
 	r.HandleFunc("/api/users/", serveUserList).Methods("GET")
 	r.HandleFunc("/api/tags/", serveTagList).Methods("GET")

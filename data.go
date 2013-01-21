@@ -73,6 +73,14 @@ type User struct {
 	Prefs     map[string]interface{} `json:"prefs"`
 }
 
+type Reminder struct {
+	BugId     string    `json:"bugid"`
+	Type      string    `json:"type"`
+	CreatedAt time.Time `json:"created_at"`
+	When      time.Time `json:"when"`
+	User      string    `json:"user"`
+}
+
 type APIComment Comment
 
 type APIBug Bug
