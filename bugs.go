@@ -262,54 +262,92 @@ func serveBugUpdate(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte(rval))
 }
 
-func serveBugList(w http.ResponseWriter, r *http.Request) {
-	args := map[string]interface{}{
-		"reduce": false,
-		"stale":  false,
+type bugListResult struct {
+	ID    string
+	Key   []string
+	Value struct {
+		Title  string
+		Owner  Email
+		Status string
 	}
+}
 
-	viewName := "by_state"
+func getBugList(viewName string,
+	args map[string]interface{},
+	chres chan []bugListResult, cherr chan error) {
 
 	viewRes := struct {
-		Rows []struct {
-			ID    string
-			Key   []string
-			Value struct {
-				Title  string
-				Owner  Email
-				Status string
-			}
-		}
+		Rows []bugListResult
 	}{}
-
-	if r.FormValue("user") == "" {
-		if r.FormValue("state") != "" {
-			st := r.FormValue("state")
-			args["start_key"] = []interface{}{st}
-			args["end_key"] = []interface{}{st, map[string]string{}}
-		}
-	} else {
-		viewName = "owners"
-		u := r.FormValue("user")
-		if r.FormValue("state") != "" {
-			st := r.FormValue("state")
-			args["start_key"] = []interface{}{u, st}
-			args["end_key"] = []interface{}{u, st, map[string]string{}}
-		}
-	}
 
 	err := db.ViewCustom("cbugg", viewName, args, &viewRes)
 	if err != nil {
-		showError(w, r, err.Error(), 500)
+		cherr <- err
 		return
 	}
 
-	jres, err := json.Marshal(viewRes.Rows)
-	if err != nil {
-		showError(w, r, err.Error(), 500)
-		return
+	chres <- viewRes.Rows
+}
+
+func serveBugList(w http.ResponseWriter, r *http.Request) {
+	startPre := []interface{}{}
+
+	viewName := "by_state"
+
+	if r.FormValue("user") != "" {
+		viewName = "owners"
+		u := r.FormValue("user")
+		startPre = []interface{}{u}
 	}
-	w.Write(jres)
+
+	states := strings.Split(r.FormValue("state"), ",")
+	todo := 0
+
+	cherr := make(chan error)
+	chres := make(chan []bugListResult, len(states)+1)
+
+	for _, st := range states {
+		start := make([]interface{}, len(startPre)+1)
+		end := make([]interface{}, len(startPre)+2)
+
+		copy(start, startPre)
+		copy(end, startPre)
+		start[len(startPre)] = st
+		end[len(startPre)] = st
+		end[len(startPre)+1] = map[string]string{}
+
+		args := map[string]interface{}{
+			"reduce":    false,
+			"stale":     false,
+			"start_key": start,
+			"end_key":   end,
+		}
+
+		todo++
+		go getBugList(viewName, args, chres, cherr)
+	}
+
+	if len(states) == 0 {
+		todo++
+		args := map[string]interface{}{
+			"reduce": false,
+			"stale":  false,
+		}
+		go getBugList(viewName, args, chres, cherr)
+	}
+
+	results := []bugListResult{}
+	for i := 0; i < todo; i++ {
+		select {
+		case err := <-cherr:
+			showError(w, r, err.Error(), 500)
+			return
+		case res := <-chres:
+			results = append(results, res...)
+		}
+	}
+
+	mustEncode(w, results)
 }
 
 func serveSubscribeBug(w http.ResponseWriter, r *http.Request) {
