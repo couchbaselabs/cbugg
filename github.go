@@ -21,7 +21,7 @@ type githubIssueHook struct {
 		Body      string
 		CreatedAt time.Time `json:"created_at"`
 		URL       string    `json:"html_url"`
-		Labels    []string
+		Labels    []struct{ Name string }
 		User      githubUser
 	}
 	Repository struct {
@@ -55,16 +55,20 @@ func serveGithubIssue(w http.ResponseWriter, r *http.Request) {
 		"\nby github user: " + hookdata.Issue.User.Login +
 		" ![g](" + hookdata.Issue.User.Avatar + "&s=64)"
 
+	labels := []string{}
+	for _, l := range hookdata.Issue.Labels {
+		labels = append(labels, l.Name)
+	}
+
 	bug := Bug{
 		Id:          fmt.Sprintf("bug-%v", id),
 		Title:       hookdata.Issue.Title,
 		Description: body,
 		Creator:     *mailFrom,
 		Status:      "inbox",
-		Tags: append(hookdata.Issue.Labels, "github",
-			hookdata.Repository.Name),
-		Type:      "bug",
-		CreatedAt: hookdata.Issue.CreatedAt.UTC(),
+		Tags:        append(labels, "github", hookdata.Repository.Name),
+		Type:        "bug",
+		CreatedAt:   hookdata.Issue.CreatedAt.UTC(),
 	}
 
 	added, err := db.Add(bug.Id, 0, bug)
