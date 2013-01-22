@@ -41,7 +41,8 @@ func searchBugs(w http.ResponseWriter, r *http.Request) {
 	if r.FormValue("tags") != "" {
 		statsFilter = map[string]interface{}{
 			"terms": map[string]interface{}{
-				"doc.tags": strings.Split(r.FormValue("tags"), ","),
+				"doc.tags":  strings.Split(r.FormValue("tags"), ","),
+				"execution": "and",
 			},
 		}
 	}
