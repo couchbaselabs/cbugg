@@ -41,6 +41,12 @@ func serveGithubIssue(w http.ResponseWriter, r *http.Request) {
 
 	log.Printf("Got hook: %+v", hookdata)
 
+	if hookdata.Action != "opened" || hookdata.Callpath != "new" {
+		log.Printf("Something other than create happened, skipping")
+		w.WriteHeader(204)
+		return
+	}
+
 	id, err := newBugId()
 	if err != nil {
 		showError(w, r, err.Error(), 500)
