@@ -14,18 +14,18 @@
             <div class="navbar-inner">
                 <div class="container" ng-controller="LoginCtrl">
                     <form class="navbar-form pull-right" ng-show="loggedin">
-                        <a href="#/user/{{username}}/new,open">
-                          <img ng-src="http://www.gravatar.com/avatar/{{gravatar}}?s=28" class="uimg">
+                        <a href="#/user/{{auth.username}}/new,open">
+                          <img ng-src="http://www.gravatar.com/avatar/{{auth.gravatar}}?s=28" class="uimg">
                         </a>
                         <div class="btn-group">
                             <button class="btn dropdown-toggle" data-toggle="dropdown">
-                                {{username}}
+                                {{auth.username}}
                                 <span class="caret"></span>
                             </button>
                             <ul class="dropdown-menu">
-                                <li> <a href="#/user/{{username}}/new,open">My Open Bugs</a> </li>
+                                <li> <a href="#/user/{{auth.username}}/new,open">My Open Bugs</a> </li>
                                 <li>
-                                  <a href="#/search/subscribers:{{username}}%20AND%20(status:open%20OR%20status:new)">Open
+                                  <a href="#/search/subscribers:{{auth.username}}%20AND%20(status:open%20OR%20status:new)">Open
                                     Starred Bugs</a>
                                 </li>
                                 <li class="divider"></li>
@@ -70,6 +70,7 @@
                      '../js/editor',
                      '../js/bug-page',
                      '../js/alert',
+                     '../js/auth',
                      '../bootstrap/js/bootstrap.min'], 'app');
         });
         $script.ready('cm-overlay', function() {

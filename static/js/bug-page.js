@@ -1,4 +1,5 @@
-function BugCtrl($scope, $routeParams, $http, $rootScope, $timeout, bAlert) {
+function BugCtrl($scope, $routeParams, $http, $rootScope, $timeout, bAlert, cbuggAuth) {
+    $rootScope.$watch('loggedin', function() { $scope.auth = cbuggAuth.get(); });
     var updateBug = function(field, newValue) {
         var bug = $scope.bug;
         if (newValue === undefined) {
@@ -166,14 +167,14 @@ function BugCtrl($scope, $routeParams, $http, $rootScope, $timeout, bAlert) {
         if($scope.bug) {
             $scope.subcount = $scope.bug.subscribers.length;
             _.forEach($scope.bug.subscribers, function(el) {
-                $scope.subscribed |= ($rootScope.loginscope.gravatar == el.md5);
+                $scope.subscribed |= ($scope.auth.gravatar == el.md5);
             });
         }
     };
 
     var checkOwnership = function (objects) {
         return _.map(objects, function(ob) {
-            if(ob.user && $rootScope.loggedin && $rootScope.loginscope.gravatar == ob.user.md5) {
+            if(ob.user && $rootScope.loggedin && $scope.auth.gravatar == ob.user.md5) {
                 ob.mine = true;
             } else {
                 ob.mine = false;
@@ -340,7 +341,7 @@ function BugCtrl($scope, $routeParams, $http, $rootScope, $timeout, bAlert) {
     };
 
     $scope.setOwnerToMe = function() {
-        $scope.bug.owner.email = $rootScope.loginscope.username;
+        $scope.bug.owner.email = $scope.auth.username;
         updateBug("owner", $scope.bug.owner.email);
         $scope.editingowner = false;
         return false;

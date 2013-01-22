@@ -28,7 +28,8 @@ angular.module('cbuggFilters', []).
         };
     });
 
-angular.module('cbugg', ['cbuggFilters', 'cbuggEditor', 'cbuggAlert', 'ui', '$strap.directives']).
+angular.module('cbugg', ['cbuggFilters', 'cbuggAuth', 'cbuggEditor', 'cbuggAlert',
+                         'ui', '$strap.directives']).
     config(['$routeProvider', function($routeProvider) {
         $routeProvider.
             when('/bug/:bugId', {templateUrl: 'partials/bug.html',
@@ -85,46 +86,8 @@ function BugsByUserStateCtrl($scope, $routeParams, $http, $rootScope) {
     });
 }
 
-function FakeLoginCtrl($scope) {
-    $rootScope.loginscope = $scope;
-    $scope.login = function() {
-        $rootScope.loggedin = true;
-        $scope.loggedin = true;
-        $scope.username = "Test User";
-        $scope.gravatar = "eee3b47a26586bb79e0a832466c066be";
-    };
-    $scope.logout = function() {
-        $rootScope.loggedin = false;
-        $scope.loggedin = false;
-    };
-}
-
-function LoginCtrl($scope, $http, $rootScope, bAlert) {
-    $rootScope.loginscope = $scope;
-    $scope.authtoken = null;
-
-    navigator.id.watch({
-        onlogin: function(assertion) {
-            $http.post('/auth/login', "assertion="+assertion+"&audience=" +
-                encodeURIComponent(location.protocol+"//"+location.host),
-                {headers: {"Content-Type": "application/x-www-form-urlencoded"}}).
-                success(function(res) {
-                    $scope.loggedin = true;
-                    $scope.username = res.email;
-                    $scope.gravatar = res.emailmd5;
-                    $scope.authtoken = "";
-                    $rootScope.loggedin = true;
-                }).
-                error(function(res, err) {
-                    bAlert("Error", "Couldn't log you in.", "error");
-                });
-        },
-        onlogout: function() {
-            $rootScope.loggedin = false;
-            $scope.loggedin = false;
-            $scope.authtoken = "";
-        }
-    });
+function LoginCtrl($scope, $http, $rootScope, bAlert, cbuggAuth) {
+    $rootScope.$watch('loggedin', function() { $scope.auth = cbuggAuth.get(); });
 
     $scope.getAuthToken = function() {
         $http.get("/api/me/token/").
@@ -133,27 +96,12 @@ function LoginCtrl($scope, $http, $rootScope, bAlert) {
             });
     };
 
-    $scope.logout = function() {
-        navigator.id.logout();
-        $http.post('/auth/logout').
-        success(function(res) {
-            $rootScope.loggedin = false;
-            $scope.loggedin = false;
-        }).
-        error(function(res) {
-            bAlert("Error", "Problem logging out.", "error");
-            $rootScope.loggedin = false;
-            $scope.loggedin = false;
-        });
-    };
-
-    $scope.login = function() {
-        navigator.id.request();
-    };
+    $scope.logout = cbuggAuth.logout;
+    $scope.login = cbuggAuth.login;
 }
 
-function SearchCtrl($scope, $http, $rootScope, $location) {
-    $rootScope.loginscope = $scope;
+function SearchCtrl($scope, $http, $rootScope, $location, cbuggAuth) {
+    $rootScope.$watch('loggedin', function() { $scope.auth = cbuggAuth.get(); });
 
     $scope.search = function() {
         $location.path("/search/" + $scope.query);
@@ -234,8 +182,8 @@ function SimilarBugCtrl($scope, $http, $rootScope, $location) {
     }
 }
 
-function PingCtrl($scope, $rootScope, $http, bAlert) {
-    var loginscope = $rootScope.loginscope;
+function PingCtrl($scope, $rootScope, $http, bAlert, cbuggAuth) {
+    $rootScope.$watch('loggedin', function() { $scope.auth = cbuggAuth.get(); });
     $(".pinguserinput").focus();
     //Should actually factor getUsers out into a service instead of do this
     //hacky parent scope thing..
@@ -252,8 +200,8 @@ function PingCtrl($scope, $rootScope, $http, bAlert) {
                 .success(function(data) {
                     $scope.$parent.comments.push({
                         type: 'ping',
-                        from: {md5: loginscope.gravatar,
-                               email: loginscope.username.match(/[^@]+/)[0]},
+                        from: {md5: $scope.auth.gravatar,
+                               email: $scope.auth.username.match(/[^@]+/)[0]},
                         to: data
                     });
                 });
@@ -262,8 +210,8 @@ function PingCtrl($scope, $rootScope, $http, bAlert) {
     }
 }
 
-function RemindCtrl($scope, $rootScope, $http, bAlert) {
-    var loginscope = $rootScope.loginscope;
+function RemindCtrl($scope, $rootScope, $http, bAlert, cbuggAuth) {
+    $rootScope.$watch('loggedin', function() { $scope.auth = cbuggAuth.get(); });
     $(".remindmeinput").focus();
     $scope.remindMe = function() {
         var user = $(".remindmeinput").val();
