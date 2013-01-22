@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 	"strconv"
+	"strings"
 
 	"github.com/mattbaird/elastigo/api"
 	"github.com/mattbaird/elastigo/core"
@@ -27,6 +28,24 @@ func searchBugs(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
+	statsFilter := map[string]interface{}{}
+	if r.FormValue("status") != "" {
+		statsFilter = map[string]interface{}{
+			"terms": map[string]interface{}{
+				"doc.status": strings.Split(r.FormValue("status"), ","),
+			},
+		}
+	}
+
+	tagsFilter := map[string]interface{}{}
+	if r.FormValue("tags") != "" {
+		statsFilter = map[string]interface{}{
+			"terms": map[string]interface{}{
+				"doc.tags": strings.Split(r.FormValue("tags"), ","),
+			},
+		}
+	}
+
 	if r.FormValue("query") != "" {
 
 		filter := map[string]interface{}{
@@ -41,6 +60,8 @@ func searchBugs(w http.ResponseWriter, r *http.Request) {
 						"doc.type": "bug",
 					},
 				},
+				statsFilter,
+				tagsFilter,
 			},
 		}
 

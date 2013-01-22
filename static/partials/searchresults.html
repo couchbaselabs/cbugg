@@ -30,18 +30,31 @@
 			<div class="row-fluid">
 
 				<!-- facet information -->
-				<div class="span3">
-					<div class="well sidebar-nav">
-						<ul class="nav nav-list">
-							<li ng-hide="facets.statuses.terms == null" class="nav-header">Status</li>
-							<li ng-repeat="status in facets.statuses.terms">{{status.term}}
-								({{status.count}})</li>
-							<li ng-hide="facets.tags.terms == null" class="nav-header">Tags</li>
-							<li ng-repeat="status in facets.tags.terms">{{status.term}}
-								({{status.count}})</li>
-						</ul>
+				<form>
+					<div class="span3">
+						<div class="well sidebar-nav">
+							<h5>Filter</h5>
+							<ul class="nav nav-list">
+								<li ng-hide="facets.statuses.terms == null" class="nav-header">Status</li>
+								<li ng-repeat="status in facets.statuses.terms"><input
+									ng-show="filterStatus.indexOf(status.term) === -1"
+									type="checkbox" value="{{status.term}}"
+									ng-click="updateStatusFilter(status.term)" /><input
+									ng-hide="filterStatus.indexOf(status.term) === -1"
+									type="checkbox" value="{{status.term}}"
+									ng-click="updateStatusFilter(status.term)" checked />
+									{{status.term}} ({{status.count}})</li>
+								<li ng-hide="facets.tags.terms == null" class="nav-header">Tags</li>
+								<li ng-repeat="tag in facets.tags.terms"><input
+									ng-show="filterTags.indexOf(tag.term) === -1" type="checkbox"
+									value="{{tag.term}}" ng-click="updateTagFilter(tag.term)" /><input
+									ng-hide="filterTags.indexOf(tag.term) === -1" type="checkbox"
+									value="{{tag.term}}" ng-click="updateTagFilter(tag.term)"
+									checked /> {{tag.term}} ({{tag.count}})</li>
+							</ul>
+						</div>
 					</div>
-				</div>
+				</form>
 
 				<!-- search results table -->
 				<div class="span9">
@@ -56,7 +69,7 @@
 						<tbody>
 							<tr ng-repeat="result in results">
 								<td><a class="status-{{result.source.doc.status}}"
-                       href="#/bug/{{result._id}}">{{result._id}}</a></td>
+									href="#/bug/{{result._id}}">{{result._id}}</a></td>
 								<td>{{result.source.doc.title}}</td>
 								<td>{{result._score}}</td>
 							</tr>
@@ -88,7 +101,11 @@
 	<hr />
 	<div ng-controller="SimilarBugCtrl">
 		<form action="/api/bug/" id="newbug" method="POST">
-			Briefly describe your new problem: <input type="text" ng-model="bugTitle" ng-change="debouncedLookupSimilar()" ng-required="true" pattern="(.){4,}" title="Bug descriptions must have at least 4 characters" name="title" autocomplete="off"/>
+			Briefly describe your new problem: <input type="text"
+				ng-model="bugTitle" ng-change="debouncedLookupSimilar()"
+				ng-required="true" pattern="(.){4,}"
+				title="Bug descriptions must have at least 4 characters"
+				name="title" autocomplete="off" />
 		</form>
 		<div ng-show="similarBugs.length > 0">
 			<h5>Existing bugs that appear similar to your problem</h5>
