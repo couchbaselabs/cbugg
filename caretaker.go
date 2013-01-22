@@ -93,8 +93,6 @@ func maybeLog(name string, err error) {
 }
 
 func doPeriodicStuff(t time.Time) {
-	log.Printf("Janitoring")
-
 	maybeLog("move inbox items", moveOldInboxItems(t))
 	maybeLog("process reminders", processReminders(t))
 }
