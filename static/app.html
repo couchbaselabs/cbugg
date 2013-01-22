@@ -1,9 +1,6 @@
 <!DOCTYPE html>
-<html ng-app="cbugg">
+<html>
     <head>
-        <script src="/static/lib/jquery.min.js"></script>
-        <script src="/static/lib/angular.min.js"></script>
-        <script src="/static/lib/angular-ui.min.js"></script>
         <link rel="stylesheet" type="text/css" href="/static/bootstrap/css/bootstrap.min.css"/>
         <link rel="stylesheet" type="text/css" href="/static/fontawesome/css/font-awesome.min.css"/>
         <link rel="stylesheet" type="text/css" href="/static/lib/codemirror.css"/>
@@ -55,17 +52,32 @@
         <div class="container app">
             <div ng-view></div>
         </div>
-        <script src="/static/bootstrap/js/bootstrap.min.js"></script>
-        <script src="/static/lib/angular-strap.js"></script>
-        <script src="/static/lib/lodash.min.js"></script>
-        <script src="/static/lib/less.js"></script>
-        <script src="/static/lib/moment.min.js"></script>
-        <script src="/static/lib/marked.js"></script>
-        <script src="/static/lib/codemirror.js"></script>
-        <script src="/static/lib/codemirror/overlay.js"></script>
-        <script src="/static/lib/codemirror/mode/markdown/markdown.js"></script>
-        <script src="/static/lib/codemirror/mode/gfm/gfm.js"></script>
-        <script src="/static/cbugg.js"></script>
-        <script src="https://login.persona.org/include.js"></script>
+        <script src="/static/lib/script.min.js"></script>
+        <script>
+        $script.path('/static/lib/');
+        $script(['jquery.min',
+                 'http://login.persona.org/include.js',
+                 'angular.min',
+                 'angular-ui.min',
+                 'angular-strap',
+                 'lodash.min',
+                 'less',
+                 'moment.min',
+                 'marked',
+                 'codemirror'], 'libs');
+        $script.ready('libs', function() {
+            $script('codemirror/overlay', 'cm-overlay');
+            $script(['../cbugg',
+                     '../bootstrap/js/bootstrap.min'], 'app');
+        });
+        $script.ready('cm-overlay', function() {
+            $script(['codemirror/mode/markdown/markdown',
+                     'codemirror/mode/gfm/gfm'], 'cm-modes');
+        });
+        $script.ready(['libs', 'cm-overlay', 'cm-modes', 'app'], function() {
+            if(console) { console.log('All loaded!'); }
+            angular.bootstrap(document, ['cbugg']);
+        });
+        </script>
     </body>
 </html>
