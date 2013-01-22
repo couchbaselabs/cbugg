@@ -289,6 +289,8 @@ func main() {
 		serveUpdateUserAuthToken).Methods("POST").MatcherFunc(authRequired)
 	r.HandleFunc("/api/me/token/", notAuthed)
 
+	r.HandleFunc("/hooks/github/issue/", serveGithubIssue).Methods("POST")
+
 	r.HandleFunc("/api/state-counts", serveStateCounts)
 	r.HandleFunc("/auth/login", serveLogin).Methods("POST")
 	r.HandleFunc("/auth/logout", serveLogout).Methods("POST")
