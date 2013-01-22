@@ -18,15 +18,14 @@ function BugCtrl($scope, $routeParams, $http, $rootScope, $timeout, bAlert, cbug
         }
     };
 
-    $scope.allStates = null;
     $scope.availableStates = [];
     $scope.comments = [];
     $scope.attachments = [];
     $scope.draftcomment = "";
     $scope.subscribed = false;
 
-    $http.get("/api/states/").success(function(data) {
-        $scope.allStates = data;
+    $scope.allStates = $http.get("/api/states/").then(function(resp) {
+        return resp.data;
     });
 
     // ============== DRAG & DROP =============
@@ -122,18 +121,19 @@ function BugCtrl($scope, $routeParams, $http, $rootScope, $timeout, bAlert, cbug
     }
 
     var updateAvailableStates = function(current) {
-        var scopeMap = _.object(_.pluck($scope.allStates, 'name'), $scope.allStates);
+        $scope.allStates.then(function(allStates) {
+            var scopeMap = _.object(_.pluck(allStates, 'name'), allStates);
 
-        $scope.availableStates = [current];
-        var cur = scopeMap[current];
-        var targets = cur.targets ||  _.without(_.keys(scopeMap), current);
-        $scope.availableStates = $scope.availableStates.concat(targets);
+            $scope.availableStates = [current];
+            var cur = scopeMap[current];
+            var targets = cur.targets ||  _.without(_.keys(scopeMap), current);
+            $scope.availableStates = $scope.availableStates.concat(targets);
 
-        $scope.availableStates = _.sortBy($scope.availableStates,
-                                          function(e) {
-                                              return scopeMap[e].order;
-                                          });
-
+            $scope.availableStates = _.sortBy($scope.availableStates,
+                                              function(e) {
+                                                  return scopeMap[e].order;
+                                              });
+        });
     };
 
     $rootScope.title = $routeParams.bugId;
@@ -147,7 +147,7 @@ function BugCtrl($scope, $routeParams, $http, $rootScope, $timeout, bAlert, cbug
             }
         });
         $scope.$watch('bug.status', function(next, prev) {
-            updateAvailableStates(next);
+            if(next) { updateAvailableStates(next); }
             if($scope.bug && next !== prev) {
                 updateBug("status");
             }
