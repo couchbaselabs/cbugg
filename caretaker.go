@@ -100,7 +100,7 @@ func doPeriodicStuff(t time.Time) {
 }
 
 func janitorize() {
-	for t := range time.Tick(time.Second * 5) {
+	for t := range time.Tick(time.Minute * 5) {
 		doPeriodicStuff(t)
 	}
 }
