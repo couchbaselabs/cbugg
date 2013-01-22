@@ -203,6 +203,7 @@ func serveAttachment(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", res.Header.Get("Content-Type"))
 	w.Header().Set("Content-Length", fmt.Sprintf("%v", res.ContentLength))
+	w.Header().Set("Content-Disposition", "attachment")
 
 	_, err = io.Copy(w, res.Body)
 	if err != nil {
