@@ -1,4 +1,4 @@
-function BugCtrl($scope, $routeParams, $http, $rootScope, $timeout) {
+function BugCtrl($scope, $routeParams, $http, $rootScope, $timeout, bAlert) {
     var updateBug = function(field, newValue) {
         var bug = $scope.bug;
         if (newValue === undefined) {

@@ -1,15 +1,3 @@
-function bAlert(heading, message, kind) {
-    var kindclass = "";
-    if(kind) {
-        kindclass = "alert-" + kind;
-    }
-    $(".app").prepend(
-            "<div class='alert fade in " + kindclass + "'>"+
-            "<button type='button' class='close' data-dismiss='alert'>&times;</button>"+
-            "<strong>" + heading + ":</strong> " + message + "</div>");
-    $(".alert").alert();
-}
-
 angular.module('cbuggFilters', []).
     filter('markdownify', function() {
         return function(string) {
@@ -40,7 +28,7 @@ angular.module('cbuggFilters', []).
         };
     });
 
-angular.module('cbugg', ['cbuggFilters', 'cbuggEditor', 'ui', '$strap.directives']).
+angular.module('cbugg', ['cbuggFilters', 'cbuggEditor', 'cbuggAlert', 'ui', '$strap.directives']).
     config(['$routeProvider', function($routeProvider) {
         $routeProvider.
             when('/bug/:bugId', {templateUrl: 'partials/bug.html',
@@ -111,7 +99,7 @@ function FakeLoginCtrl($scope) {
     };
 }
 
-function LoginCtrl($scope, $http, $rootScope) {
+function LoginCtrl($scope, $http, $rootScope, bAlert) {
     $rootScope.loginscope = $scope;
     $scope.authtoken = null;
 
@@ -246,7 +234,7 @@ function SimilarBugCtrl($scope, $http, $rootScope, $location) {
     }
 }
 
-function PingCtrl($scope, $rootScope, $http) {
+function PingCtrl($scope, $rootScope, $http, bAlert) {
     var loginscope = $rootScope.loginscope;
     $(".pinguserinput").focus();
     //Should actually factor getUsers out into a service instead of do this
@@ -274,7 +262,7 @@ function PingCtrl($scope, $rootScope, $http) {
     }
 }
 
-function RemindCtrl($scope, $rootScope, $http) {
+function RemindCtrl($scope, $rootScope, $http, bAlert) {
     var loginscope = $rootScope.loginscope;
     $(".remindmeinput").focus();
     $scope.remindMe = function() {
