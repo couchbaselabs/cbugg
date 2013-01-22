@@ -58,8 +58,6 @@
         $script(['jquery.min',
                  'http://login.persona.org/include.js',
                  'angular.min',
-                 'angular-ui.min',
-                 'angular-strap',
                  'lodash.min',
                  'less',
                  'moment.min',
@@ -67,14 +65,17 @@
                  'codemirror'], 'libs');
         $script.ready('libs', function() {
             $script('codemirror/overlay', 'cm-overlay');
+            $script(['angular-ui.min', 'angular-strap'], 'angular-extras');
             $script(['../cbugg',
+                     '../js/editor',
+                     '../js/bug-page',
                      '../bootstrap/js/bootstrap.min'], 'app');
         });
         $script.ready('cm-overlay', function() {
             $script(['codemirror/mode/markdown/markdown',
                      'codemirror/mode/gfm/gfm'], 'cm-modes');
         });
-        $script.ready(['libs', 'cm-overlay', 'cm-modes', 'app'], function() {
+        $script.ready(['libs', 'cm-overlay', 'cm-modes', 'app', 'angular-extras'], function() {
             if(console) { console.log('All loaded!'); }
             angular.bootstrap(document, ['cbugg']);
         });
