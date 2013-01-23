@@ -63,6 +63,13 @@ func searchBugs(w http.ResponseWriter, r *http.Request) {
 
 		query := buildQueryStringQuery(r.FormValue("query"), filter, facets, from)
 
+		if *debugEs {
+			queryJson, err := json.Marshal(query)
+			if err == nil {
+				log.Printf("Elasticsearch query: %v", string(queryJson))
+			}
+		}
+
 		searchresponse, err := core.Search(false, *esIndex, "couchbaseDocument", query, "")
 		if err != nil {
 			showError(w, r, err.Error(), 500)

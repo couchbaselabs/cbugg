@@ -21,6 +21,7 @@ var esHost = flag.String("elasticsearchHost", "localhost", "ElasticSearch hostna
 var esPort = flag.String("elasticsearchPort", "9200", "ElasticSearch port")
 var esScheme = flag.String("elasticsearchScheme", "http", "ElasticSearch scheme")
 var esIndex = flag.String("elasticsearchIndex", "cbugg", "ElasticSearch index")
+var debugEs = flag.Bool("elasticsearchDebug", false, "ElasticSearch debugging")
 var NotFound = errors.New("not found")
 
 var staticPath = flag.String("static", "static", "Path to the static content")
