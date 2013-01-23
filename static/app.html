@@ -55,14 +55,16 @@
         <script src="/static/lib/script.min.js"></script>
         <script>
         $script.path('/static/lib/');
-        $script(['jquery.min',
-                 'http://login.persona.org/include.js',
-                 'angular.min',
-                 'lodash.min',
-                 'less',
-                 'moment.min',
-                 'marked',
-                 'codemirror'], 'libs');
+        $script('jquery.min', 'jquery');
+        $script.ready('jquery', function() {
+            $script(['http://login.persona.org/include.js',
+                     'angular.min',
+                     'lodash.min',
+                     'less',
+                     'moment.min',
+                     'marked',
+                     'codemirror'], 'libs');
+        })
         $script.ready('libs', function() {
             $script('codemirror/overlay', 'cm-overlay');
             $script(['angular-ui.min', 'angular-strap'], 'angular-extras');
