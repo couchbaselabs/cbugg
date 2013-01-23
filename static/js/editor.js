@@ -23,7 +23,18 @@ angular.module('cbuggEditor', [])
                         scope.codeMirror.setValue(ngModel.$viewValue);
                     }
                 }
-                $timeout(scope.setupMirror);
+                scope.tearDownMirror = function() {
+                    scope.codeMirror.toTextArea()
+                    scope.codeMirror = null;
+                }
+                scope.$watch(function() {
+                    if(scope.editing && !scope.codeMirror) {
+                        scope.setupMirror();
+                    }
+                    if(!scope.editing && scope.codeMirror) {
+                        scope.tearDownMirror();
+                    }
+                });
             }
         }
     }])
