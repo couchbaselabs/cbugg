@@ -21,6 +21,63 @@ func getDefaultFilterComponents() []Filter {
 	}
 }
 
+// powers the bug similarity feature when entering new bugs
+func findSimilarBugs(w http.ResponseWriter, r *http.Request) {
+
+	api.Domain = *esHost
+	api.Port = *esPort
+	api.Protocol = *esScheme
+
+	if r.FormValue("query") != "" {
+
+		filterComponents := getDefaultFilterComponents()
+		matchFilter := buildAndFilter(filterComponents)
+
+		activeBugsFilter := buildTermsFilter("doc.status", []string{"inbox", "new", "open"}, "")
+		inactiveBugsFilter := buildTermsFilter("doc.status", []string{"resolved", "closed"}, "")
+
+		boostFilters := Filters{
+			map[string]interface{}{
+				"filter": activeBugsFilter,
+				"boost":  10,
+			},
+			map[string]interface{}{
+				"filter": inactiveBugsFilter,
+				"boost":  1,
+			},
+		}
+
+		query := buildCustomFiltersScoreQuery(r.FormValue("query"), matchFilter, boostFilters, "first")
+
+		if *debugEs {
+			queryJson, err := json.Marshal(query)
+			if err == nil {
+				log.Printf("Elasticsearch query: %v", string(queryJson))
+			}
+		}
+
+		searchresponse, err := core.Search(false, *esIndex, "couchbaseDocument", query, "")
+		if err != nil {
+			showError(w, r, err.Error(), 500)
+			return
+		}
+
+		ourresponse := convertElasticSearchResponse(searchresponse)
+
+		jres, err := json.Marshal(ourresponse)
+		if err != nil {
+			showError(w, r, err.Error(), 500)
+			return
+		}
+		w.Write(jres)
+		return
+	}
+
+	showError(w, r, "Search query cannot be empty", 500)
+
+}
+
+// powers the bug search
 func searchBugs(w http.ResponseWriter, r *http.Request) {
 
 	api.Domain = *esHost
@@ -141,9 +198,11 @@ func convertElasticSearchResponse(searchresponse core.SearchResult) map[string]i
 		}
 
 		ourfacets := map[string]interface{}{}
-		err := json.Unmarshal(searchresponse.Facets, &ourfacets)
-		if err != nil {
-			log.Printf("Error unmarshalling search result facets: %v", err)
+		if searchresponse.Facets != nil {
+			err := json.Unmarshal(searchresponse.Facets, &ourfacets)
+			if err != nil {
+				log.Printf("Error unmarshalling search result facets: %v", err)
+			}
 		}
 
 		ourhits := map[string]interface{}{
@@ -189,6 +248,7 @@ func combineSearchHitWithDoc(hit core.Hit, doc interface{}) (map[string]interfac
 // ---------------------------------------
 
 type Filter map[string]interface{}
+type Filters []map[string]interface{}
 type Query map[string]interface{}
 type Facet map[string]interface{}
 type Facets map[string]interface{}
@@ -248,5 +308,23 @@ func buildQueryStringQuery(queryString string, filter Filter, facets Facets, fro
 		"filter": filter,
 		"from":   from,
 		"facets": facets,
+	}
+}
+
+func buildCustomFiltersScoreQuery(queryString string, matchFilter Filter, boostFilters Filters, scoreMode string) Query {
+
+	return Query{
+		"query": map[string]interface{}{
+			"custom_filters_score": map[string]interface{}{
+				"query": map[string]interface{}{
+					"query_string": map[string]interface{}{
+						"query": queryString,
+					},
+				},
+				"filters":    boostFilters,
+				"score_mode": scoreMode,
+			},
+		},
+		"filter": matchFilter,
 	}
 }

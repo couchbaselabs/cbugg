@@ -279,7 +279,10 @@ func main() {
 	r.HandleFunc("/api/recent/", serveRecent).Methods("GET")
 	r.HandleFunc("/api/states/", serveStates).Methods("GET")
 
+	// simple search
 	r.HandleFunc("/api/search/", searchBugs).Methods("POST")
+	// find similar bugs
+	r.HandleFunc("/api/bugslike/", findSimilarBugs).Methods("POST")
 
 	r.HandleFunc("/api/me/", serveMe).Methods("GET")
 	r.HandleFunc("/api/me/prefs/",

@@ -197,7 +197,7 @@ function SimilarBugCtrl($scope, $http, $rootScope, $location) {
 
     $scope.lookupSimilar = function() {
         if($scope.bugTitle != "") {
-            $http.post('/api/search/?query=' + $scope.bugTitle).success(function(data) {
+            $http.post('/api/bugslike/?query=' + $scope.bugTitle).success(function(data) {
                 $scope.similarBugs = data.hits.hits;
             }).error(function(data, status, headers, config){
                 // in this case we remove anything that might be in the variable
