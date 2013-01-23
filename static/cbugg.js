@@ -196,7 +196,7 @@ function SimilarBugCtrl($scope, $http, $rootScope, $location) {
     $scope.debouncedLookupSimilar = _.debounce(function(){$scope.lookupSimilar()}, 500);
 
     $scope.lookupSimilar = function() {
-        if($scope.bugTitle != "") {
+        if($scope.bugTitle) {
             $http.post('/api/bugslike/?query=' + $scope.bugTitle).success(function(data) {
                 $scope.similarBugs = data.hits.hits;
             }).error(function(data, status, headers, config){
