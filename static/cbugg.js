@@ -193,6 +193,7 @@ function SearchResultsCtrl($scope, $routeParams, $http, $rootScope) {
 
 function SimilarBugCtrl($scope, $http, $rootScope, $location) {
 
+    $scope.similarBugs = [];
     $scope.debouncedLookupSimilar = _.debounce(function(){$scope.lookupSimilar()}, 500);
 
     $scope.lookupSimilar = function() {
@@ -204,7 +205,9 @@ function SimilarBugCtrl($scope, $http, $rootScope, $location) {
                 $scope.similarBugs = [];
             });
         } else {
-            $scope.similarBugs = [];
+            $scope.$apply(function(scope) {
+                scope.similarBugs = [];
+              });
         }
 
     }
