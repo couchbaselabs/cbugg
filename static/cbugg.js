@@ -117,6 +117,7 @@ function SearchResultsCtrl($scope, $routeParams, $http, $rootScope) {
     $scope.searchError = false;
     $scope.page = 1;
     $scope.rpp = 10;
+    $scope.pageSizes = [ 10, 30, 50, 100 ];
     $scope.filterStatus = [];
     $scope.filterTags = [];
     $rootScope.title = "Search";
@@ -128,8 +129,8 @@ function SearchResultsCtrl($scope, $routeParams, $http, $rootScope) {
         $scope.page = pageNum;
         $http.post(
             '/api/search/?query=' + $routeParams.query + '&from='
-                    + (($scope.page - 1) * $scope.rpp) + "&status="
-                    + $scope.filterStatus.join(",") + "&tags="
+                    + (($scope.page - 1) * $scope.rpp) + '&size=' + $scope.rpp
+                    + "&status=" + $scope.filterStatus.join(",") + "&tags="
                     + $scope.filterTags.join(",")).success(function(data) {
             $scope.shards = data._shards;
             $scope.results = data.hits.hits;
@@ -187,6 +188,11 @@ function SearchResultsCtrl($scope, $routeParams, $http, $rootScope) {
             $scope.filterTags.splice(pos, 1);
         }
         $scope.jumpToPage(1, null);
+    }
+
+    $scope.changeRpp = function(size, $event) {
+        $scope.rpp = size;
+        $scope.jumpToPage(1, $event);
     }
 
     $scope.query = $routeParams.query;

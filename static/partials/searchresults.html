@@ -58,6 +58,19 @@
 
 				<!-- search results table -->
 				<div class="span9">
+					<h5>
+						Show
+						<div class="btn-group">
+							<a class="btn dropdown-toggle btn-small" data-toggle="dropdown"
+								href="#"> {{rpp}} <span class="caret"></span>
+							</a>
+							<ul class="dropdown-menu">
+								<!-- dropdown menu links -->
+								<li ng-repeat="size in pageSizes"><a href="#" ng-click="changeRpp(size, $event)">{{size}}</a></li>
+							</ul>
+						</div>
+						bugs
+					</h5>
 					<table class="table-bordered table-striped" width="100%">
 						<thead>
 							<tr>

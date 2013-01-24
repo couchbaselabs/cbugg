@@ -94,6 +94,15 @@ func searchBugs(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
+	size := 10
+	if r.FormValue("size") != "" {
+		size, err = strconv.Atoi(r.FormValue("size"))
+		if err != nil {
+			log.Printf("Invalid value for size: %v", r.FormValue("size"))
+			size = 10
+		}
+	}
+
 	if r.FormValue("query") != "" {
 
 		filterComponents := getDefaultFilterComponents()
@@ -118,7 +127,7 @@ func searchBugs(w http.ResponseWriter, r *http.Request) {
 			"tags":     tagsFacet,
 		}
 
-		query := buildQueryStringQuery(r.FormValue("query"), filter, facets, from)
+		query := buildQueryStringQuery(r.FormValue("query"), filter, facets, from, size)
 
 		if *debugEs {
 			queryJson, err := json.Marshal(query)
@@ -298,7 +307,7 @@ func buildTermsFacet(field string, filter Filter, size int) Facet {
 	}
 }
 
-func buildQueryStringQuery(queryString string, filter Filter, facets Facets, from int) Query {
+func buildQueryStringQuery(queryString string, filter Filter, facets Facets, from int, size int) Query {
 	return Query{
 		"query": map[string]interface{}{
 			"query_string": map[string]interface{}{
@@ -308,6 +317,7 @@ func buildQueryStringQuery(queryString string, filter Filter, facets Facets, fro
 		"filter": filter,
 		"from":   from,
 		"facets": facets,
+		"size":   size,
 	}
 }
 
