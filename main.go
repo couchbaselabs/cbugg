@@ -281,6 +281,7 @@ func main() {
 
 	r.HandleFunc("/api/users/", serveUserList).Methods("GET")
 	r.HandleFunc("/api/tags/", serveTagList).Methods("GET")
+	r.HandleFunc("/api/tags/{tag}/", serveTagStates).Methods("GET")
 	r.HandleFunc("/api/recent/", serveRecent).Methods("GET")
 	r.HandleFunc("/api/states/", serveStates).Methods("GET")
 

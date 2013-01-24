@@ -2,6 +2,8 @@ package main
 
 import (
 	"net/http"
+
+	"github.com/gorilla/mux"
 )
 
 func serveTagList(w http.ResponseWriter, r *http.Request) {
@@ -28,4 +30,26 @@ func serveTagList(w http.ResponseWriter, r *http.Request) {
 	}
 
 	mustEncode(w, rv)
+}
+
+func serveTagStates(w http.ResponseWriter, r *http.Request) {
+	t := mux.Vars(r)["tag"]
+	args := map[string]interface{}{
+		"group_level": 2,
+		"stale":       false,
+		"start_key":   []interface{}{t},
+		"end_key":     []interface{}{t, map[string]interface{}{}},
+	}
+	states, err := db.View("cbugg", "tags", args)
+	if err != nil {
+		showError(w, r, err.Error(), 500)
+		return
+	}
+
+	statemap := map[string]interface{}{}
+	for _, row := range states.Rows {
+		statemap[row.Key.([]interface{})[1].(string)] = row.Value
+	}
+
+	mustEncode(w, map[string]interface{}{"states": statemap})
 }
