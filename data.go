@@ -81,6 +81,12 @@ type Reminder struct {
 	User      string    `json:"user"`
 }
 
+type Tag struct {
+	Name        string   `json:"name"`
+	Type        string   `json:"type"`
+	Subscribers []string `json:"subscribers,omitempty"`
+}
+
 type APIComment Comment
 
 type APIBug Bug

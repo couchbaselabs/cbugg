@@ -280,8 +280,16 @@ func main() {
 		notAuthed).Methods("POST")
 
 	r.HandleFunc("/api/users/", serveUserList).Methods("GET")
+
+	// All about tags
 	r.HandleFunc("/api/tags/", serveTagList).Methods("GET")
 	r.HandleFunc("/api/tags/{tag}/", serveTagStates).Methods("GET")
+	r.HandleFunc("/api/tags/{tag}/sub/",
+		serveSubscribeTag).Methods("POST").MatcherFunc(authRequired)
+	r.HandleFunc("/api/tags/{tag}/sub/",
+		serveUnsubscribeTag).Methods("DELETE").MatcherFunc(authRequired)
+	r.HandleFunc("/api/tags/{tag}/sub/", notAuthed).Methods("POST", "DELETE")
+
 	r.HandleFunc("/api/recent/", serveRecent).Methods("GET")
 	r.HandleFunc("/api/states/", serveStates).Methods("GET")
 

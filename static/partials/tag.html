@@ -1,4 +1,16 @@
-<h2>Tag {{tag.name}}</h2>
+<div class="titlearea clearfix">
+  <h2 class="titletext pull-left">Tag {{tag.name}}</h2>
+
+  <div class="subs pull-right">
+    <a title="Click to stop watching this tag" ng-show="subscribed" ng-click="unsubscribe()">
+      <i class="icon-star starred"></i>
+    </a>
+    <a title="Click to watch this tag."  ng-hide="subscribed" ng-click="subscribe()">
+      <i class="icon-star-empty muted"></i>
+    </a>
+    ({{subcount}})
+  </div>
+</div>
 
 Counts by state for bugs tagged {{tag.name}}.
 

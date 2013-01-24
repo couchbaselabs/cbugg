@@ -269,20 +269,51 @@ function RemindCtrl($scope, $rootScope, $http, bAlert, cbuggAuth) {
     };
 }
 
-function TagCtrl($scope, $routeParams, $http, $rootScope) {
-    console.log("route params", $routeParams);
+function TagCtrl($scope, $routeParams, $http, $rootScope, $timeout, $location, bAlert, cbuggAuth) {
     $rootScope.title = "Tag " + $routeParams.tagname;
-    $scope.tag = {
-        name: $routeParams.tagname
+    $scope.tag = null;
+    $scope.states = [];
+    $scope.subscribed = false;
+    $scope.subcount = 0;
+
+    var checkSubscribed = function() {
+        if($scope.tag) {
+            $scope.subcount = $scope.tag.subscribers.length;
+            _.forEach($scope.tag.subscribers, function(el) {
+                $scope.subscribed |= ($scope.auth.gravatar == el.md5);
+            });
+        }
     };
 
-    $http.get('/api/tags/' + $routeParams.tagname + "/").success(function(stateCounts) {
+    $rootScope.$watch("loggedin", function(nv, ov) {
+        $scope.auth = cbuggAuth.get();
+        checkSubscribed();
+    });
+
+    $scope.subscribe = function() {
+        $http.post('/api/tags/' + $scope.tag.name + '/sub/');
+        $scope.subscribed = true;
+        $scope.subcount++;
+        return false;
+    };
+
+    $scope.unsubscribe = function() {
+        $http.delete('/api/tags/' + $scope.tag.name + '/sub/');
+        $scope.subscribed = false;
+        $scope.subcount--;
+        return false;
+    };
+
+    $http.get('/api/tags/' + $routeParams.tagname + "/").success(function(taginfo) {
         $http.get("/api/states/").success(function(allstates) {
+            $scope.tag = taginfo;
             var scopeMap = _.object(_.pluck(allstates, 'name'), allstates);
-            $scope.states = _.sortBy(_.pairs(stateCounts.states),
+            $scope.states = _.sortBy(_.pairs(taginfo.states),
                                      function(n) {
                                          return scopeMap[n[0]].order;
                                      });
+
+            $scope.subcount = taginfo.subscribers.length;
         });
     });
 }
