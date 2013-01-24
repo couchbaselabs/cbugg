@@ -43,6 +43,8 @@ angular.module('cbugg', ['cbuggFilters', 'cbuggAuth', 'cbuggEditor', 'cbuggAlert
                                          controller: 'SearchResultsCtrl'}).
             when('/statecounts', {templateUrl: '/static/partials/statecounts.html',
                                   controller: 'StatesByCountCtrl'}).
+            when('/tags/', {templateUrl: '/static/partials/tags.html',
+                                    controller: 'TagsCtrl'}).
             when('/tag/:tagname', {templateUrl: '/static/partials/tag.html',
                                   controller: 'TagCtrl'}).
             otherwise({redirectTo: '/statecounts'});
@@ -267,6 +269,12 @@ function RemindCtrl($scope, $rootScope, $http, bAlert, cbuggAuth) {
         }
         $scope.dismiss();
     };
+}
+
+function TagsCtrl($scope, $routeParams, $http, $rootScope) {
+    $http.get("/api/tags/").success(function(tags) {
+        $scope.tags = cloudify(tags);
+    });
 }
 
 function TagCtrl($scope, $routeParams, $http, $rootScope, $timeout, $location, bAlert, cbuggAuth) {
