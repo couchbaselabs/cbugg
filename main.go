@@ -317,18 +317,19 @@ func main() {
 		http.FileServer(http.Dir(*staticPath))))
 
 	// application pages
-	r.PathPrefix("/bug/").Handler(RewriteURL("app.html",
-		http.FileServer(http.Dir(*staticPath))))
-	r.PathPrefix("/user/").Handler(RewriteURL("app.html",
-		http.FileServer(http.Dir(*staticPath))))
-	r.PathPrefix("/state/").Handler(RewriteURL("app.html",
-		http.FileServer(http.Dir(*staticPath))))
-	r.PathPrefix("/search/").Handler(RewriteURL("app.html",
-		http.FileServer(http.Dir(*staticPath))))
-	r.PathPrefix("/statecounts").Handler(RewriteURL("app.html",
-		http.FileServer(http.Dir(*staticPath))))
-	r.PathPrefix("/tag/").Handler(RewriteURL("app.html",
-		http.FileServer(http.Dir(*staticPath))))
+	appPages := []string{
+		"/bug/",
+		"/user/",
+		"/state/",
+		"/search/",
+		"/statecounts/",
+		"/tag/",
+	}
+
+	for _, p := range appPages {
+		r.PathPrefix(p).Handler(RewriteURL("app.html",
+			http.FileServer(http.Dir(*staticPath))))
+	}
 
 	if *quitPath != "" {
 		r.HandleFunc(*quitPath, func(w http.ResponseWriter, r *http.Request) {
