@@ -12,9 +12,8 @@ func init() {
 func moveOldInboxItems(t time.Time) error {
 	t = t.UTC()
 	args := map[string]interface{}{
-		"end_key":    []interface{}{"inbox", t.Add(-time.Duration(time.Hour))},
-		"start_key":  []interface{}{"inbox", map[string]string{}},
-		"descending": true,
+		"start_key": []interface{}{"inbox"},
+		"end_key":   []interface{}{"inbox", t.Add(-time.Duration(time.Hour))},
 	}
 
 	viewRes := struct {
