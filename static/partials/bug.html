@@ -107,7 +107,7 @@
 <div class="attachments">
   <div class="attachment" ng-repeat="att in attachments">
     <img ng-src="http://www.gravatar.com/avatar/{{att.user.md5}}?s=16">
-    <a href="/api/bug/{{bug.id}}/attachments/{{att.id}}/{{att.filename}}">
+    <a target="_self" href="/api/bug/{{bug.id}}/attachments/{{att.id}}/{{att.filename}}">
       {{att.filename}} ({{att.content_type}}, {{att.size | bytes}})
     </a>
     <button ng-click="deleteAttachment(att)" ng-show="att.mine"
