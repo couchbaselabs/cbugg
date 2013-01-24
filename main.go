@@ -309,6 +309,7 @@ func main() {
 	r.HandleFunc("/api/me/token/", notAuthed)
 
 	r.HandleFunc("/hooks/github/issue/", serveGithubIssue).Methods("POST")
+	r.HandleFunc("/hooks/github/pull/", serveGithubPullRequest).Methods("POST")
 
 	r.HandleFunc("/api/state-counts", serveStateCounts)
 	r.HandleFunc("/auth/login", serveLogin).Methods("POST")

@@ -15,6 +15,11 @@ type githubUser struct {
 	Login  string
 }
 
+type GithubRepository struct {
+	Url  string `json:"html_url"`
+	Name string
+}
+
 type githubIssueHook struct {
 	Action   string
 	Callpath string `json:"hook_callpath"`
@@ -29,10 +34,22 @@ type githubIssueHook struct {
 			PatchURL *string `json:"patch_url"`
 		} `json:"pull_request"`
 	}
-	Repository struct {
-		Url  string `json:"html_url"`
-		Name string
-	}
+	Repository GithubRepository
+}
+
+type githubPullRequestHook struct {
+	Action      string
+	Callpath    string `json:"hook_callpath"`
+	PullRequest struct {
+		Title     string
+		Body      string    `json:"body"`
+		CreatedAt time.Time `json:"created_at"`
+		PatchURL  string    `json:"patch_url"`
+		URL       string    `json:"html_url"`
+		User      githubUser
+	} `json:"pull_request"`
+	Repository GithubRepository
+	Sender     githubUser
 }
 
 func cleanupPatchTitle(t string) string {
@@ -49,8 +66,8 @@ func cleanupPatchTitle(t string) string {
 	return rv
 }
 
-func getGithubPatch(bug Bug, hookdata githubIssueHook) {
-	gres, err := http.Get(*hookdata.Issue.Pull.PatchURL)
+func getGithubPatch(bug Bug, url string) {
+	gres, err := http.Get(url)
 	if gres != nil && gres.Body != nil {
 		defer gres.Body.Close()
 	}
@@ -59,7 +76,7 @@ func getGithubPatch(bug Bug, hookdata githubIssueHook) {
 			err = errors.New(gres.Status)
 		}
 		log.Printf("Error getting pull request for bug %v from %v: %v",
-			bug.Id, hookdata.Issue.Pull.PatchURL, err)
+			bug.Id, url, err)
 		return
 	}
 
@@ -174,8 +191,72 @@ func serveGithubIssue(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if hookdata.Issue.Pull.PatchURL != nil {
-		go getGithubPatch(bug, hookdata)
+		go getGithubPatch(bug, *hookdata.Issue.Pull.PatchURL)
 	}
+
+	w.WriteHeader(204)
+}
+
+func serveGithubPullRequest(w http.ResponseWriter, r *http.Request) {
+	hookdata := githubPullRequestHook{}
+	err := json.Unmarshal([]byte(r.FormValue("payload")), &hookdata)
+
+	if err != nil {
+		showError(w, r, err.Error(), 500)
+		return
+	}
+
+	log.Printf("Got pull request hook: %+v", hookdata)
+
+	if hookdata.Action != "opened" || hookdata.Callpath != "new" {
+		log.Printf("Something other than create happened, skipping")
+		w.WriteHeader(204)
+		return
+	}
+
+	id, err := newBugId()
+	if err != nil {
+		showError(w, r, err.Error(), 500)
+		return
+	}
+
+	body := hookdata.PullRequest.Body
+	if body != "" {
+		body += "\n\n----\n"
+	}
+	body += hookdata.PullRequest.URL +
+		"\nby github user: " + hookdata.PullRequest.User.Login +
+		" ![g](" + hookdata.PullRequest.User.Avatar + "&s=64)"
+
+	tags := []string{"github", "pull-request", hookdata.Repository.Name}
+
+	bug := Bug{
+		Id:          fmt.Sprintf("bug-%v", id),
+		Title:       hookdata.PullRequest.Title,
+		Description: body,
+		Creator:     *mailFrom,
+		Status:      "inbox",
+		Tags:        tags,
+		Type:        "bug",
+		CreatedAt:   hookdata.PullRequest.CreatedAt.UTC(),
+	}
+
+	added, err := db.Add(bug.Id, 0, bug)
+	if err != nil {
+		showError(w, r, err.Error(), 500)
+		return
+	}
+	if !added {
+		// This is a bug bug
+		showError(w, r, "Bug collision on "+bug.Id, 500)
+		return
+	}
+
+	for _, t := range tags {
+		notifyTagAssigned(bug.Id, t, bug.Creator)
+	}
+
+	go getGithubPatch(bug, hookdata.PullRequest.PatchURL)
 
 	w.WriteHeader(204)
 }
