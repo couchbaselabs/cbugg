@@ -53,6 +53,10 @@ func serveNewBug(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	for _, t := range r.Form["tag"] {
+		notifyTagAssigned(bug.Id, t, email)
+	}
+
 	http.Redirect(w, r, bug.Url(), 303)
 }
 
@@ -126,9 +130,26 @@ func getBugHistory(id string) ([]BugHistoryItem, error) {
 	return histitems, nil
 }
 
+func newTags(o, n string) []string {
+	oldm := map[string]bool{}
+
+	for _, s := range strings.Split(o, ",") {
+		oldm[s] = true
+	}
+
+	out := []string{}
+	for _, s := range strings.Split(n, ",") {
+		if !oldm[s] {
+			out = append(out, s)
+		}
+	}
+	return out
+}
+
 func updateBug(id, field, val, who string) ([]byte, error) {
 	now := time.Now().UTC()
 	rval := []byte{}
+	var oldval string
 
 	historyKey := id + "-" + now.Format(time.RFC3339Nano)
 
@@ -150,7 +171,6 @@ func updateBug(id, field, val, who string) ([]byte, error) {
 			ModBy:      who,
 		}
 
-		var oldval string
 		switch field {
 		case "description":
 			oldval = bug.Description
@@ -182,6 +202,7 @@ func updateBug(id, field, val, who string) ([]byte, error) {
 			}
 		case "tags":
 			history.Tags = bug.Tags
+			oldval = strings.Join(bug.Tags, ",")
 			bug.Tags = strings.FieldsFunc(val,
 				func(r rune) bool {
 					switch r {
@@ -237,6 +258,10 @@ func updateBug(id, field, val, who string) ([]byte, error) {
 		if field == "owner" {
 			if val != who {
 				notifyBugAssignment(id, val)
+			}
+		} else if field == "tags" {
+			for _, newtag := range newTags(oldval, val) {
+				notifyTagAssigned(id, newtag, who)
 			}
 		}
 	case couchbase.UpdateCancel:

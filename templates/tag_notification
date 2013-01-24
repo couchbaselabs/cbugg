@@ -1,0 +1,23 @@
+Subject: Bug tagged {{.Tag}} - [{{.Bug.Id}}] {{.Bug.Title}}
+
+As a subscriber of tag "{{.Tag}}," I thought I should let you know that
+a new bug has been given that tag.
+
+You are not automatically subscribed to this bug, so if you're
+interested, you may want to go look at it and subscribe yourself.
+
+If you don't want to watch this tag anymore, go here:
+
+{{.BaseURL}}/tag/{{.Tag}}
+
+Here's what I know about this bug so far:
+
+Title:  {{.Bug.Title}}
+Status: {{.Bug.Status}}
+Owner:  {{.Bug.Owner}}
+Tags:   {{range .Bug.Tags}}{{.}} {{end}}
+
+{{.Bug.Description}}
+
+
+{{.BaseURL}}{{.Bug.Url}}

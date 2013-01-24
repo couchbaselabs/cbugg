@@ -11,6 +11,8 @@ import (
 	"strings"
 	"sync"
 	"time"
+
+	"github.com/dustin/gomemcached"
 )
 
 type bugChange struct {
@@ -25,11 +27,16 @@ type bugPing struct {
 	from, to string
 }
 
+type bugTagged struct {
+	bugid, tag, actor string
+}
+
 var commentChan = make(chan Comment, 100)
 var attachmentChan = make(chan Attachment, 100)
 var bugChan = make(chan bugChange, 100)
 var assignedChan = make(chan string, 100)
 var pingChan = make(chan bugPing, 100)
+var tagChan = make(chan bugTagged, 100)
 
 var bugNotifyDelays map[string]chan bugChange
 var bugNotifyDelayLock sync.Mutex
@@ -54,6 +61,10 @@ func notifyAttachment(a Attachment) {
 
 func notifyBugPing(b Bug, from, to string) {
 	pingChan <- bugPing{b, from, to}
+}
+
+func notifyTagAssigned(bugid, tag, actor string) {
+	tagChan <- bugTagged{bugid, tag, actor}
 }
 
 func notifyBugChange(bugid, field, actor string) {
@@ -264,6 +275,33 @@ func sendBugAssignedNotification(bugid string) {
 		map[string]interface{}{"Bug": b})
 }
 
+func sendTagNotification(bugid, tagName, actor string) {
+	b, err := getBug(bugid)
+	if err != nil {
+		log.Printf("Error getting bug %v for tag notification: %v",
+			bugid, err)
+		return
+	}
+
+	tag := Tag{}
+	err = db.Get("tag-"+tagName, &tag)
+	if err != nil {
+		if !gomemcached.IsNotFound(err) {
+			log.Printf("Error sending notification for tag %v: %v",
+				tagName, err)
+		}
+		return
+	}
+
+	to := removeFromList(b.Subscribers, actor)
+
+	sendNotifications("tag_notification", to,
+		map[string]interface{}{
+			"Bug": b,
+			"Tag": tagName,
+		})
+}
+
 func sendBugPingNotification(bp bugPing) {
 	sendNotifications("bug_ping", []string{bp.to},
 		map[string]interface{}{
@@ -312,6 +350,8 @@ func notificationLoop() {
 			sendBugAssignedNotification(bugid)
 		case c := <-bugChan:
 			addBugNotification(c)
+		case t := <-tagChan:
+			sendTagNotification(t.bugid, t.tag, t.actor)
 		}
 	}
 }
