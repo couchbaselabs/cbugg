@@ -54,11 +54,23 @@
         </div>
         <script src="/static/lib/script.min.js"></script>
         <script>
+        personaLoaded = (function(){
+            var personaDeferred = [];
+            $script('http://login.persona.org/include.js', function() {
+                for(i in personaDeferred) {
+                    personaDeferred[i]();
+                }
+            })
+            return function(f) {
+                if(navigator.id) { return f(); }
+                personaDeferred.push(f);
+            }
+        })();
+
         $script.path('/static/lib/');
         $script('jquery.min', 'jquery');
         $script.ready('jquery', function() {
-            $script(['http://login.persona.org/include.js',
-                     'angular.min',
+            $script(['angular.min',
                      'lodash.min',
                      'less',
                      'moment.min',

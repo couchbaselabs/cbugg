@@ -7,7 +7,7 @@ cbuggAuth.factory('cbuggAuth', function($rootScope, $http, bAlert) {
         authtoken: ""
     };
 
-    if(navigator.id) {
+    personaLoaded(function () {
         navigator.id.watch({
             onlogin: function(assertion) {
                 $http.post('/auth/login', "assertion="+assertion+"&audience=" +
@@ -29,7 +29,7 @@ cbuggAuth.factory('cbuggAuth', function($rootScope, $http, bAlert) {
                 auth.loggedin = false;
                 auth.authtoken = "";
             }});
-    }
+    });
     function fetchAuthToken() {
         $http.get("/api/me/token/").
             success(function(res) {
