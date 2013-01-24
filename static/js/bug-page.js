@@ -77,8 +77,10 @@ function BugCtrl($scope, $routeParams, $http, $rootScope, $timeout, $location, b
 
     $scope.uploadFile = function() {
         var fd = new FormData();
-        for (var i in $scope.files) {
-            fd.append("uploadedFile", $scope.files[i]);
+        if ($scope.files.length > 0) {
+            fd.append("uploadedFile", $scope.files[0]);
+        } else {
+            return;
         }
         var xhr = new XMLHttpRequest();
         xhr.upload.addEventListener("progress", uploadProgress, false);
@@ -103,9 +105,13 @@ function BugCtrl($scope, $routeParams, $http, $rootScope, $timeout, $location, b
     function uploadComplete(evt) {
         var j = JSON.parse(evt.currentTarget.responseText);
         $scope.progressVisible = false;
-        $scope.files = [];
+        $scope.files = _.filter($scope.files,
+                                function(e) {
+                                    return e.name != j.filename;
+                                });
         j.mine = true;
         $scope.attachments.push(j);
+        $scope.uploadFile();
         $scope.$apply();
     }
 
