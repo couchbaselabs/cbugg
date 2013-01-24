@@ -348,9 +348,7 @@ function BugCtrl($scope, $routeParams, $http, $rootScope, $timeout, $location, b
     };
 
     $scope.listTag = function(tagname) {
-        var query = 'tags:%22' + encodeURIComponent(tagname) +
-            '%22%20AND%20(status:open%20OR%20status:new)';
-        $location.path("/search/" + query);
+        $location.path("/tag/" + encodeURIComponent(tagname));
         return false;
     };
 
