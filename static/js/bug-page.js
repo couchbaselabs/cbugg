@@ -1,4 +1,4 @@
-function BugCtrl($scope, $routeParams, $http, $rootScope, $timeout, bAlert, cbuggAuth) {
+function BugCtrl($scope, $routeParams, $http, $rootScope, $timeout, $location, bAlert, cbuggAuth) {
     $rootScope.$watch('loggedin', function() { $scope.auth = cbuggAuth.get(); });
     var updateBug = function(field, newValue) {
         var bug = $scope.bug;
@@ -350,7 +350,7 @@ function BugCtrl($scope, $routeParams, $http, $rootScope, $timeout, bAlert, cbug
     $scope.listTag = function(tagname) {
         var query = 'tags:%22' + encodeURIComponent(tagname) +
             '%22%20AND%20(status:open%20OR%20status:new)';
-        location.hash = "#/search/" + query;
+        $location.path("/search/" + query);
         return false;
     };
 

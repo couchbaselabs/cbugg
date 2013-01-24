@@ -30,19 +30,22 @@ angular.module('cbuggFilters', []).
 
 angular.module('cbugg', ['cbuggFilters', 'cbuggAuth', 'cbuggEditor', 'cbuggAlert',
                          'ui', '$strap.directives']).
-    config(['$routeProvider', function($routeProvider) {
+    config(['$routeProvider', '$locationProvider',
+            function($routeProvider, $locationProvider) {
         $routeProvider.
-            when('/bug/:bugId', {templateUrl: 'partials/bug.html',
+            when('/bug/:bugId', {templateUrl: '/static/partials/bug.html',
                                  controller: 'BugCtrl'}).
-            when('/state/:stateId', {templateUrl: 'partials/buglist.html',
+            when('/state/:stateId', {templateUrl: '/static/partials/buglist.html',
                                      controller: 'BugsByStateCtrl'}).
-            when('/user/:userId/:stateId', {templateUrl: 'partials/buglist.html',
+            when('/user/:userId/:stateId', {templateUrl: '/static/partials/buglist.html',
                                      controller: 'BugsByUserStateCtrl'}).
-            when('/search/:query', {templateUrl: 'partials/searchresults.html',
+            when('/search/:query', {templateUrl: '/static/partials/searchresults.html',
                                          controller: 'SearchResultsCtrl'}).
-            when('/statecounts', {templateUrl: 'partials/statecounts.html',
+            when('/statecounts', {templateUrl: '/static/partials/statecounts.html',
                                   controller: 'StatesByCountCtrl'}).
             otherwise({redirectTo: '/statecounts'});
+        $locationProvider.html5Mode(true);
+        $locationProvider.hashPrefix('!');
     }]);
 
 function StatesByCountCtrl($scope, $http, $rootScope) {

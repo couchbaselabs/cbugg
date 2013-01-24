@@ -200,6 +200,13 @@ func notAuthed(w http.ResponseWriter, r *http.Request) {
 	showError(w, r, "You are not authenticated", 401)
 }
 
+func RewriteURL(to string, h http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		r.URL.Path = to
+		h.ServeHTTP(w, r)
+	})
+}
+
 func main() {
 	addr := flag.String("addr", ":8066", "http listen address")
 	cbServ := flag.String("couchbase", "http://localhost:8091/",
@@ -228,8 +235,6 @@ func main() {
 	r.HandleFunc("/api/bug/{bugid}",
 		serveBugUpdate).Methods("POST").MatcherFunc(authRequired)
 	r.HandleFunc("/api/bug/{bugid}", notAuthed).Methods("POST")
-	// short url for bug
-	r.HandleFunc("/bug/{bugid}", serveBugRedirect).Methods("GET")
 
 	r.HandleFunc("/api/bug/{bugid}/attachments/",
 		serveFileUpload).Methods("POST").MatcherFunc(authRequired)
@@ -300,6 +305,16 @@ func main() {
 	r.HandleFunc("/auth/login", serveLogin).Methods("POST")
 	r.HandleFunc("/auth/logout", serveLogout).Methods("POST")
 	r.PathPrefix("/static/").Handler(http.StripPrefix("/static/",
+		http.FileServer(http.Dir(*staticPath))))
+	r.PathPrefix("/bug/").Handler(RewriteURL("app.html",
+		http.FileServer(http.Dir(*staticPath))))
+	r.PathPrefix("/user/").Handler(RewriteURL("app.html",
+		http.FileServer(http.Dir(*staticPath))))
+	r.PathPrefix("/state/").Handler(RewriteURL("app.html",
+		http.FileServer(http.Dir(*staticPath))))
+	r.PathPrefix("/search/").Handler(RewriteURL("app.html",
+		http.FileServer(http.Dir(*staticPath))))
+	r.PathPrefix("/statecounts").Handler(RewriteURL("app.html",
 		http.FileServer(http.Dir(*staticPath))))
 
 	if *quitPath != "" {

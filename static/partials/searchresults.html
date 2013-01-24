@@ -69,7 +69,7 @@
 						<tbody>
 							<tr ng-repeat="result in results">
 								<td><a class="status-{{result.source.doc.status}}"
-									href="#/bug/{{result._id}}">{{result._id}}</a></td>
+									href="/bug/{{result._id}}">{{result._id}}</a></td>
 								<td>{{result.source.doc.title}}</td>
 								<td>{{result._score}}</td>
 							</tr>
@@ -111,7 +111,7 @@
 			<h5>Existing bugs that appear similar to your problem</h5>
 			<ul>
 				<li ng-repeat="bug in similarBugs"><a target="_blank"
-					href="#/bug/{{bug._id}}">{{bug._id}} - {{bug.source.doc.title}}</a></li>
+					href="/bug/{{bug._id}}">{{bug._id}} - {{bug.source.doc.title}}</a></li>
 			</ul>
 		</div>
 

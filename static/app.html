@@ -14,7 +14,7 @@
             <div class="navbar-inner">
                 <div class="container" ng-controller="LoginCtrl">
                     <form class="navbar-form pull-right" ng-show="loggedin">
-                        <a href="#/user/{{auth.username}}/new,open">
+                        <a href="/user/{{auth.username}}/new,open">
                           <img ng-src="http://www.gravatar.com/avatar/{{auth.gravatar}}?s=28" class="uimg">
                         </a>
                         <div class="btn-group">
@@ -23,9 +23,9 @@
                                 <span class="caret"></span>
                             </button>
                             <ul class="dropdown-menu">
-                                <li> <a href="#/user/{{auth.username}}/new,open">My Open Bugs</a> </li>
+                                <li> <a href="/user/{{auth.username}}/new,open">My Open Bugs</a> </li>
                                 <li>
-                                  <a href="#/search/subscribers:{{auth.username}}%20AND%20(status:open%20OR%20status:new)">Open
+                                  <a href="/search/subscribers:{{auth.username}}%20AND%20(status:open%20OR%20status:new)">Open
                                     Starred Bugs</a>
                                 </li>
                                 <li class="divider"></li>
@@ -40,7 +40,7 @@
                     <p class="navbar-text pull-right">
                     <a ng-hide="loggedin" ng-click="login()">Log In</a>
                     </p>
-                    <a href="#/" class="brand gohome"><img id="logo" src="/static/cbugg.png"/> cbugg</a>
+                    <a href="/" class="brand gohome"><img id="logo" src="/static/cbugg.png"/> cbugg</a>
                     <div ng-controller="SearchCtrl">
                         <form ng-submit="search()" class="navbar-search" method="GET">
                             <input ng-model="query" ng-required="true" type="text" class="search-query" placeholder="Search">
