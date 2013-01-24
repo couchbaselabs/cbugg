@@ -322,7 +322,7 @@ func main() {
 		"/user/",
 		"/state/",
 		"/search/",
-		"/statecounts/",
+		"/statecounts",
 		"/tag/",
 		"/tags/",
 	}
