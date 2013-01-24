@@ -43,6 +43,19 @@ func randstring(l int) string {
 	return string(stuff)
 }
 
+type countingReader struct {
+	r io.Reader
+	n int64
+}
+
+func (c *countingReader) Read(b []byte) (int, error) {
+	n, err := c.r.Read(b)
+	if n > 0 {
+		c.n += int64(n)
+	}
+	return n, err
+}
+
 func serveFileUpload(w http.ResponseWriter, r *http.Request) {
 	if *cbfsUrl == "" {
 		showError(w, r, "attachment storage is not configured", 500)
@@ -61,7 +74,9 @@ func serveFileUpload(w http.ResponseWriter, r *http.Request) {
 	attid := randstring(8)
 	dest := *cbfsUrl + bugid + "/" + attid + "/" + fh.Filename
 
-	req, err := http.NewRequest("PUT", dest, f)
+	cr := &countingReader{r: f}
+
+	req, err := http.NewRequest("PUT", dest, cr)
 	if err != nil {
 		showError(w, r, err.Error(), 500)
 		return
@@ -80,18 +95,12 @@ func serveFileUpload(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	fileLen, err := f.Seek(0, 1)
-	if err != nil {
-		showError(w, r, res.Status, 500)
-		return
-	}
-
 	att := Attachment{
 		Id:          bugid + "-" + attid,
 		BugId:       bugid,
 		Type:        "attachment",
 		Url:         dest,
-		Size:        fileLen,
+		Size:        cr.n,
 		ContentType: fh.Header.Get("Content-Type"),
 		Filename:    fh.Filename,
 		User:        whoami(r),
