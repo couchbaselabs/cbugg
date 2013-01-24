@@ -169,6 +169,10 @@ func serveGithubIssue(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	for _, t := range tags {
+		notifyTagAssigned(bug.Id, t, bug.Creator)
+	}
+
 	if hookdata.Issue.Pull.PatchURL != nil {
 		go getGithubPatch(bug, hookdata)
 	}
