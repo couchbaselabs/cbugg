@@ -73,7 +73,6 @@ func serveTagStates(w http.ResponseWriter, r *http.Request) {
 }
 
 func updateTagSubscription(tagname, email string, add bool) error {
-	log.Printf("Looking for %v", tagname)
 	return db.Update("tag-"+tagname, 0, func(current []byte) ([]byte, error) {
 		tag := Tag{}
 		if len(current) > 0 {
@@ -94,7 +93,6 @@ func updateTagSubscription(tagname, email string, add bool) error {
 			tag.Subscribers = append(tag.Subscribers, email)
 		}
 
-		log.Printf("Marshaling %v", tag)
 		return json.Marshal(tag)
 	})
 }
