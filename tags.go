@@ -11,7 +11,7 @@ func serveTagList(w http.ResponseWriter, r *http.Request) {
 
 	viewRes := struct {
 		Rows []struct {
-			Key   string
+			Key   []string
 			Value int
 		}
 	}{}
@@ -24,7 +24,7 @@ func serveTagList(w http.ResponseWriter, r *http.Request) {
 
 	rv := map[string]int{}
 	for _, r := range viewRes.Rows {
-		rv[r.Key] = r.Value
+		rv[r.Key[0]] = r.Value
 	}
 
 	mustEncode(w, rv)

@@ -15,7 +15,7 @@ type viewMarker struct {
 }
 
 const ddocKey = "/@cbuggddocVersion"
-const ddocVersion = 19
+const ddocVersion = 20
 const designDoc = `
 {
     "spatialInfos": [],
@@ -39,7 +39,7 @@ const designDoc = `
             "viewLink": "#showView=cbugg%2F_design%252Fcbugg%2F_view%2Fbug_history"
         },
         {
-            "map": "function (doc, meta) {\n  if (doc.type === 'bug') {\n    emit([doc.status, doc.created_at], {title: doc.title, owner: doc.owner});\n  }\n}",
+            "map": "function (doc, meta) {\n  if (doc.type === 'bug') {\n    emit([doc.status, doc.created_at], {title: doc.title, owner: doc.owner, status: doc.status});\n  }\n}",
             "name": "by_state",
             "reduce": "_count",
             "removeLink": "#removeView=cbugg%2F_design%252Fcbugg%2F_view%2Fby_state",
@@ -58,11 +58,17 @@ const designDoc = `
             "viewLink": "#showView=cbugg%2F_design%252Fcbugg%2F_view%2Fcomments"
         },
         {
-            "map": "function (doc, meta) {\n  if (doc.type === 'bug' && doc.owner) {\n    emit([doc.owner, doc.status, doc.created_at], {title: doc.title, owner: doc.owner});\n  }\n}",
+            "map": "function (doc, meta) {\n  if (doc.type === 'bug' && doc.owner) {\n    emit([doc.owner, doc.status, doc.created_at], {title: doc.title, owner: doc.owner, status: doc.status});\n  }\n}",
             "name": "owners",
             "reduce": "_count",
             "removeLink": "#removeView=cbugg%2F_design%252Fcbugg%2F_view%2Fowners",
             "viewLink": "#showView=cbugg%2F_design%252Fcbugg%2F_view%2Fowners"
+        },
+        {
+            "map": "function (doc, meta) {\n  if (doc.type === \"reminder\") {\n    emit(doc.when, null);\n  }\n}",
+            "name": "reminders",
+            "removeLink": "#removeView=cbugg%2F_design%252Fcbugg%2F_view%2Freminders",
+            "viewLink": "#showView=cbugg%2F_design%252Fcbugg%2F_view%2Freminders"
         },
         {
             "map": "function (doc, meta) {\n  if (doc.type === 'bug' && doc.tags) {\n    for (var i = 0; i < doc.tags.length; i++) {\n      emit(doc.tags[i], null);\n    }\n  }\n}",
@@ -107,7 +113,7 @@ const designDoc = `
             "map": "function (doc, meta) {\n  if (doc.type === \"reminder\") {\n    emit(doc.when, null);\n  }\n}"
         },
         "tags": {
-            "map": "function (doc, meta) {\n  if (doc.type === 'bug' && doc.tags) {\n    for (var i = 0; i < doc.tags.length; i++) {\n      emit(doc.tags[i], null);\n    }\n  }\n}",
+            "map": "function (doc, meta) {\n  if (doc.type === 'bug' && doc.tags) {\n    for (var i = 0; i < doc.tags.length; i++) {\n      emit([doc.tags[i], doc.status], null);\n    }\n  }\n}",
             "reduce": "_count"
         },
         "users": {
