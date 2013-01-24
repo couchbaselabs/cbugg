@@ -1,0 +1,71 @@
+Why would I want to use cbugg?
+
+Dustin Sallings
+2013-01-23
+
+* The Mission
+
+We wish to build an acceptable issue tracking system that makes us
+have to deal with our own software.
+
+It is *not* to build a better bug tracker than any in the field
+(though we like it).
+
+* What Do I Get Out of It?
+
+While our goals don't involve making the best bug tracker ever, we've
+actually found in practice that it's quite nice to use.
+
+There are lots of reasons you might want to come on board.
+
+- it's faster
+- it's easier to use
+- it's streamlined around our needs
+- you can help us all build better products
+
+* Reaching Out
+
+How low can we get the bar to having users engage?
+
+.image why/new_bug.png
+
+- People can file bugs/comment via email
+- XMPP, IRC, etc...?
+- People can even file bugs in cbugg from github's issues tool
+
+.image why/github.png
+
+* Bringing People In
+
+You can ask for someone's input on a bug without harassing them in
+general, and that action is visible to everyone so a user doesn't have
+to get a ton of duplicate emails from people pointing them to a URL.
+
+.image why/ping.png
+
+* ...Even Yourself
+
+And if the you're not ready to work on something, you can ask cbugg to
+send you an email when you think you might be ready.
+
+.image why/remind.png
+
+* Finding Duplicates
+
+Instead of searching before you start to file a bug, just file it.
+Our ElasticSearch integration will immediately help you find out if
+someone else has seen your issue.
+
+.image why/similar_bugs.png
+
+* Attachments!
+
+.image why/attachments.png
+
+* Big Attachments!
+
+As many attachments as you want.
+
+As big as you want.
+
+.image why/big_attachments.png
