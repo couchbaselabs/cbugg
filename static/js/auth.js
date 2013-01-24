@@ -7,27 +7,29 @@ cbuggAuth.factory('cbuggAuth', function($rootScope, $http, bAlert) {
         authtoken: ""
     };
 
-    navigator.id.watch({
-        onlogin: function(assertion) {
-            $http.post('/auth/login', "assertion="+assertion+"&audience=" +
-                encodeURIComponent(location.protocol+"//"+location.host),
-                {headers: {"Content-Type": "application/x-www-form-urlencoded"}}).
-            success(function(res) {
-                auth.loggedin = true;
-                auth.username = res.email;
-                auth.gravatar = res.emailmd5;
+    if(navigator.id) {
+        navigator.id.watch({
+            onlogin: function(assertion) {
+                $http.post('/auth/login', "assertion="+assertion+"&audience=" +
+                    encodeURIComponent(location.protocol+"//"+location.host),
+                    {headers: {"Content-Type": "application/x-www-form-urlencoded"}}).
+                success(function(res) {
+                    auth.loggedin = true;
+                    auth.username = res.email;
+                    auth.gravatar = res.emailmd5;
+                    auth.authtoken = "";
+                    $rootScope.loggedin = true;
+                }).
+                error(function(res, err) {
+                    bAlert("Error", "Couldn't log you in.", "error");
+                });
+            },
+            onlogout: function() {
+                $rootScope.loggedin = false;
+                auth.loggedin = false;
                 auth.authtoken = "";
-                $rootScope.loggedin = true;
-            }).
-            error(function(res, err) {
-                bAlert("Error", "Couldn't log you in.", "error");
-            });
-        },
-        onlogout: function() {
-            $rootScope.loggedin = false;
-            auth.loggedin = false;
-            auth.authtoken = "";
-        }});
+            }});
+    }
     function fetchAuthToken() {
         $http.get("/api/me/token/").
             success(function(res) {
