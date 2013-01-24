@@ -307,6 +307,8 @@ func main() {
 	r.HandleFunc("/auth/logout", serveLogout).Methods("POST")
 	r.PathPrefix("/static/").Handler(http.StripPrefix("/static/",
 		http.FileServer(http.Dir(*staticPath))))
+
+	// application pages
 	r.PathPrefix("/bug/").Handler(RewriteURL("app.html",
 		http.FileServer(http.Dir(*staticPath))))
 	r.PathPrefix("/user/").Handler(RewriteURL("app.html",
@@ -316,6 +318,8 @@ func main() {
 	r.PathPrefix("/search/").Handler(RewriteURL("app.html",
 		http.FileServer(http.Dir(*staticPath))))
 	r.PathPrefix("/statecounts").Handler(RewriteURL("app.html",
+		http.FileServer(http.Dir(*staticPath))))
+	r.PathPrefix("/tag/").Handler(RewriteURL("app.html",
 		http.FileServer(http.Dir(*staticPath))))
 
 	if *quitPath != "" {

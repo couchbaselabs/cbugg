@@ -43,6 +43,8 @@ angular.module('cbugg', ['cbuggFilters', 'cbuggAuth', 'cbuggEditor', 'cbuggAlert
                                          controller: 'SearchResultsCtrl'}).
             when('/statecounts', {templateUrl: '/static/partials/statecounts.html',
                                   controller: 'StatesByCountCtrl'}).
+            when('/tag/:tagname', {templateUrl: '/static/partials/tag.html',
+                                  controller: 'TagCtrl'}).
             otherwise({redirectTo: '/statecounts'});
         $locationProvider.html5Mode(true);
         $locationProvider.hashPrefix('!');
@@ -265,4 +267,22 @@ function RemindCtrl($scope, $rootScope, $http, bAlert, cbuggAuth) {
         }
         $scope.dismiss();
     };
+}
+
+function TagCtrl($scope, $routeParams, $http, $rootScope) {
+    console.log("route params", $routeParams);
+    $rootScope.title = "Tag " + $routeParams.tagname;
+    $scope.tag = {
+        name: $routeParams.tagname
+    };
+
+    $http.get('/api/tags/' + $routeParams.tagname + "/").success(function(stateCounts) {
+        $http.get("/api/states/").success(function(allstates) {
+            var scopeMap = _.object(_.pluck(allstates, 'name'), allstates);
+            $scope.states = _.sortBy(_.pairs(stateCounts.states),
+                                     function(n) {
+                                         return scopeMap[n[0]].order;
+                                     });
+        });
+    });
 }
