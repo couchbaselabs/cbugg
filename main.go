@@ -22,6 +22,7 @@ var esPort = flag.String("elasticsearchPort", "9200", "ElasticSearch port")
 var esScheme = flag.String("elasticsearchScheme", "http", "ElasticSearch scheme")
 var esIndex = flag.String("elasticsearchIndex", "cbugg", "ElasticSearch index")
 var debugEs = flag.Bool("elasticsearchDebug", false, "ElasticSearch debugging")
+var staticEtag = flag.String("staticEtag", "", "A static etag value.")
 var NotFound = errors.New("not found")
 
 var staticPath = flag.String("static", "static", "Path to the static content")
@@ -207,6 +208,17 @@ func RewriteURL(to string, h http.Handler) http.Handler {
 	})
 }
 
+type myFileHandler struct {
+	h http.Handler
+}
+
+func (mfh myFileHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	if *staticEtag != "" {
+		w.Header().Set("Etag", *staticEtag)
+	}
+	mfh.h.ServeHTTP(w, r)
+}
+
 func main() {
 	addr := flag.String("addr", ":8066", "http listen address")
 	cbServ := flag.String("couchbase", "http://localhost:8091/",
@@ -315,7 +327,7 @@ func main() {
 	r.HandleFunc("/auth/login", serveLogin).Methods("POST")
 	r.HandleFunc("/auth/logout", serveLogout).Methods("POST")
 	r.PathPrefix("/static/").Handler(http.StripPrefix("/static/",
-		http.FileServer(http.Dir(*staticPath))))
+		myFileHandler{http.FileServer(http.Dir(*staticPath))}))
 
 	// application pages
 	appPages := []string{
