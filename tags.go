@@ -86,6 +86,7 @@ func updateTagSubscription(tagname, email string, add bool) error {
 			}
 		}
 
+		tag.Name = tagname
 		tag.Type = "tag"
 		tag.Subscribers = removeFromList(tag.Subscribers, email)
 
