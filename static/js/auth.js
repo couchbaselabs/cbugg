@@ -41,12 +41,10 @@ cbuggAuth.factory('cbuggAuth', function($rootScope, $http, bAlert) {
         $http.post('/auth/logout').
             success(function(res) {
                 $rootScope.loggedin = false;
-                $scope.loggedin = false;
             }).
         error(function(res) {
             bAlert("Error", "Problem logging out.", "error");
             $rootScope.loggedin = false;
-            $scope.loggedin = false;
         });
     }
     function login() {
