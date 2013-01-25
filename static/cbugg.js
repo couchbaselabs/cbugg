@@ -19,11 +19,11 @@ angular.module('cbuggFilters', []).
         return function(s) {
             if (s < 10) {
                 return s + "B";
-	        }
-	        var e = parseInt(Math.floor(Math.log(s) / Math.log(1024)));
+            }
+            var e = Math.floor(Math.log(parseInt(s, 10)) / Math.log(1024));
             var sizes = ["B", "KB", "MB", "GB", "TB", "PB", "EB"];
-	        var suffix = sizes[parseInt(e)];
-	        var val = s / Math.pow(1024, Math.floor(e));
+            var suffix = sizes[e];
+            var val = s / Math.pow(1024, Math.floor(e));
             return val.toFixed(2) + suffix;
         };
     });
@@ -53,7 +53,7 @@ angular.module('cbugg', ['cbuggFilters', 'cbuggAuth', 'cbuggEditor', 'cbuggAlert
     }]);
 
 function StatesByCountCtrl($scope, $http, $rootScope) {
-    $rootScope.title = "Home"
+    $rootScope.title = "Home";
     $http.get('/api/state-counts').success(function(stateCounts) {
         $http.get("/api/states/").success(function(allstates) {
             var scopeMap = _.object(_.pluck(allstates, 'name'), allstates);
@@ -127,15 +127,15 @@ function SearchResultsCtrl($scope, $routeParams, $http, $rootScope) {
     $rootScope.title = "Search";
 
     $scope.jumpToPage = function(pageNum, $event) {
-        if ($event != null) {
+        if ($event) {
             $event.preventDefault();
         }
         $scope.page = pageNum;
         $http.post(
-            '/api/search/?query=' + $routeParams.query + '&from='
-                    + (($scope.page - 1) * $scope.rpp) + '&size=' + $scope.rpp
-                    + "&status=" + $scope.filterStatus.join(",") + "&tags="
-                    + $scope.filterTags.join(",")).success(function(data) {
+            '/api/search/?query=' + $routeParams.query + '&from=' +
+                    (($scope.page - 1) * $scope.rpp) + '&size=' + $scope.rpp +
+                    "&status=" + $scope.filterStatus.join(",") + "&tags=" +
+                    $scope.filterTags.join(",")).success(function(data) {
             $scope.shards = data._shards;
             $scope.results = data.hits.hits;
             $scope.facets = data.facets;
@@ -152,15 +152,15 @@ function SearchResultsCtrl($scope, $routeParams, $http, $rootScope) {
 
     $scope.verifyAllSearchShards = function() {
         if ($scope.shards.total != $scope.shards.successful) {
-            $scope.searchWarning = "Search only contains results from "
-                    + $scope.shards.successful + " of " + $scope.shards.total
-                    + " shards";
+            $scope.searchWarning = "Search only contains results from " +
+                    $scope.shards.successful + " of " + $scope.shards.total +
+                    " shards";
         }
-    }
+    };
 
     $scope.computeValidPages = function() {
         $scope.numPages = Math.ceil($scope.total / $scope.rpp);
-        $scope.validPages = new Array();
+        $scope.validPages = [];
         for (i = 1; i <= $scope.numPages; i++) {
             $scope.validPages.push(i);
         }
@@ -177,27 +177,27 @@ function SearchResultsCtrl($scope, $routeParams, $http, $rootScope) {
     $scope.updateStatusFilter = function(val) {
         pos = $scope.filterStatus.indexOf(val);
         if (pos == -1) {
-            $scope.filterStatus.push(val)
+            $scope.filterStatus.push(val);
         } else {
             $scope.filterStatus.splice(pos, 1);
         }
         $scope.jumpToPage(1, null);
-    }
+    };
 
     $scope.updateTagFilter = function(val) {
         pos = $scope.filterTags.indexOf(val);
         if (pos == -1) {
-            $scope.filterTags.push(val)
+            $scope.filterTags.push(val);
         } else {
             $scope.filterTags.splice(pos, 1);
         }
         $scope.jumpToPage(1, null);
-    }
+    };
 
     $scope.changeRpp = function(size, $event) {
         $scope.rpp = size;
         $scope.jumpToPage(1, $event);
-    }
+    };
 
     $scope.query = $routeParams.query;
     $scope.jumpToPage(1, null);
@@ -207,7 +207,7 @@ function SearchResultsCtrl($scope, $routeParams, $http, $rootScope) {
 function SimilarBugCtrl($scope, $http, $rootScope, $location) {
 
     $scope.similarBugs = [];
-    $scope.debouncedLookupSimilar = _.debounce(function(){$scope.lookupSimilar()}, 500);
+    $scope.debouncedLookupSimilar = _.debounce(function(){$scope.lookupSimilar();}, 500);
 
     $scope.lookupSimilar = function() {
         if($scope.bugTitle) {
@@ -223,7 +223,7 @@ function SimilarBugCtrl($scope, $http, $rootScope, $location) {
               });
         }
 
-    }
+    };
 }
 
 function PingCtrl($scope, $rootScope, $http, bAlert, cbuggAuth) {
@@ -251,7 +251,7 @@ function PingCtrl($scope, $rootScope, $http, bAlert, cbuggAuth) {
                 });
         }
         $scope.dismiss();
-    }
+    };
 }
 
 function RemindCtrl($scope, $rootScope, $http, bAlert, cbuggAuth) {

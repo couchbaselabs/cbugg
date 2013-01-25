@@ -21,12 +21,12 @@ angular.module('cbuggEditor', [])
                     }
                     ngModel.$render = function() {
                         scope.codeMirror.setValue(ngModel.$viewValue);
-                    }
-                }
+                    };
+                };
                 scope.tearDownMirror = function() {
-                    scope.codeMirror.toTextArea()
+                    scope.codeMirror.toTextArea();
                     scope.codeMirror = null;
-                }
+                };
                 scope.$watch(function() {
                     if(scope.editing && !scope.codeMirror) {
                         scope.setupMirror();
@@ -36,7 +36,7 @@ angular.module('cbuggEditor', [])
                     }
                 });
             }
-        }
+        };
     }])
     .directive('cbEditor', function () {
         var editortpl = '<div ng-class="{edithide: !editing}"><textarea ng-model="source" '+
@@ -56,11 +56,11 @@ angular.module('cbuggEditor', [])
                     post: function(scope, el, attrs) {
                         scope.editfn = function() {
                             scope.editing = true;
-                        }
+                        };
                         scope.save = function() {
                             scope.editing = false;
                             scope.source = scope.codeMirror.getValue();
-                        }
+                        };
                     }
                 };
             }

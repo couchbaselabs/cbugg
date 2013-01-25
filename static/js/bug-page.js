@@ -71,7 +71,7 @@ function BugCtrl($scope, $routeParams, $http, $rootScope, $timeout, $location, b
                 }
             });
             $scope.uploadFile();
-        };
+        }
     }, false);
     // ============== DRAG & DROP =============
 
@@ -241,7 +241,7 @@ function BugCtrl($scope, $routeParams, $http, $rootScope, $timeout, $location, b
     $("#tagbox").typeahead({
         source: getTags,
         updater: function(i) {
-            $timeout($scope.addTags)
+            $timeout($scope.addTags);
             return i;
         }
     });
@@ -282,7 +282,7 @@ function BugCtrl($scope, $routeParams, $http, $rootScope, $timeout, $location, b
                 data.mine = true;
                 $scope.comments.push(data);
                 $scope.draftcomment="";
-                $timeout(function() { $scope.addingcomment = false; })
+                $timeout(function() { $scope.addingcomment = false; });
                 if (!$scope.subscribed) {
                     $scope.subcount++;
                     $scope.subscribed = true;
@@ -311,7 +311,7 @@ function BugCtrl($scope, $routeParams, $http, $rootScope, $timeout, $location, b
                 $scope.comments = _.map($scope.comments, function(check) {
                     if(check.id == comment.id) {
                         check.deleted = true;
-                    };
+                    }
                     return check;
                 });
             }).
@@ -326,7 +326,7 @@ function BugCtrl($scope, $routeParams, $http, $rootScope, $timeout, $location, b
                 $scope.comments = _.map($scope.comments, function(check) {
                     if(check.id == comment.id) {
                         check.deleted = false;
-                    };
+                    }
                     return check;
                 });
             }).
