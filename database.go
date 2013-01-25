@@ -15,7 +15,7 @@ type viewMarker struct {
 }
 
 const ddocKey = "/@cbuggddocVersion"
-const ddocVersion = 21
+const ddocVersion = 23
 const designDoc = `
 {
     "spatialInfos": [],
@@ -93,7 +93,7 @@ const designDoc = `
             "map": "function (doc, meta) {\n  if (doc.type === \"attachment\") {\n    emit([doc.bugId, doc.created_at], {url: doc.url,\n                                       type: doc.content_type,\n                                       user: doc.user,\n                                       size: doc.size});\n  }\n}"
         },
         "bug_history": {
-            "map": "function (doc, meta) {\n  if (doc.type === 'bughistory') {\n    emit([doc.id, doc.modified_at], {\"type\": doc.modify_type, \"by\": doc.modified_by});\n  }\n}"
+            "map": "function (doc, meta) {\n  if (doc.type === 'bughistory' || doc.type === 'bug') {\n    emit([doc.id, doc.modified_at], {\"type\": doc.modify_type || \"created\",\n                                     \"by\": doc.modified_by});\n  }\n}"
         },
         "by_state": {
             "map": "function (doc, meta) {\n  if (doc.type === 'bug') {\n    emit([doc.status, doc.created_at], {title: doc.title, owner: doc.owner, status: doc.status});\n  }\n}",

@@ -173,6 +173,8 @@ func serveGithubIssue(w http.ResponseWriter, r *http.Request) {
 		Tags:        tags,
 		Type:        "bug",
 		CreatedAt:   hookdata.Issue.CreatedAt.UTC(),
+		ModifiedAt:  hookdata.Issue.CreatedAt.UTC(),
+		ModBy:       *mailFrom,
 	}
 
 	added, err := db.Add(bug.Id, 0, bug)
@@ -239,6 +241,8 @@ func serveGithubPullRequest(w http.ResponseWriter, r *http.Request) {
 		Tags:        tags,
 		Type:        "bug",
 		CreatedAt:   hookdata.PullRequest.CreatedAt.UTC(),
+		ModifiedAt:  hookdata.PullRequest.CreatedAt.UTC(),
+		ModBy:       *mailFrom,
 	}
 
 	added, err := db.Add(bug.Id, 0, bug)

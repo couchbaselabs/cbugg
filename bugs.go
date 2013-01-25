@@ -30,6 +30,8 @@ func serveNewBug(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	now := time.Now().UTC()
+
 	bug := Bug{
 		Id:          fmt.Sprintf("bug-%v", id),
 		Title:       r.FormValue("title"),
@@ -39,7 +41,9 @@ func serveNewBug(w http.ResponseWriter, r *http.Request) {
 		Tags:        r.Form["tag"],
 		Type:        "bug",
 		Subscribers: []string{email},
-		CreatedAt:   time.Now().UTC(),
+		CreatedAt:   now,
+		ModifiedAt:  now,
+		ModBy:       email,
 	}
 
 	added, err := db.Add(bug.Id, 0, bug)
@@ -166,9 +170,9 @@ func updateBug(id, field, val, who string) ([]byte, error) {
 		history := Bug{
 			Id:         id,
 			Type:       "bughistory",
-			ModifiedAt: now,
-			ModType:    field,
-			ModBy:      who,
+			ModifiedAt: bug.ModifiedAt,
+			ModType:    bug.ModType,
+			ModBy:      bug.ModBy,
 		}
 
 		switch field {
@@ -238,6 +242,8 @@ func updateBug(id, field, val, who string) ([]byte, error) {
 		}
 
 		bug.ModifiedAt = now
+		bug.ModBy = who
+		bug.ModType = field
 		bug.Parent = historyKey
 
 		// The version that goes to the DB is different from
