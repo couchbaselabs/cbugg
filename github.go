@@ -1,14 +1,19 @@
 package main
 
 import (
+	"bytes"
 	"encoding/json"
 	"errors"
+	"flag"
 	"fmt"
 	"log"
 	"net/http"
 	"time"
 	"unicode"
 )
+
+var ghUser = flag.String("ghuser", "", "github username")
+var ghPass = flag.String("ghpass", "", "github password")
 
 type githubUser struct {
 	Avatar string `json:"avatar_url"`
@@ -24,13 +29,15 @@ type githubIssueHook struct {
 	Action   string
 	Callpath string `json:"hook_callpath"`
 	Issue    struct {
-		Title     string
-		Body      string
-		CreatedAt time.Time `json:"created_at"`
-		URL       string    `json:"html_url"`
-		Labels    []struct{ Name string }
-		User      githubUser
-		Pull      struct {
+		Title       string
+		Body        string
+		CreatedAt   time.Time `json:"created_at"`
+		URL         string    `json:"html_url"`
+		Labels      []struct{ Name string }
+		User        githubUser
+		EditURL     string `json:"url"`
+		CommentsURL string `json:"comments_url"`
+		Pull        struct {
 			PatchURL *string `json:"patch_url"`
 		} `json:"pull_request"`
 	}
@@ -41,12 +48,14 @@ type githubPullRequestHook struct {
 	Action      string
 	Callpath    string `json:"hook_callpath"`
 	PullRequest struct {
-		Title     string
-		Body      string    `json:"body"`
-		CreatedAt time.Time `json:"created_at"`
-		PatchURL  string    `json:"patch_url"`
-		URL       string    `json:"html_url"`
-		User      githubUser
+		Title       string
+		Body        string    `json:"body"`
+		CreatedAt   time.Time `json:"created_at"`
+		PatchURL    string    `json:"patch_url"`
+		URL         string    `json:"html_url"`
+		EditURL     string    `json:"issue_url"`
+		CommentsURL string    `json:"comments_url"`
+		User        githubUser
 	} `json:"pull_request"`
 	Repository GithubRepository
 	Sender     githubUser
@@ -64,6 +73,61 @@ func cleanupPatchTitle(t string) string {
 		}
 	}
 	return rv
+}
+
+func closeGithubIssue(bug Bug, commentUrl, editUrl string) {
+	if *ghUser == "" || *ghPass == "" {
+		log.Printf("Github user not configured, not closing")
+	}
+
+	buf := &bytes.Buffer{}
+	mustEncode(buf, map[string]interface{}{
+		"body": "Issue has been moved to " + *baseURL + bug.Url(),
+	})
+
+	creq, err := http.NewRequest("POST", commentUrl,
+		bytes.NewReader(buf.Bytes()))
+	if err != nil {
+		log.Printf("Error creating comment post: %v", err)
+		return
+	}
+	creq.SetBasicAuth(*ghUser, *ghPass)
+	creq.Header.Set("Content-Type", "application/json")
+	creq.ContentLength = int64(buf.Len())
+
+	cres, err := http.DefaultClient.Do(creq)
+	if err != nil {
+		log.Printf("Error posting close comment to %v: %v",
+			commentUrl, err)
+		return
+	}
+	defer cres.Body.Close()
+	if cres.StatusCode != 201 {
+		log.Printf("Could not create new comment: %v", cres.Status)
+		return
+	}
+
+	closeBody := []byte(`{"state":"closed"}`)
+	preq, err := http.NewRequest("PATCH", editUrl,
+		bytes.NewReader(closeBody))
+	if err != nil {
+		log.Printf("Error creating patch URL: %v", err)
+	}
+	preq.SetBasicAuth(*ghUser, *ghPass)
+	preq.Header.Set("Content-Type", "application/json")
+	preq.ContentLength = int64(len(closeBody))
+
+	pres, err := http.DefaultClient.Do(preq)
+	if err != nil {
+		log.Printf("Error patching to close at %v: %v",
+			editUrl, err)
+		return
+	}
+	defer pres.Body.Close()
+	if pres.StatusCode != 200 {
+		log.Printf("Could not close issue: %v", pres.Status)
+		return
+	}
 }
 
 func getGithubPatch(bug Bug, url string) {
@@ -196,6 +260,9 @@ func serveGithubIssue(w http.ResponseWriter, r *http.Request) {
 		go getGithubPatch(bug, *hookdata.Issue.Pull.PatchURL)
 	}
 
+	go closeGithubIssue(bug, hookdata.Issue.CommentsURL,
+		hookdata.Issue.EditURL)
+
 	w.WriteHeader(204)
 }
 
@@ -261,6 +328,9 @@ func serveGithubPullRequest(w http.ResponseWriter, r *http.Request) {
 	}
 
 	go getGithubPatch(bug, hookdata.PullRequest.PatchURL)
+
+	go closeGithubIssue(bug, hookdata.PullRequest.CommentsURL,
+		hookdata.PullRequest.EditURL)
 
 	w.WriteHeader(204)
 }
