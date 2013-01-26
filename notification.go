@@ -85,6 +85,11 @@ func notifyBugAssignment(bugid, assigned string) {
 	exceptBugChange(bugid, assigned)
 }
 
+func emailIsInternal(email string) bool {
+	u, err := getUser(email)
+	return err == nil && u.Internal
+}
+
 func sendNotifications(tmplName string, subs []string,
 	fields map[string]interface{}) {
 
@@ -100,8 +105,15 @@ func sendNotifications(tmplName string, subs []string,
 		return
 	}
 
+	bug, hasBug := fields["Bug"].(Bug)
+
 	for _, to := range subs {
 		buf := &bytes.Buffer{}
+
+		if hasBug && bug.Private && !emailIsInternal(to) {
+			log.Printf("Skipping private notification of %v to %v", bug, to)
+			continue
+		}
 
 		fields["MailTo"] = to
 		err := templates.ExecuteTemplate(buf, tmplName, fields)
