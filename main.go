@@ -306,7 +306,7 @@ func main() {
 	r.HandleFunc("/api/states/", serveStates).Methods("GET")
 
 	// simple search
-	r.HandleFunc("/api/search/", searchBugs).Methods("POST")
+	r.HandleFunc("/api/search/", searchBugs).Methods("POST", "GET")
 	// find similar bugs
 	r.HandleFunc("/api/bugslike/", findSimilarBugs).Methods("POST")
 
@@ -338,6 +338,7 @@ func main() {
 		"/statecounts",
 		"/tag/",
 		"/tags/",
+		"/navigator/",
 	}
 
 	for _, p := range appPages {

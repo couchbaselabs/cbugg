@@ -1,0 +1,173 @@
+<h3>Navigator</h3>
+
+<div class="tabbable">
+	<!-- Only required for left/right tabs -->
+	<ul class="nav nav-tabs">
+		<li ng-repeat="(id, tab) in defaultTabs"
+			ng-class="{active : id == selectedTab, inactive : id != selectedTab}"
+			ng-show="$eval(tab.show)" data-toggle="tab"><a
+			href="/navigator/{{id}}">{{tab.name}}</a></li>
+	</ul>
+	<div class="tab-content">
+		<div class="tab-pane active">
+
+			<div ng-show="searchInProgress">
+
+				<h3>Search for "{{query}}" in progress...</h3>
+				<div class="progress progress-striped active">
+
+					<div class="bar" style="width: 100%;"></div>
+				</div>
+
+			</div>
+
+			<div ng-show="searchError && searchWarning != null"
+				class="alert alert-error">
+				<span class="label label-important">Error</span> {{searchWarning}}
+			</div>
+
+			<div ng-hide="searchError || searchInProgress">
+				<div ng-show="searchWarning" class="alert alert-error">
+					<span class="label label-important">Warning</span>
+					{{searchWarning}}
+				</div>
+
+				<!-- no results -->
+				<div ng-hide="total > 0" id="searchResultContainer" class="clearfix">
+					<h5>No bugs match this query</h5>
+				</div>
+
+				<!-- some results -->
+				<div ng-show="total > 0" id="searchResultContainer" class="clearfix">
+					<div class="container-fluid">
+						<div class="row-fluid">
+
+							<!-- facet information -->
+							<div class="span3">
+								<form>
+									<div class="well sidebar-nav filter">
+										<ul class="nav nav-list">
+											<li ng-hide="facets.statuses.terms == null"
+												class="nav-header">Status</li>
+											<li ng-repeat="status in facets.statuses.terms"><input
+												ng-show="filterStatus.indexOf(status.term) === -1"
+												type="checkbox" value="{{status.term}}"
+												ng-click="updateStatusFilter(status.term)" /><input
+												ng-hide="filterStatus.indexOf(status.term) === -1"
+												type="checkbox" value="{{status.term}}"
+												ng-click="updateStatusFilter(status.term)" checked />
+												{{status.term}} ({{status.count}})</li>
+											<li ng-hide="facets.tags.terms == null" class="nav-header">Tags</li>
+											<li ng-repeat="tag in facets.tags.terms"><input
+												ng-show="filterTags.indexOf(tag.term) === -1"
+												type="checkbox" value="{{tag.term}}"
+												ng-click="updateTagFilter(tag.term)" /><input
+												ng-hide="filterTags.indexOf(tag.term) === -1"
+												type="checkbox" value="{{tag.term}}"
+												ng-click="updateTagFilter(tag.term)" checked />
+												{{tag.term}} ({{tag.count}})</li>
+										</ul>
+									</div>
+								</form>
+							</div>
+
+							<!-- search results table -->
+							<div class="span9">
+								<div class="btn-toolbar search-toolbar">
+									<div class="btn-group">
+										<button class="btn disabled">Assign</button>
+										<button class="btn dropdown-toggle disabled"
+											data-toggle="dropdown">
+											<span class="caret"></span>
+										</button>
+									</div>
+									<div class="btn-group">
+										<button class="btn disabled">Tag</button>
+										<button class="btn dropdown-toggle disabled"
+											data-toggle="dropdown">
+											<span class="caret"></span>
+										</button>
+									</div>
+									<div class="btn-group pull-right">
+										<button class="btn">Score</button>
+										<button class="btn">Created</button>
+										<button class="btn">Modified</button>
+									</div>
+								</div>
+
+								<table class="table-bordered table-striped table-condensed"
+									width="100%">
+									<tbody>
+										<tr ng-repeat="result in results">
+											<td class="bugCheckbox"><input type="checkbox" /></td>
+											<td class="bugId"><a
+												class="status-{{result.source.doc.status}}"
+												href="/bug/{{result._id}}">{{result._id}}</a></td>
+											<td>
+												<div style="float:left; width:38em;">
+													<p class="bugTitle ellipsis" title="{{result.source.doc.title}}">{{result.source.doc.title}}</p>
+													<div class="searchResultRowFooter">
+														Created by <img
+															ng-src="http://www.gravatar.com/avatar/{{result.source.doc.creator.md5}}?s=12">
+														{{result.source.doc.creator.email}}
+														{{result.source.doc.created_at | relDate}}.  Updated by <img
+															ng-src="http://www.gravatar.com/avatar/{{result.source.doc.modified_by.md5}}?s=12">
+														{{result.source.doc.modified_by.email}}
+														{{result.source.doc.modified_at | relDate}}
+													</div>
+												</div>
+												<div class="searchResultStar">
+													<i
+														ng-show="isSubscribed(auth.gravatar, result.source.doc.subscribers)"
+														class="icon-star starred"></i>
+												</div>
+											</td>
+										</tr>
+									</tbody>
+								</table>
+								<h5 class="pull-left">Displaying {{firstResult}} -
+									{{lastResult}} of {{total}} matching bugs</h5>
+								<div class="pagination pull-right">
+									<ul>
+										<li><a ng-show="page > 1"
+											ng-click="jumpToTabPage(selectedTab, page-1, $event)"
+											href="#">Prev</a><span ng-hide="page > 1">Prev</span></li>
+										<li ng-repeat="i in validPages"><a ng-show="i != page"
+											href="#" ng-click="jumpToTabPage(selectedTab, i, $event)">{{i}}</a><span
+											ng-hide="i != page">{{i}}</span></li>
+										<li><a ng-show="page < numPages"
+											ng-click="jumpToTabPage(selectedTab, page+1, $event)"
+											href="#">Next</a><span ng-hide="page < numPages">Next</span></li>
+									</ul>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+
+
+
+				<!-- file new bug -->
+				<hr />
+				<div ng-controller="SimilarBugCtrl">
+					<form action="/api/bug/" id="newbug" method="POST">
+						Briefly describe your new problem: <input type="text"
+							ng-model="bugTitle" ng-change="debouncedLookupSimilar()"
+							ng-required="true" pattern="(.){4,}"
+							title="Bug descriptions must have at least 4 characters"
+							name="title" autocomplete="off" />
+					</form>
+					<div ng-show="similarBugs.length > 0">
+						<h5>Existing bugs that appear similar to your problem</h5>
+						<ul>
+							<li ng-repeat="bug in similarBugs"><a target="_blank"
+								href="/bug/{{bug._id}}">{{bug._id}} -
+									{{bug.source.doc.title}}</a></li>
+						</ul>
+					</div>
+
+				</div>
+
+			</div>
+		</div>
+	</div>

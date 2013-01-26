@@ -1,7 +1,6 @@
 package main
 
 import (
-	"encoding/base64"
 	"encoding/json"
 	"log"
 	"net/http"
@@ -103,57 +102,57 @@ func searchBugs(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
+	filterComponents := getDefaultFilterComponents()
+
+	if r.FormValue("status") != "" {
+		statusFilter := buildTermsFilter("doc.status", strings.Split(r.FormValue("status"), ","), "")
+		filterComponents = append(filterComponents, statusFilter)
+	}
+
+	if r.FormValue("tags") != "" {
+		tagsFilter := buildTermsFilter("doc.tags", strings.Split(r.FormValue("tags"), ","), "and")
+		filterComponents = append(filterComponents, tagsFilter)
+	}
+
+	filter := buildAndFilter(filterComponents)
+
+	statusFacet := buildTermsFacet("doc.status", filter, 5)
+	tagsFacet := buildTermsFacet("doc.tags", filter, 5)
+
+	facets := Facets{
+		"statuses": statusFacet,
+		"tags":     tagsFacet,
+	}
+
+	// default to match all query
+	query := buildMatchAllQuery(filter, facets, from, size)
+
+	// if they actually provided a query string, run that instead
 	if r.FormValue("query") != "" {
+		query = buildQueryStringQuery(r.FormValue("query"), filter, facets, from, size)
+	}
 
-		filterComponents := getDefaultFilterComponents()
-
-		if r.FormValue("status") != "" {
-			statusFilter := buildTermsFilter("doc.status", strings.Split(r.FormValue("status"), ","), "")
-			filterComponents = append(filterComponents, statusFilter)
+	if *debugEs {
+		queryJson, err := json.Marshal(query)
+		if err == nil {
+			log.Printf("Elasticsearch query: %v", string(queryJson))
 		}
+	}
 
-		if r.FormValue("tags") != "" {
-			tagsFilter := buildTermsFilter("doc.tags", strings.Split(r.FormValue("tags"), ","), "and")
-			filterComponents = append(filterComponents, tagsFilter)
-		}
-
-		filter := buildAndFilter(filterComponents)
-
-		statusFacet := buildTermsFacet("doc.status", filter, 5)
-		tagsFacet := buildTermsFacet("doc.tags", filter, 5)
-
-		facets := Facets{
-			"statuses": statusFacet,
-			"tags":     tagsFacet,
-		}
-
-		query := buildQueryStringQuery(r.FormValue("query"), filter, facets, from, size)
-
-		if *debugEs {
-			queryJson, err := json.Marshal(query)
-			if err == nil {
-				log.Printf("Elasticsearch query: %v", string(queryJson))
-			}
-		}
-
-		searchresponse, err := core.Search(false, *esIndex, "couchbaseDocument", query, "")
-		if err != nil {
-			showError(w, r, err.Error(), 500)
-			return
-		}
-
-		ourresponse := convertElasticSearchResponse(searchresponse)
-
-		jres, err := json.Marshal(ourresponse)
-		if err != nil {
-			showError(w, r, err.Error(), 500)
-			return
-		}
-		w.Write(jres)
+	searchresponse, err := core.Search(false, *esIndex, "couchbaseDocument", query, "")
+	if err != nil {
+		showError(w, r, err.Error(), 500)
 		return
 	}
 
-	showError(w, r, "Search query cannot be empty", 500)
+	ourresponse := convertElasticSearchResponse(searchresponse)
+
+	jres, err := json.Marshal(ourresponse)
+	if err != nil {
+		showError(w, r, err.Error(), 500)
+		return
+	}
+	w.Write(jres)
 }
 
 // this unfortunate function converse a response from Elasticsearch
@@ -190,12 +189,12 @@ func convertElasticSearchResponse(searchresponse core.SearchResult) map[string]i
 
 			// find the couchbase response for this hit
 			mcResponse := bulkResponse[hit.Id]
-			cbDoc := map[string]interface{}{}
+			cbDoc := APIBug{}
 			// unmarshall the json
-			jsonErr := json.Unmarshal(mcResponse.Body, &cbDoc)
-			if jsonErr != nil {
-				// if any error occurred, assume it wasnt json, return full data as base64
-				cbDoc = map[string]interface{}{"base64": base64.StdEncoding.EncodeToString(mcResponse.Body)}
+			err := json.Unmarshal(mcResponse.Body, &cbDoc)
+			if err != nil {
+				log.Printf("%v", err)
+				continue
 			}
 
 			ourhit, err := combineSearchHitWithDoc(hit, cbDoc)
@@ -313,6 +312,18 @@ func buildQueryStringQuery(queryString string, filter Filter, facets Facets, fro
 			"query_string": map[string]interface{}{
 				"query": queryString,
 			},
+		},
+		"filter": filter,
+		"from":   from,
+		"facets": facets,
+		"size":   size,
+	}
+}
+
+func buildMatchAllQuery(filter Filter, facets Facets, from int, size int) Query {
+	return Query{
+		"query": map[string]interface{}{
+			"match_all": map[string]interface{}{},
 		},
 		"filter": filter,
 		"from":   from,
