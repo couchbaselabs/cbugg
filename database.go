@@ -15,7 +15,7 @@ type viewMarker struct {
 }
 
 const ddocKey = "/@cbuggddocVersion"
-const ddocVersion = 28
+const ddocVersion = 29
 const designDoc = `
 {
     "spatialInfos": [],
@@ -117,7 +117,7 @@ const designDoc = `
             "reduce": "_sum"
         },
         "users": {
-            "map": "function (doc, meta) {\n  if (doc.type === 'bug') {\n    if (doc.creator) {\n      emit(doc.creator, null);\n    } else if(doc.modified_by && doc.modified_by != doc.creator) {\n      emit(doc.modified_by, null);\n    }\n  } else if(doc.type === \"user\") {\n    emit(doc.id, null);\n  }\n}",
+            "map": "function (doc, meta) {\n  if (doc.type === 'bug') {\n    if (doc.creator) {\n      emit(doc.creator, null);\n    } else if(doc.modified_by && doc.modified_by != doc.creator) {\n      emit(doc.modified_by, null);\n    }\n  } else if(doc.type === \"user\") {\n    emit(doc.id, null);\n  } else if(doc.type === \"ping\") {\n    emit(doc.from, null);\n    emit(doc.to, null);\n  }\n}",
             "reduce": "_count"
         }
     }
