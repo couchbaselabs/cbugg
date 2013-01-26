@@ -15,7 +15,7 @@ type viewMarker struct {
 }
 
 const ddocKey = "/@cbuggddocVersion"
-const ddocVersion = 30
+const ddocVersion = 31
 const designDoc = `
 {
     "spatialInfos": [],
@@ -39,7 +39,7 @@ const designDoc = `
             "viewLink": "#showView=cbugg%2F_design%252Fcbugg%2F_view%2Fbug_history"
         },
         {
-            "map": "function (doc, meta) {\n  if (doc.type === 'bug') {\n    emit([doc.status, doc.created_at], {title: doc.title, owner: doc.owner, status: doc.status});\n  }\n}",
+            "map": "function (doc, meta) {\n  if (doc.type === 'bug') {\n    emit([doc.status, doc.created_at], {title: doc.title,\n                                        owner: doc.owner,\n                                        status: doc.status,\n                                        tags:doc.tags});\n  }\n}",
             "name": "by_state",
             "reduce": "_count",
             "removeLink": "#removeView=cbugg%2F_design%252Fcbugg%2F_view%2Fby_state",
@@ -58,7 +58,7 @@ const designDoc = `
             "viewLink": "#showView=cbugg%2F_design%252Fcbugg%2F_view%2Fcomments"
         },
         {
-            "map": "function (doc, meta) {\n  if (doc.type === 'bug' && doc.owner) {\n    emit([doc.owner, doc.status, doc.created_at], {title: doc.title, owner: doc.owner, status: doc.status});\n  }\n}",
+            "map": "function (doc, meta) {\n  if (doc.type === 'bug' && doc.owner) {\n    emit([doc.owner, doc.status, doc.created_at], {title: doc.title,\n                                                   owner: doc.owner,\n                                                   status: doc.status,\n                                                   tags: doc.tags});\n  }\n}",
             "name": "owners",
             "reduce": "_count",
             "removeLink": "#removeView=cbugg%2F_design%252Fcbugg%2F_view%2Fowners",
@@ -78,7 +78,7 @@ const designDoc = `
             "viewLink": "#showView=cbugg%2F_design%252Fcbugg%2F_view%2Ftags"
         },
         {
-            "map": "function (doc, meta) {\n  if (doc.type === 'bug' && doc.creator) {\n    emit(doc.creator, null);\n  }\n}",
+            "map": "function (doc, meta) {\n  if (doc.type === 'bug') {\n    if (doc.creator) {\n      emit(doc.creator, null);\n    } else if(doc.modified_by && doc.modified_by != doc.creator) {\n      emit(doc.modified_by, null);\n    }\n  } else if(doc.type === \"user\") {\n    emit(doc.id, null);\n  } else if(doc.type === \"ping\") {\n    emit(doc.from, null);\n    emit(doc.to, null);\n  }\n}",
             "name": "users",
             "reduce": "_count",
             "removeLink": "#removeView=cbugg%2F_design%252Fcbugg%2F_view%2Fusers",
@@ -100,7 +100,7 @@ const designDoc = `
             "reduce": "_count"
         },
         "changes": {
-            "map": "function (doc, meta) {\n  if (doc.type === 'bughistory') {\n    var ob = {actor: doc.modified_by,\n              action: \"changed \" + doc.modify_type + ' of',\n              bugid: doc.id};\n    \n    emit(doc.modified_at, ob);\n  } else if (doc.type === 'comment') {\n    emit(doc.created_at, {actor: doc.user, action: \"commented on\", bugid: doc.bugId});\n  } else if (doc.type === 'bug') {\n    emit(doc.created_at, {actor: doc.creator, action: \"created\", bugid: doc.id});\n  }\n}"
+            "map": "function (doc, meta) {\n  if (doc.type === 'bughistory') {\n    var ob = {actor: doc.modified_by,\n              action: \"changed \" + doc.modify_type + ' of',\n              bugid: doc.id};\n    \n    emit(doc.modified_at, ob);\n  } else if (doc.type === 'comment') {\n    emit(doc.created_at, {actor: doc.user, action: \"commented on\", bugid: doc.bugId});\n  } else if (doc.type === 'bug') {\n    emit(doc.modified_at, {actor: doc.creator, action: \"created\", bugid: doc.id});\n  }\n}"
         },
         "comments": {
             "map": "function (doc, meta) {\n  if (doc.type === \"comment\" || doc.type === \"ping\") {\n    emit([doc.bugId, doc.created_at], doc.type);\n  }\n}"
