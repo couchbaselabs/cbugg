@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"strings"
 	"time"
 	"unicode"
 )
@@ -220,7 +221,7 @@ func serveGithubIssue(w http.ResponseWriter, r *http.Request) {
 
 	labels := []string{}
 	for _, l := range hookdata.Issue.Labels {
-		labels = append(labels, l.Name)
+		labels = append(labels, strings.ToLower(l.Name))
 	}
 
 	tags := append(labels, "github", hookdata.Repository.Name)
