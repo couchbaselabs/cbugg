@@ -15,7 +15,7 @@ type viewMarker struct {
 }
 
 const ddocKey = "/@cbuggddocVersion"
-const ddocVersion = 23
+const ddocVersion = 27
 const designDoc = `
 {
     "spatialInfos": [],
@@ -33,7 +33,7 @@ const designDoc = `
             "viewLink": "#showView=cbugg%2F_design%252Fcbugg%2F_view%2Fattachments"
         },
         {
-            "map": "function (doc, meta) {\n  if (doc.type === 'bughistory') {\n    emit([doc.id, doc.modified_at], {\"type\": doc.modify_type, \"by\": doc.modified_by});\n  }\n}",
+            "map": "function (doc, meta) {\n  if (doc.type === 'bughistory' || doc.type === 'bug') {\n    emit([doc.id, doc.modified_at], {\"type\": doc.modify_type || \"created\",\n                                     \"by\": doc.modified_by});\n  }\n}",
             "name": "bug_history",
             "removeLink": "#removeView=cbugg%2F_design%252Fcbugg%2F_view%2Fbug_history",
             "viewLink": "#showView=cbugg%2F_design%252Fcbugg%2F_view%2Fbug_history"
@@ -46,7 +46,7 @@ const designDoc = `
             "viewLink": "#showView=cbugg%2F_design%252Fcbugg%2F_view%2Fby_state"
         },
         {
-            "map": "function (doc, meta) {\n  if (doc.type === 'bughistory') {\n    var ob = {actor: doc.modified_by,\n              action: \"changed \" + doc.modify_type + ' of',\n              bugid: doc.id};\n    \n    emit(doc.modified_at, ob);\n  } else if (doc.type === 'comment') {\n    emit(doc.created_at, {actor: doc.user, action: \"commented on\", bugid: doc.bugId});\n  } else if (doc.type === 'bug') {\n    emit(doc.created_at, {actor: doc.creator, action: \"created\", bugid: doc.id});\n  }\n}",
+            "map": "function (doc, meta) {\n  if (doc.type === 'bughistory' || doc.type === 'bug') {\n    var ob = {actor: doc.modified_by,\n              action: \"changed \" + doc.modify_type + ' of',\n              bugid: doc.id};\n    if (doc.modify_type === 'created') {\n      ob.action = 'created';\n    }\n    emit(doc.modified_at, ob);\n  } else if (doc.type === 'comment') {\n    emit(doc.created_at, {actor: doc.user, action: \"commented on\", bugid: doc.bugId});\n  }\n}",
             "name": "changes",
             "removeLink": "#removeView=cbugg%2F_design%252Fcbugg%2F_view%2Fchanges",
             "viewLink": "#showView=cbugg%2F_design%252Fcbugg%2F_view%2Fchanges"
@@ -71,9 +71,9 @@ const designDoc = `
             "viewLink": "#showView=cbugg%2F_design%252Fcbugg%2F_view%2Freminders"
         },
         {
-            "map": "function (doc, meta) {\n  if (doc.type === 'bug' && doc.tags) {\n    for (var i = 0; i < doc.tags.length; i++) {\n      emit(doc.tags[i], null);\n    }\n  }\n}",
+            "map": "function (doc, meta) {\n  if (doc.type === 'bug' && doc.tags) {\n    for (var i = 0; i < doc.tags.length; i++) {\n      emit([doc.tags[i], doc.status], 1);\n    }\n  } else if(doc.type === 'tag') {\n    emit([doc.name, \"inbox\"], 0);\n  }\n}",
             "name": "tags",
-            "reduce": "_count",
+            "reduce": "_sum",
             "removeLink": "#removeView=cbugg%2F_design%252Fcbugg%2F_view%2Ftags",
             "viewLink": "#showView=cbugg%2F_design%252Fcbugg%2F_view%2Ftags"
         },
@@ -100,7 +100,7 @@ const designDoc = `
             "reduce": "_count"
         },
         "changes": {
-            "map": "function (doc, meta) {\n  if (doc.type === 'bughistory') {\n    var ob = {actor: doc.modified_by,\n              action: \"changed \" + doc.modify_type + ' of',\n              bugid: doc.id};\n    \n    emit(doc.modified_at, ob);\n  } else if (doc.type === 'comment') {\n    emit(doc.created_at, {actor: doc.user, action: \"commented on\", bugid: doc.bugId});\n  } else if (doc.type === 'bug') {\n    emit(doc.created_at, {actor: doc.creator, action: \"created\", bugid: doc.id});\n  }\n}"
+            "map": "function (doc, meta) {\n  if (doc.type === 'bughistory' || doc.type === 'bug') {\n    var ob = {actor: doc.modified_by,\n              action: \"changed \" + doc.modify_type + ' of',\n              bugid: doc.id};\n    if (doc.modify_type == null || doc.modify_type === 'created') {\n      ob.action = 'created';\n    }\n    emit(doc.modified_at, ob);\n  } else if (doc.type === 'comment') {\n    emit(doc.created_at, {actor: doc.user, action: \"commented on\", bugid: doc.bugId});\n  }\n}"
         },
         "comments": {
             "map": "function (doc, meta) {\n  if (doc.type === \"comment\" || doc.type === \"ping\") {\n    emit([doc.bugId, doc.created_at], doc.type);\n  }\n}"
