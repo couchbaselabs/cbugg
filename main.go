@@ -169,25 +169,31 @@ func serveRecent(w http.ResponseWriter, r *http.Request) {
 	}
 
 	type OutType struct {
-		Time   string `json:"time"`
-		User   Email  `json:"user"`
-		Action string `json:"action"`
-		BugId  string `json:"bugid"`
-		Status string `json:"status"`
-		Title  string `json:"title"`
+		Time    string `json:"time"`
+		User    Email  `json:"user"`
+		Action  string `json:"action"`
+		BugId   string `json:"bugid"`
+		Status  string `json:"status"`
+		Title   string `json:"title"`
+		Private bool   `json:"private"`
 	}
 
 	output := []OutType{}
 
+	me := whoami(r)
 	for _, r := range viewRes.Rows {
-		output = append(output,
-			OutType{r.Key,
-				Email(r.Value.Actor),
-				r.Value.Action,
-				r.Value.BugId,
-				bugs[r.Value.BugId].Status,
-				bugs[r.Value.BugId].Title,
-			})
+		isPrivate := bugs[r.Value.BugId].Private
+		if me.Internal || !isPrivate {
+			output = append(output,
+				OutType{r.Key,
+					Email(r.Value.Actor),
+					r.Value.Action,
+					r.Value.BugId,
+					bugs[r.Value.BugId].Status,
+					bugs[r.Value.BugId].Title,
+					isPrivate,
+				})
+		}
 	}
 
 	mustEncode(w, output)
