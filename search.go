@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
+	"sort"
 	"strconv"
 	"strings"
 
@@ -196,6 +197,7 @@ func convertElasticSearchResponse(searchresponse core.SearchResult) map[string]i
 				log.Printf("%v", err)
 				continue
 			}
+			sort.Strings(cbDoc.Tags)
 
 			ourhit, err := combineSearchHitWithDoc(hit, cbDoc)
 			if err != nil {
