@@ -13,7 +13,7 @@
   <ul class="unstyled">
     <li class="status-{{bug.Value.Status}}" ng-repeat="bug in ob[1]">
       <a href="/bug/{{bug.ID}}">{{bug.ID}} - {{bug.Value.Title}}</a>
-      <a class="buglist-tag" ng-repeat="t in bug.Value.Tags"
+      <a class="buglist-tag tag-{{t}}" ng-repeat="t in bug.Value.Tags"
          href="/tag/{{t}}">{{t}}</a>
     </li>
   </ul>

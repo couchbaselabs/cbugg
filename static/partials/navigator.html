@@ -117,7 +117,7 @@
 														{{result.source.doc.modified_by.email}}
 														{{result.source.doc.modified_at |
 															relDate}}
-                            <a class="buglist-tag" ng-repeat="t in result.source.doc.tags"
+                            <a class="buglist-tag tag-{{t}}" ng-repeat="t in result.source.doc.tags"
                                href="/tag/{{t}}">{{t}}</a>
 													</div>
 												</div>
