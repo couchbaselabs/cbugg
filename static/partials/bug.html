@@ -56,7 +56,7 @@
     <form>
         Tags:
         <span ng-repeat="tag in bug.tags">
-          <a class="bugpage-tag tag-{{tag}} btn-success" ng-click="listTag(tag)">{{tag}}</a>
+          <a class="bugpage-tag tag-{{tag}}" ng-click="listTag(tag)">{{tag}}</a>
           <a ng-show="auth.loggedin" class="killtag" ng-click="killTag(tag)">
             <i class="icon-remove"></i>
           </a>
