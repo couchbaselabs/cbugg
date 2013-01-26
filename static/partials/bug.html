@@ -38,6 +38,13 @@
   {{bug.creator.email}}.
 </p>
 
+<div ng-show="currentuser.internal" class="btn-group pull-right" bs-buttons-checkbox>
+  <button type="button" class="btn btn-small btn-private" ng-model="bug.private">
+    <span ng-show="bug.private">Private <i class="icon-lock"></i></span>
+    <span ng-hide="bug.private">Public <i class="icon-unlock"></i></span>
+    </button>
+</div>
+
 <div class="form-inline">
   <form>
     Status:
@@ -46,11 +53,6 @@
     <span ng-hide="auth.loggedin">{{bug.status}}</span>
   </form>
 
-  <div ng-show="currentuser.internal">
-    <form>
-      <label><input type="checkbox" ng-model="bug.private" /> Private</label>
-    </form>
-  </div>
 
   <div class="tags">
     <form>
