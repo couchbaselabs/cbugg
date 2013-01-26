@@ -15,7 +15,7 @@ type viewMarker struct {
 }
 
 const ddocKey = "/@cbuggddocVersion"
-const ddocVersion = 29
+const ddocVersion = 30
 const designDoc = `
 {
     "spatialInfos": [],
@@ -96,7 +96,7 @@ const designDoc = `
             "map": "function (doc, meta) {\n  if (doc.type === 'bughistory' || doc.type === 'bug') {\n    emit([doc.id, doc.modified_at], {\"type\": doc.modify_type || \"created\",\n                                     \"by\": doc.modified_by});\n  }\n}"
         },
         "by_state": {
-            "map": "function (doc, meta) {\n  if (doc.type === 'bug') {\n    emit([doc.status, doc.created_at], {title: doc.title, owner: doc.owner, status: doc.status});\n  }\n}",
+            "map": "function (doc, meta) {\n  if (doc.type === 'bug') {\n    emit([doc.status, doc.created_at], {title: doc.title,\n                                        owner: doc.owner,\n                                        status: doc.status,\n                                        tags:doc.tags});\n  }\n}",
             "reduce": "_count"
         },
         "changes": {
@@ -106,7 +106,7 @@ const designDoc = `
             "map": "function (doc, meta) {\n  if (doc.type === \"comment\" || doc.type === \"ping\") {\n    emit([doc.bugId, doc.created_at], doc.type);\n  }\n}"
         },
         "owners": {
-            "map": "function (doc, meta) {\n  if (doc.type === 'bug' && doc.owner) {\n    emit([doc.owner, doc.status, doc.created_at], {title: doc.title, owner: doc.owner, status: doc.status});\n  }\n}",
+            "map": "function (doc, meta) {\n  if (doc.type === 'bug' && doc.owner) {\n    emit([doc.owner, doc.status, doc.created_at], {title: doc.title,\n                                                   owner: doc.owner,\n                                                   status: doc.status,\n                                                   tags: doc.tags});\n  }\n}",
             "reduce": "_count"
         },
         "reminders": {

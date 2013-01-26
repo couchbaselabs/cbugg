@@ -300,6 +300,7 @@ type bugListResult struct {
 		Title  string
 		Owner  Email
 		Status string
+		Tags   []string
 	}
 }
 

@@ -207,3 +207,20 @@ td.bugId {
     margin-bottom: 3px;
     line-height: 15px;
 }
+
+.rounded-corners (@radius: 5px) {
+  -webkit-border-radius: @radius;
+  -moz-border-radius: @radius;
+  -ms-border-radius: @radius;
+  -o-border-radius: @radius;
+  border-radius: @radius;
+}
+
+.buglist-tag {
+    color: #777;
+    background: #ddf;
+    font-size: 8px;
+    margin-right: 5px;
+    padding: 3px;
+    .rounded-corners(3px);
+}
