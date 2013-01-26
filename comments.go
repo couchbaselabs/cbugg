@@ -11,7 +11,7 @@ import (
 )
 
 func serveNewComment(w http.ResponseWriter, r *http.Request) {
-	email := whoami(r)
+	me := whoami(r)
 
 	bugid := mux.Vars(r)["bugid"]
 	id := "c-" + bugid + "-" + time.Now().UTC().Format(time.RFC3339Nano)
@@ -20,7 +20,7 @@ func serveNewComment(w http.ResponseWriter, r *http.Request) {
 		Id:        id,
 		BugId:     bugid,
 		Type:      "comment",
-		User:      email,
+		User:      me.Id,
 		Text:      r.FormValue("body"),
 		CreatedAt: time.Now().UTC(),
 	}
@@ -38,10 +38,10 @@ func serveNewComment(w http.ResponseWriter, r *http.Request) {
 
 	notifyComment(c)
 
-	err = updateSubscription(bugid, email, true)
+	err = updateSubscription(bugid, me.Id, true)
 	if err != nil {
 		log.Printf("Error subscribing commenter %v to bug %v: %v",
-			email, bugid, err)
+			me.Id, bugid, err)
 	}
 
 	mustEncode(w, APIComment(c))
@@ -108,7 +108,7 @@ func serveCommentList(w http.ResponseWriter, r *http.Request) {
 }
 
 func updateCommentDeleted(w http.ResponseWriter, r *http.Request, to bool) {
-	email := whoami(r)
+	me := whoami(r)
 
 	err := db.Update(mux.Vars(r)["commid"], 0, func(current []byte) ([]byte, error) {
 		if len(current) == 0 {
@@ -125,7 +125,7 @@ func updateCommentDeleted(w http.ResponseWriter, r *http.Request, to bool) {
 				comment.Type)
 		}
 
-		if comment.User != email {
+		if comment.User != me.Id {
 			return nil, fmt.Errorf("You can only delete your own comments")
 		}
 
@@ -143,7 +143,7 @@ func updateCommentDeleted(w http.ResponseWriter, r *http.Request, to bool) {
 }
 
 func serveCommentUpdate(w http.ResponseWriter, r *http.Request) {
-	email := whoami(r)
+	me := whoami(r)
 	commid := mux.Vars(r)["commid"]
 
 	c := Comment{}
@@ -153,7 +153,7 @@ func serveCommentUpdate(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if c.Type != "comment" || c.User != email {
+	if c.Type != "comment" || c.User != me.Id {
 		showError(w, r, "You can't change this comment", 403)
 		return
 	}

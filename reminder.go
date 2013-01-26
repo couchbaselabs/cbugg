@@ -43,7 +43,7 @@ func serveNewReminder(w http.ResponseWriter, r *http.Request) {
 		Type:      "reminder",
 		CreatedAt: time.Now().UTC(),
 		When:      when,
-		User:      whoami(r),
+		User:      whoami(r).Id,
 	}
 
 	err = db.Set(id, 0, reminder)

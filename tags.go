@@ -99,7 +99,7 @@ func updateTagSubscription(tagname, email string, add bool) error {
 }
 
 func serveSubscribeTag(w http.ResponseWriter, r *http.Request) {
-	err := updateTagSubscription(mux.Vars(r)["tag"], whoami(r), true)
+	err := updateTagSubscription(mux.Vars(r)["tag"], whoami(r).Id, true)
 	if err != nil {
 		showError(w, r, err.Error(), 500)
 		return
@@ -109,7 +109,7 @@ func serveSubscribeTag(w http.ResponseWriter, r *http.Request) {
 }
 
 func serveUnsubscribeTag(w http.ResponseWriter, r *http.Request) {
-	err := updateTagSubscription(mux.Vars(r)["tag"], whoami(r), false)
+	err := updateTagSubscription(mux.Vars(r)["tag"], whoami(r).Id, false)
 	if err != nil {
 		showError(w, r, err.Error(), 500)
 		return

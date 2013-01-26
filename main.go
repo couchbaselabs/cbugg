@@ -103,7 +103,7 @@ func serveStates(w http.ResponseWriter, r *http.Request) {
 func serveUserList(w http.ResponseWriter, r *http.Request) {
 	rv := []string{}
 
-	if whoami(r) != "" {
+	if whoami(r).Id != "" {
 		args := map[string]interface{}{
 			"group_level": 1,
 		}
@@ -194,7 +194,7 @@ func serveRecent(w http.ResponseWriter, r *http.Request) {
 }
 
 func authRequired(r *http.Request, rm *mux.RouteMatch) bool {
-	return whoami(r) != ""
+	return whoami(r).Id != ""
 }
 
 func notAuthed(w http.ResponseWriter, r *http.Request) {

@@ -103,7 +103,7 @@ func serveFileUpload(w http.ResponseWriter, r *http.Request) {
 		Size:        cr.n,
 		ContentType: fh.Header.Get("Content-Type"),
 		Filename:    fh.Filename,
-		User:        whoami(r),
+		User:        whoami(r).Id,
 		CreatedAt:   time.Now().UTC(),
 	}
 
@@ -222,7 +222,7 @@ func serveAttachment(w http.ResponseWriter, r *http.Request) {
 
 func serveDeleteAttachment(w http.ResponseWriter, r *http.Request) {
 	attid := mux.Vars(r)["attid"]
-	email := whoami(r)
+	me := whoami(r)
 
 	att := Attachment{}
 	err := db.Get(attid, &att)
@@ -236,7 +236,7 @@ func serveDeleteAttachment(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if att.User != email {
+	if att.User != me.Id {
 		showError(w, r, "not your attachment", 400)
 		return
 	}

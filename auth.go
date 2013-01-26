@@ -33,35 +33,44 @@ func initSecureCookie(hashKey []byte) {
 	secureCookie = securecookie.New(hashKey, nil)
 }
 
-func whoami(r *http.Request) string {
+func whoami(r *http.Request) User {
 	if cookie, err := r.Cookie(AUTH_COOKIE); err == nil {
 		val := browserIdData{}
 		if err = secureCookie.Decode("user", cookie.Value, &val); err == nil {
 			// TODO: Check expiration
-			return val.Email
+			u, err := getUser(val.Email)
+			if err != nil {
+				u.Id = val.Email
+			}
+			return u
 		}
 	}
 	if ahdr := r.Header.Get("Authorization"); ahdr != "" {
 		parts := strings.Split(ahdr, " ")
 		if len(parts) < 2 {
-			return ""
+			return User{}
 		}
 		decoded, err := base64.StdEncoding.DecodeString(parts[1])
 		if err != nil {
-			return ""
+			return User{}
 		}
 		userpass := strings.SplitN(string(decoded), ":", 2)
 
 		user, err := getUser(userpass[0])
 		if err != nil {
-			return ""
+			return User{}
 		}
 
 		if user.AuthToken == userpass[1] {
-			return userpass[0]
+			u, err := getUser(userpass[0])
+			if err != nil {
+				u.Id = userpass[0]
+				u.Type = "user"
+			}
+			return u
 		}
 	}
-	return ""
+	return User{}
 }
 
 func md5string(i string) string {
@@ -146,17 +155,16 @@ func performAuth(w http.ResponseWriter, r *http.Request) {
 }
 
 func serveLogin(w http.ResponseWriter, r *http.Request) {
-	email := whoami(r)
+	me := whoami(r)
 
-	if email == "" {
+	if me.Id == "" {
 		performAuth(w, r)
 	} else {
-		log.Printf("Reusing existing thing: %v", email)
+		log.Printf("Reusing existing thing: %v", me.Id)
 		mustEncode(w, map[string]string{
-			"email":    email,
-			"emailmd5": md5string(email),
+			"email":    me.Id,
+			"emailmd5": md5string(me.Id),
 		})
-		return
 	}
 }
 

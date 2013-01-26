@@ -5,8 +5,6 @@ import (
 	"errors"
 	"log"
 	"net/http"
-
-	"github.com/dustin/gomemcached"
 )
 
 var NotAUser = errors.New("not a user")
@@ -22,22 +20,10 @@ func getUser(email string) (User, error) {
 }
 
 func serveMe(w http.ResponseWriter, r *http.Request) {
-	var rv User
-	var err error
-
 	me := whoami(r)
-	if me != "" {
-		rv, err = getUser(me)
-		if !(err == nil || gomemcached.IsNotFound(err)) {
-			showError(w, r, err.Error(), 500)
-			return
-		}
-		rv.Id = me
-		rv.Type = "user"
-		rv.AuthToken = ""
-	}
+	me.AuthToken = ""
 
-	mustEncode(w, rv)
+	mustEncode(w, me)
 }
 
 func serveSetMyPrefs(w http.ResponseWriter, r *http.Request) {
@@ -47,7 +33,7 @@ func serveSetMyPrefs(w http.ResponseWriter, r *http.Request) {
 	}
 
 	me := whoami(r)
-	key := "u-" + me
+	key := "u-" + me.Id
 	user := User{}
 
 	parsedPrefs := user.Prefs
@@ -68,7 +54,7 @@ func serveSetMyPrefs(w http.ResponseWriter, r *http.Request) {
 		}
 
 		// Common fields
-		user.Id = me
+		user.Id = me.Id
 		user.Type = "user"
 
 		user.Prefs = parsedPrefs
@@ -85,32 +71,19 @@ func serveSetMyPrefs(w http.ResponseWriter, r *http.Request) {
 }
 
 func serveUserAuthToken(w http.ResponseWriter, r *http.Request) {
-	var rv User
-	var err error
-
 	me := whoami(r)
-	if me != "" {
-		rv, err = getUser(me)
-		if !(err == nil || gomemcached.IsNotFound(err)) {
-			showError(w, r, err.Error(), 500)
-			return
-		}
-		rv.Id = me
-		rv.Type = "user"
-	}
-
 	// If the user doesn't have an auth token, make one.
-	if rv.AuthToken == "" {
+	if me.AuthToken == "" {
 		serveUpdateUserAuthToken(w, r)
 		return
 	}
 
-	mustEncode(w, map[string]string{"token": rv.AuthToken})
+	mustEncode(w, map[string]string{"token": me.AuthToken})
 }
 
 func serveUpdateUserAuthToken(w http.ResponseWriter, r *http.Request) {
 	me := whoami(r)
-	key := "u-" + me
+	key := "u-" + me.Id
 	user := User{}
 
 	err := db.Update(key, 0, func(current []byte) ([]byte, error) {
@@ -122,7 +95,7 @@ func serveUpdateUserAuthToken(w http.ResponseWriter, r *http.Request) {
 		}
 
 		// Common fields
-		user.Id = me
+		user.Id = me.Id
 		user.Type = "user"
 
 		user.AuthToken = randstring(16)

@@ -23,7 +23,7 @@ func serveNewBug(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	email := whoami(r)
+	me := whoami(r)
 
 	id, err := newBugId()
 	if err != nil {
@@ -38,13 +38,13 @@ func serveNewBug(w http.ResponseWriter, r *http.Request) {
 		Title:       r.FormValue("title"),
 		Description: r.FormValue("description"),
 		Status:      "inbox",
-		Creator:     email,
+		Creator:     me.Id,
 		Tags:        r.Form["tag"],
 		Type:        "bug",
-		Subscribers: []string{email},
+		Subscribers: []string{me.Id},
 		CreatedAt:   now,
 		ModifiedAt:  now,
-		ModBy:       email,
+		ModBy:       me.Id,
 	}
 
 	added, err := db.Add(bug.Id, 0, bug)
@@ -59,7 +59,7 @@ func serveNewBug(w http.ResponseWriter, r *http.Request) {
 	}
 
 	for _, t := range r.Form["tag"] {
-		notifyTagAssigned(bug.Id, t, email)
+		notifyTagAssigned(bug.Id, t, me.Id)
 	}
 
 	http.Redirect(w, r, bug.Url(), 303)
@@ -151,7 +151,7 @@ func newTags(o, n string) []string {
 	return out
 }
 
-func updateBug(id, field, val, who string) ([]byte, error) {
+func updateBug(id, field, val string, me User) ([]byte, error) {
 	now := time.Now().UTC()
 	rval := []byte{}
 	var oldval string
@@ -243,7 +243,7 @@ func updateBug(id, field, val, who string) ([]byte, error) {
 		}
 
 		bug.ModifiedAt = now
-		bug.ModBy = who
+		bug.ModBy = me.Id
 		bug.ModType = field
 		bug.Parent = historyKey
 
@@ -261,14 +261,14 @@ func updateBug(id, field, val, who string) ([]byte, error) {
 
 	switch err {
 	case nil:
-		notifyBugChange(id, field, who)
+		notifyBugChange(id, field, me.Id)
 		if field == "owner" {
-			if val != who {
+			if val != me.Id {
 				notifyBugAssignment(id, val)
 			}
 		} else if field == "tags" {
 			for _, newtag := range newTags(oldval, val) {
-				notifyTagAssigned(id, newtag, who)
+				notifyTagAssigned(id, newtag, me.Id)
 			}
 		}
 	case couchbase.UpdateCancel:
@@ -389,7 +389,7 @@ func serveBugList(w http.ResponseWriter, r *http.Request) {
 
 func serveSubscribeBug(w http.ResponseWriter, r *http.Request) {
 	err := updateSubscription(mux.Vars(r)["bugid"],
-		whoami(r), true)
+		whoami(r).Id, true)
 	if err != nil {
 		showError(w, r, err.Error(), 500)
 		return
@@ -400,7 +400,7 @@ func serveSubscribeBug(w http.ResponseWriter, r *http.Request) {
 
 func serveUnsubscribeBug(w http.ResponseWriter, r *http.Request) {
 	err := updateSubscription(mux.Vars(r)["bugid"],
-		whoami(r), false)
+		whoami(r).Id, false)
 	if err != nil {
 		showError(w, r, err.Error(), 500)
 		return
@@ -417,7 +417,7 @@ func serveBugPing(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	from := whoami(r)
+	from := whoami(r).Id
 	to := r.FormValue("to")
 	if !strings.Contains(to, "@") {
 		showError(w, r, "Invalid 'to' parameter", 400)
