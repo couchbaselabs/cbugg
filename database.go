@@ -15,7 +15,7 @@ type viewMarker struct {
 }
 
 const ddocKey = "/@cbuggddocVersion"
-const ddocVersion = 31
+const ddocVersion = 32
 const designDoc = `
 {
     "spatialInfos": [],
@@ -100,7 +100,7 @@ const designDoc = `
             "reduce": "_count"
         },
         "changes": {
-            "map": "function (doc, meta) {\n  if (doc.type === 'bughistory') {\n    var ob = {actor: doc.modified_by,\n              action: \"changed \" + doc.modify_type + ' of',\n              bugid: doc.id};\n    \n    emit(doc.modified_at, ob);\n  } else if (doc.type === 'comment') {\n    emit(doc.created_at, {actor: doc.user, action: \"commented on\", bugid: doc.bugId});\n  } else if (doc.type === 'bug') {\n    emit(doc.modified_at, {actor: doc.creator, action: \"created\", bugid: doc.id});\n  }\n}"
+            "map": "function (doc, meta) {\n  if (doc.type === 'bughistory' || doc.type === \"bug\") {\n    var ob = {actor: doc.modified_by,\n              action: \"changed \" + doc.modify_type + ' of',\n              bugid: doc.id};\n    if (doc.modify_type === '' || doc.modify_type === 'created') {\n      ob.action = 'created';\n    }\n    emit(doc.modified_at, ob);\n  } else if (doc.type === 'comment') {\n    emit(doc.created_at, {actor: doc.user, action: \"commented on\", bugid: doc.bugId});\n  }\n}"
         },
         "comments": {
             "map": "function (doc, meta) {\n  if (doc.type === \"comment\" || doc.type === \"ping\") {\n    emit([doc.bugId, doc.created_at], doc.type);\n  }\n}"
