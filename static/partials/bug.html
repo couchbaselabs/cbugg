@@ -1,4 +1,4 @@
-<div class="titlearea clearfix">
+<div class="titlearea {{privateclass}} clearfix">
     <form ng-submit="submitTitle()" class="titletext form-inline pull-left">
         {{bug.id}} -
         <span class="title" ng-hide="editingTitle" ng-click="editTitle()">{{bug.title}}
@@ -45,6 +45,12 @@
     </select>
     <span ng-hide="auth.loggedin">{{bug.status}}</span>
   </form>
+
+  <div ng-show="currentuser.internal">
+    <form>
+      <label><input type="checkbox" ng-model="bug.private" /> Private</label>
+    </form>
+  </div>
 
   <div class="tags">
     <form>

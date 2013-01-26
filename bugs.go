@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"log"
 	"net/http"
@@ -12,6 +13,8 @@ import (
 	"github.com/couchbaselabs/go-couchbase"
 	"github.com/gorilla/mux"
 )
+
+var bugNotVisible = errors.New("this bug is not visible")
 
 func newBugId() (uint64, error) {
 	return db.Incr(".bugid", 1, 0, 0)
@@ -74,6 +77,16 @@ func getBug(bugid string) (Bug, error) {
 func serveBugHistory(w http.ResponseWriter, r *http.Request) {
 	id := mux.Vars(r)["bugid"]
 
+	bug, err := getBug(id)
+	if err != nil {
+		showError(w, r, err.Error(), 500)
+		return
+	}
+	if !bug.Visible(whoami(r)) {
+		showError(w, r, bugNotVisible.Error(), 401)
+		return
+	}
+
 	hist, err := getBugHistory(id)
 	if err != nil {
 		showError(w, r, err.Error(), 404)
@@ -87,6 +100,11 @@ func serveBug(w http.ResponseWriter, r *http.Request) {
 	bug, err := getBug(mux.Vars(r)["bugid"])
 	if err != nil {
 		showError(w, r, err.Error(), 404)
+		return
+	}
+
+	if !bug.Visible(whoami(r)) {
+		showError(w, r, bugNotVisible.Error(), 401)
 		return
 	}
 
@@ -168,6 +186,10 @@ func updateBug(id, field, val string, me User) ([]byte, error) {
 			return nil, err
 		}
 
+		if !bug.Visible(me) {
+			return nil, bugNotVisible
+		}
+
 		history := Bug{
 			Id:         id,
 			Type:       "bughistory",
@@ -177,6 +199,10 @@ func updateBug(id, field, val string, me User) ([]byte, error) {
 		}
 
 		switch field {
+		case "private":
+			oldval = fmt.Sprintf("%v", bug.Private)
+			history.Private = bug.Private
+			bug.Private = val == "true"
 		case "description":
 			oldval = bug.Description
 			history.Description = bug.Description

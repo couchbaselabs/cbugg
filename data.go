@@ -27,6 +27,7 @@ type Bug struct {
 	ModType     string    `json:"modify_type,omitempty"`
 	ModBy       string    `json:"modified_by,omitempty"`
 	Subscribers []string  `json:"subscribers,omitempty"`
+	Private     bool      `json:"private"`
 }
 
 type Comment struct {
@@ -70,6 +71,7 @@ type User struct {
 	Type      string                 `json:"type"`
 	Admin     bool                   `json:"admin"`
 	AuthToken string                 `json:"auth_token,omitmepty"`
+	Internal  bool                   `json:"internal"`
 	Prefs     map[string]interface{} `json:"prefs"`
 }
 
@@ -165,6 +167,10 @@ func (p APIPing) MarshalJSON() ([]byte, error) {
 
 func (b Bug) Url() string {
 	return "/bug/" + b.Id
+}
+
+func (b Bug) Visible(u User) bool {
+	return u.Internal || (!b.Private)
 }
 
 func (a Attachment) DownloadUrl() string {

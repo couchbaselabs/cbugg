@@ -23,6 +23,8 @@ function BugCtrl($scope, $routeParams, $http, $rootScope, $timeout, $location, b
     $scope.attachments = [];
     $scope.draftcomment = "";
     $scope.subscribed = false;
+    $scope.currentuser = null;
+    $scope.privateclass = "";
 
     $scope.allStates = $http.get("/api/states/").then(function(resp) {
         return resp.data;
@@ -146,6 +148,15 @@ function BugCtrl($scope, $routeParams, $http, $rootScope, $timeout, $location, b
 
     $http.get('/api/bug/' + $routeParams.bugId).success(function(data) {
         $scope.bug = data;
+        console.log("bug's private is", $scope.bug.private);
+
+        $scope.$watch('bug.private', function(next, prev) {
+            $scope.privateclass = next ? "private" : "";
+            if ($scope.bug && next !== prev) {
+                updateBug("private", "" + next);
+            }
+        });
+
         $scope.subcount = data.subscribers.length;
         $scope.$watch('bug.description', function(next, prev) {
             if($scope.bug && next !== prev) {
@@ -162,7 +173,11 @@ function BugCtrl($scope, $routeParams, $http, $rootScope, $timeout, $location, b
             $scope.editDesc();
         }
         checkSubscribed();
-    });
+    }).
+        error(function(data, code) {
+            bAlert("Error " + code, "could not fetch bug info: " + data, "error");
+        });
+
 
     $http.get("/api/bug/" + $routeParams.bugId + "/history/").success(function(data) {
         $scope.history = data;
@@ -194,6 +209,9 @@ function BugCtrl($scope, $routeParams, $http, $rootScope, $timeout, $location, b
         $scope.comments = checkOwnership($scope.comments);
         $scope.attachments = checkOwnership($scope.attachments);
         checkSubscribed();
+        $http.get("/api/me/").success(function(data) {
+            $scope.currentuser = data;
+        });
     });
 
     $http.get('/api/bug/' + $routeParams.bugId + '/comments/').success(function(data) {
