@@ -173,9 +173,11 @@
       {{hi.ModInfo.by.email}}
     </span>
     <span ng-hide="hi.ModInfo.by"><em>somebody</em></span>
-    changed
-    <span ng-show="hi.ModInfo.type"><tt>{{hi.ModInfo.type}}</tt></span>
-    <span ng-hide="hi.ModInfo.type">(unknown)</span>
+    <span ng-switch on="hi.ModInfo.type">
+      <span ng-switch-when="created"/>
+      <span ng-switch-when="">(unknown)</span>
+      <span ng-switch-default>changed <tt>{{hi.ModInfo.type}}</tt></span>
+    </span>
     {{hi.Timestamp | relDate}}
     </li>
 </ul>
