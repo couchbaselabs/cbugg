@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"sort"
 	"strings"
 	"time"
 
@@ -316,6 +317,10 @@ func getBugList(viewName string,
 	if err != nil {
 		cherr <- err
 		return
+	}
+
+	for i := range viewRes.Rows {
+		sort.Strings(viewRes.Rows[i].Value.Tags)
 	}
 
 	chres <- viewRes.Rows
