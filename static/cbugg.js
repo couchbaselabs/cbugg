@@ -45,13 +45,13 @@ angular.module('cbugg', ['cbuggFilters', 'cbuggAuth', 'cbuggEditor', 'cbuggAlert
                                           controller: 'NavigatorCtrl'}).
             when('/navigator/:tab/:page', {templateUrl: '/static/partials/navigator.html',
                                          controller: 'NavigatorCtrl'}).
-            when('/statecounts', {templateUrl: '/static/partials/statecounts.html',
+            when('/statecounts/', {templateUrl: '/static/partials/statecounts.html',
                                   controller: 'StatesByCountCtrl'}).
             when('/tags/', {templateUrl: '/static/partials/tags.html',
                                     controller: 'TagsCtrl'}).
             when('/tag/:tagname', {templateUrl: '/static/partials/tag.html',
                                   controller: 'TagCtrl'}).
-            otherwise({redirectTo: '/statecounts'});
+            otherwise({redirectTo: '/statecounts/'});
         $locationProvider.html5Mode(true);
         $locationProvider.hashPrefix('!');
     }]);

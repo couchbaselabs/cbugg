@@ -335,7 +335,7 @@ func main() {
 		"/user/",
 		"/state/",
 		"/search/",
-		"/statecounts",
+		"/statecounts/",
 		"/tag/",
 		"/tags/",
 		"/navigator/",
@@ -356,6 +356,8 @@ func main() {
 		})
 	}
 
+	// Backwards compatibility
+	r.Handle("/statecounts", http.RedirectHandler("/statecounts/", 302))
 	r.Handle("/", http.RedirectHandler("/static/app.html", 302))
 
 	http.Handle("/", r)
