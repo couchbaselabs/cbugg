@@ -85,11 +85,6 @@ func notifyBugAssignment(bugid, assigned string) {
 	exceptBugChange(bugid, assigned)
 }
 
-func emailIsInternal(email string) bool {
-	u, err := getUser(email)
-	return err == nil && u.Internal
-}
-
 func sendNotifications(tmplName string, subs []string,
 	fields map[string]interface{}) {
 

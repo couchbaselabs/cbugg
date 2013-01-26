@@ -450,6 +450,11 @@ func serveBugPing(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if bug.Private && !emailIsInternal(to) {
+		showError(w, r, "Cannot ping a user who can't see the bug", 403)
+		return
+	}
+
 	notifyBugPing(bug, from, to)
 
 	now := time.Now().UTC()

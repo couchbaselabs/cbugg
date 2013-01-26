@@ -19,6 +19,11 @@ func getUser(email string) (User, error) {
 	return rv, err
 }
 
+func emailIsInternal(email string) bool {
+	u, err := getUser(email)
+	return err == nil && u.Internal
+}
+
 func serveMe(w http.ResponseWriter, r *http.Request) {
 	me := whoami(r)
 	me.AuthToken = ""
