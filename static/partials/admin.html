@@ -1,0 +1,25 @@
+<div ng-show="me.admin">
+  <h2>Admin</h2>
+
+  <h3>Administrators</h3>
+
+  <ul class="unstyled" ng-repeat="u in admins">
+    <li>
+      <img ng-src="http://www.gravatar.com/avatar/{{u.md5}}?s=24">
+      {{u.email}}
+    </li>
+  </ul>
+
+  <h3>Internal Users</h3>
+
+  <ul class="unstyled" ng-repeat="u in internal">
+    <li>
+      <img ng-src="http://www.gravatar.com/avatar/{{u.md5}}?s=24">
+      {{u.email}}
+    </li>
+  </ul>
+
+</div>
+<div ng-hide="me.admin">
+  You are not an administrator.
+</div>

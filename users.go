@@ -5,6 +5,10 @@ import (
 	"errors"
 	"log"
 	"net/http"
+	"sort"
+	"strings"
+
+	"github.com/gorilla/mux"
 )
 
 var NotAUser = errors.New("not a user")
@@ -114,4 +118,75 @@ func serveUpdateUserAuthToken(w http.ResponseWriter, r *http.Request) {
 	}
 
 	mustEncode(w, map[string]string{"token": user.AuthToken})
+}
+
+func serveUserList(w http.ResponseWriter, r *http.Request) {
+	rv := []string{}
+
+	if whoami(r).Id != "" {
+		args := map[string]interface{}{
+			"group_level": 1,
+		}
+
+		viewRes := struct {
+			Rows []struct {
+				Key string
+			}
+		}{}
+
+		err := db.ViewCustom("cbugg", "users", args, &viewRes)
+		if err != nil {
+			showError(w, r, err.Error(), 500)
+			return
+		}
+
+		for _, r := range viewRes.Rows {
+			if strings.Contains(r.Key, "@") {
+				rv = append(rv, r.Key)
+			}
+		}
+		sort.Strings(rv)
+	}
+
+	mustEncode(w, rv)
+}
+
+func serveSpecialUserList(w http.ResponseWriter, r *http.Request) {
+	rv := []Email{}
+	t := mux.Vars(r)["type"]
+	me := whoami(r)
+
+	if !me.Admin {
+		showError(w, r, "You are not an admin", 403)
+		return
+	}
+
+	args := map[string]interface{}{
+		"reduce": false,
+		"key":    t,
+	}
+
+	viewRes := struct {
+		Rows []struct {
+			Value string
+		}
+	}{}
+
+	emails := []string{}
+	err := db.ViewCustom("cbugg", "special_users", args, &viewRes)
+	if err != nil {
+		showError(w, r, err.Error(), 500)
+		return
+	}
+
+	for _, r := range viewRes.Rows {
+		emails = append(emails, r.Value)
+	}
+	sort.Strings(emails)
+
+	for _, e := range emails {
+		rv = append(rv, Email(e))
+	}
+
+	mustEncode(w, rv)
 }

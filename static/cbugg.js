@@ -50,7 +50,10 @@ angular.module('cbugg', ['cbuggFilters', 'cbuggAuth', 'cbuggEditor', 'cbuggAlert
             when('/tags/', {templateUrl: '/static/partials/tags.html',
                                     controller: 'TagsCtrl'}).
             when('/tag/:tagname', {templateUrl: '/static/partials/tag.html',
-                                  controller: 'TagCtrl'}).
+                                   controller: 'TagCtrl'}).
+            when('/admin/', {templateUrl: '/static/partials/admin.html',
+                                   controller: 'AdminCtrl'}).
+
             otherwise({redirectTo: '/statecounts/'});
         $locationProvider.html5Mode(true);
         $locationProvider.hashPrefix('!');
@@ -327,5 +330,17 @@ function TagCtrl($scope, $routeParams, $http, $rootScope, $timeout, $location, b
 
             $scope.subcount = taginfo.subscribers.length;
         });
+    });
+}
+
+function AdminCtrl($scope, $http, $rootScope, cbuggAuth) {
+    $http.get("/api/me/").success(function(me) {
+        $scope.me = me;
+    });
+    $http.get("/api/users/admin/").success(function(a) {
+        $scope.admins = a;
+    });
+    $http.get("/api/users/internal/").success(function(a) {
+        $scope.internal = a;
     });
 }

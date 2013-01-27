@@ -8,8 +8,6 @@ import (
 	"log"
 	"net/http"
 	"os"
-	"sort"
-	"strings"
 	"time"
 
 	"github.com/couchbaselabs/go-couchbase"
@@ -98,37 +96,6 @@ func serveStateCounts(w http.ResponseWriter, r *http.Request) {
 
 func serveStates(w http.ResponseWriter, r *http.Request) {
 	mustEncode(w, bugStates)
-}
-
-func serveUserList(w http.ResponseWriter, r *http.Request) {
-	rv := []string{}
-
-	if whoami(r).Id != "" {
-		args := map[string]interface{}{
-			"group_level": 1,
-		}
-
-		viewRes := struct {
-			Rows []struct {
-				Key string
-			}
-		}{}
-
-		err := db.ViewCustom("cbugg", "users", args, &viewRes)
-		if err != nil {
-			showError(w, r, err.Error(), 500)
-			return
-		}
-
-		for _, r := range viewRes.Rows {
-			if strings.Contains(r.Key, "@") {
-				rv = append(rv, r.Key)
-			}
-		}
-		sort.Strings(rv)
-	}
-
-	mustEncode(w, rv)
 }
 
 func serveRecent(w http.ResponseWriter, r *http.Request) {
@@ -298,6 +265,7 @@ func main() {
 		notAuthed).Methods("POST")
 
 	r.HandleFunc("/api/users/", serveUserList).Methods("GET")
+	r.HandleFunc("/api/users/{type}/", serveSpecialUserList).Methods("GET")
 
 	// All about tags
 	r.HandleFunc("/api/tags/", serveTagList).Methods("GET")
@@ -345,6 +313,7 @@ func main() {
 		"/tag/",
 		"/tags/",
 		"/navigator/",
+		"/admin/",
 	}
 
 	for _, p := range appPages {

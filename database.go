@@ -15,7 +15,7 @@ type viewMarker struct {
 }
 
 const ddocKey = "/@cbuggddocVersion"
-const ddocVersion = 33
+const ddocVersion = 34
 const designDoc = `
 {
     "spatialInfos": [],
@@ -46,7 +46,7 @@ const designDoc = `
             "viewLink": "#showView=cbugg%2F_design%252Fcbugg%2F_view%2Fby_state"
         },
         {
-            "map": "function (doc, meta) {\n  if (doc.type === 'bughistory') {\n    var ob = {actor: doc.modified_by,\n              action: \"changed \" + doc.modify_type + ' of',\n              bugid: doc.id};\n    \n    emit(doc.modified_at, ob);\n  } else if (doc.type === 'comment') {\n    emit(doc.created_at, {actor: doc.user, action: \"commented on\", bugid: doc.bugId});\n  } else if (doc.type === 'bug') {\n    emit(doc.created_at, {actor: doc.creator, action: \"created\", bugid: doc.id});\n  }\n}",
+            "map": "function (doc, meta) {\n  if ((doc.type === 'bughistory' || doc.type === \"bug\") && doc.modify_type) {\n    var ob = {actor: doc.modified_by,\n              action: \"changed \" + doc.modify_type + ' of',\n              bugid: doc.id};\n    if (doc.modify_type === 'created') {\n      ob.action = 'created';\n    }\n    emit(doc.modified_at, ob);\n  } else if (doc.type === 'comment') {\n    emit(doc.created_at, {actor: doc.user, action: \"commented on\", bugid: doc.bugId});\n  }\n}",
             "name": "changes",
             "removeLink": "#removeView=cbugg%2F_design%252Fcbugg%2F_view%2Fchanges",
             "viewLink": "#showView=cbugg%2F_design%252Fcbugg%2F_view%2Fchanges"
@@ -111,6 +111,10 @@ const designDoc = `
         },
         "reminders": {
             "map": "function (doc, meta) {\n  if (doc.type === \"reminder\") {\n    emit(doc.when, null);\n  }\n}"
+        },
+        "special_users": {
+            "map": "function (doc, meta) {\n  if (doc.type === 'user') {\n    if (doc.admin) {\n      emit(\"admin\", doc.id);\n    }\n    if (doc.internal) {\n      emit(\"internal\", doc.id);\n    }\n  }\n}",
+            "reduce": "_count"
         },
         "tags": {
             "map": "function (doc, meta) {\n  if (doc.type === 'bug' && doc.tags) {\n    for (var i = 0; i < doc.tags.length; i++) {\n      emit([doc.tags[i], doc.status], 1);\n    }\n  } else if(doc.type === 'tag') {\n    emit([doc.name, \"inbox\"], 0);\n  }\n}",
