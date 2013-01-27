@@ -9,6 +9,7 @@ import (
 	"log"
 	"net/http"
 	"strings"
+	"time"
 
 	"github.com/gorilla/securecookie"
 )
@@ -37,12 +38,16 @@ func whoami(r *http.Request) User {
 	if cookie, err := r.Cookie(AUTH_COOKIE); err == nil {
 		val := browserIdData{}
 		if err = secureCookie.Decode("user", cookie.Value, &val); err == nil {
-			// TODO: Check expiration
-			u, err := getUser(val.Email)
-			if err != nil {
-				u.Id = val.Email
+			if time.Now().Unix()*1000 < int64(val.Expires) {
+				u, err := getUser(val.Email)
+				if err != nil {
+					u.Id = val.Email
+				}
+				return u
+			} else {
+				log.Printf("browserId cookie expired as of %v",
+					val.Expires)
 			}
-			return u
 		}
 	}
 	if ahdr := r.Header.Get("Authorization"); ahdr != "" {
