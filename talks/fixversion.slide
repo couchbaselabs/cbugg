@@ -1,0 +1,48 @@
+Why No "fixversion"
+
+Dustin Sallings
+2013-01-27
+
+* Keeping it Simple
+
+- File a bug.
+- Submit a fix.
+- Use data to keep track of where all the fix propagates.
+- Discard assumptions.
+
+For best results, also identify the change that introduced the bug.
+
+(if the bug has "always been there" that's also valid)
+
+* Fix Version?
+
+There are simple cases we see _today_ where a "fix version" is misleading.
+
+.image fixversion/fixversion.png
+
+The fixes for "x" and "y" both were committed and put in place
+*before* 2.1 was released.  The 2.0.1 release included the fix for "y"
+and the 2.1 release came after 2.0.1, but did not include the fix for "y"
+
+*What*is*the*"fix*version"*for*bug*y?*
+
+* ...but it gets more complicated
+
+- A bug may require changes to multiple projects.
+- _Part_ of the fix may be merged in one project, but not another.
+- A bad merge can reintroduce the bug even after the fix is merged.
+- A bug may not exist _before_ a particular version on a stability branch.
+
+What is the "fix version"?
+
+* Better Questions
+
+- What builds contain bug y?
+- What bugs are known to be in release 2.1?
+- What builds contain fixes for *both* bugs x and y?
+
+In reality, we capture data that tells us this.
+
+Tracking changes and asking the exact questions we want to know will
+yieldbetter results and things will be consistent --
+_even_when_we_make_procedural_mistakes_.
