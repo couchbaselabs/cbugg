@@ -1,0 +1,198 @@
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Why No &#34;fixversion&#34;</title>
+    <meta charset='utf-8'>
+    <script src='static/slides.js'></script>
+  </head>
+
+  <body style='display: none'>
+
+    <section class='slides layout-widescreen'>
+      
+      <article>
+        <h1>Why No &#34;fixversion&#34;</h1>
+        
+        
+        
+          <div class="presenter">
+            
+  
+  <p>
+    Dustin Sallings
+  </p>
+  
+
+  
+  <p>
+    2013-01-27
+  </p>
+  
+
+          </div>
+        
+      </article>
+      
+  
+  
+      <article>
+      
+        <h3>Keeping it Simple</h3>
+        
+  <ul>
+  
+    <li>File a bug.</li>
+  
+    <li>Submit a fix.</li>
+  
+    <li>Use data to keep track of where all the fix propagates.</li>
+  
+    <li>Discard assumptions.</li>
+  
+  </ul>
+
+  
+  <p>
+    For best results, also identify the change that introduced the bug.
+  </p>
+  
+
+  
+  <p>
+    (if the bug has &#34;always been there&#34; that&#39;s also valid)
+  </p>
+  
+
+      
+      </article>
+  
+  
+  
+      <article>
+      
+        <h3>Fix Version?</h3>
+        
+  
+  <p>
+    There are simple cases we see <i>today</i> where a &#34;fix version&#34; is misleading.
+  </p>
+  
+
+<div class="image">
+  <img src="fixversion/fixversion.png">
+</div>
+
+  
+  <p>
+    The fixes for &#34;x&#34; and &#34;y&#34; both were committed and put in place
+<br>
+
+    <b>before</b> 2.1 was released.  The 2.0.1 release included the fix for &#34;y&#34;
+<br>
+
+    and the 2.1 release came after 2.0.1, but did not include the fix for &#34;y&#34;
+  </p>
+  
+
+  
+  <p>
+    <b>What is the &#34;fix version&#34; for bug y?</b>
+  </p>
+  
+
+      
+      </article>
+  
+  
+  
+      <article>
+      
+        <h3>...but it gets more complicated</h3>
+        
+  <ul>
+  
+    <li>A bug may require changes to multiple projects.</li>
+  
+    <li><i>Part</i> of the fix may be merged in one project, but not another.</li>
+  
+    <li>A bad merge can reintroduce the bug even after the fix is merged.</li>
+  
+    <li>A bug may not exist <i>before</i> a particular version on a stability branch.</li>
+  
+  </ul>
+
+  
+  <p>
+    What is the &#34;fix version&#34;?
+  </p>
+  
+
+      
+      </article>
+  
+  
+  
+      <article>
+      
+        <h3>Better Questions</h3>
+        
+  <ul>
+  
+    <li>What builds contain bug y?</li>
+  
+    <li>What bugs are known to be in release 2.1?</li>
+  
+    <li>What builds contain fixes for <b>both</b> bugs x and y?</li>
+  
+  </ul>
+
+  
+  <p>
+    In reality, we capture data that tells us this.
+  </p>
+  
+
+  
+  <p>
+    Tracking changes and asking the exact questions we want to know will
+<br>
+
+    yieldbetter results and things will be consistent --
+<br>
+
+    <i>even when we make procedural mistakes</i>.
+  </p>
+  
+
+      
+      </article>
+  
+  
+
+      <article>
+        <h3>Thank you</h1>
+        
+          <div class="presenter">
+            
+  
+  <p>
+    Dustin Sallings
+  </p>
+  
+
+  
+  <p>
+    2013-01-27
+  </p>
+  
+
+          </div>
+        
+      </article>
+
+  </body>
+  
+  <script src='play.js'></script>
+  
+</html>
