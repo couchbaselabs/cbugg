@@ -14,11 +14,20 @@ import (
 
 // by default we only want documents of elasticsearch type "couchbaseDocument"
 // and documents with type "bug"
-func getDefaultFilterComponents() []Filter {
-	return []Filter{
+func getDefaultFilterComponents(r *http.Request) []Filter {
+
+	// base defaults for all users
+	result := []Filter{
 		buildTypeFilter("couchbaseDocument"),
 		buildTermFilter("doc.type", "bug"),
 	}
+
+	// if users is external, add additional filter
+	if whoami(r).Internal == false {
+		result = append(result, buildNotFilter(buildTermFilter("doc.private", "true")))
+	}
+
+	return result
 }
 
 // powers the bug similarity feature when entering new bugs
@@ -30,7 +39,7 @@ func findSimilarBugs(w http.ResponseWriter, r *http.Request) {
 
 	if r.FormValue("query") != "" {
 
-		filterComponents := getDefaultFilterComponents()
+		filterComponents := getDefaultFilterComponents(r)
 		matchFilter := buildAndFilter(filterComponents)
 
 		activeBugsFilter := buildTermsFilter("doc.status", []string{"inbox", "new", "open"}, "")
@@ -103,7 +112,7 @@ func searchBugs(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	filterComponents := getDefaultFilterComponents()
+	filterComponents := getDefaultFilterComponents(r)
 
 	if r.FormValue("status") != "" {
 		statusFilter := buildTermsFilter("doc.status", strings.Split(r.FormValue("status"), ","), "")
@@ -295,6 +304,12 @@ func buildTypeFilter(typ string) Filter {
 func buildAndFilter(components []Filter) Filter {
 	return Filter{
 		"and": components,
+	}
+}
+
+func buildNotFilter(filter Filter) Filter {
+	return Filter{
+		"not": filter,
 	}
 }
 
