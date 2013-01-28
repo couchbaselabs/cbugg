@@ -337,10 +337,52 @@ function AdminCtrl($scope, $http, $rootScope, cbuggAuth) {
     $http.get("/api/me/").success(function(me) {
         $scope.me = me;
     });
-    $http.get("/api/users/admin/").success(function(a) {
-        $scope.admins = a;
+    $http.get("/api/users/special/").success(function(a) {
+        $scope.special = a;
     });
-    $http.get("/api/users/internal/").success(function(a) {
-        $scope.internal = a;
-    });
+
+    $scope.getUsers = function(query, process) {
+        $http.get('/api/users/').success(function(data) {
+            process(data);
+        });
+    };
+
+    var updateUser = function(e, flag, value) {
+        return $http.post("/api/users/mod/",
+                          "email=" + encodeURIComponent(e) + "&" + flag + "=" + value,
+                          {headers: {"Content-Type": "application/x-www-form-urlencoded"}}).
+            success(function(data) {
+                if (value) {
+                    $scope.special[flag][e] = data;
+                } else {
+                    delete $scope.special[flag][e];
+                }
+            }).
+            error(function(data, code) {
+                bAlert("Error " + code, "Failed to update user.");
+            });
+    };
+
+    $scope.rmAdmin = function(e) {
+        updateUser(e, "admin", false);
+    };
+
+    $scope.rmInternal = function(e) {
+        updateUser(e, "internal", false);
+    };
+
+    $scope.addAdmin = function() {
+        var e = $(".adminbox").val();
+        updateUser(e, "admin", true);
+        $(".adminbox").val("");
+    };
+
+    $scope.addInternal = function() {
+        var e = $(".internalbox").val();
+        updateUser(e, "internal", true);
+        $(".internalbox").val("");
+    };
+
+    $(".userbox").typeahead({source: $scope.getUsers});
+
 }

@@ -265,7 +265,8 @@ func main() {
 		notAuthed).Methods("POST")
 
 	r.HandleFunc("/api/users/", serveUserList).Methods("GET")
-	r.HandleFunc("/api/users/{type}/", serveSpecialUserList).Methods("GET")
+	r.HandleFunc("/api/users/special/", serveSpecialUserList).Methods("GET")
+	r.HandleFunc("/api/users/mod/", serveAdminUserMod).Methods("POST")
 
 	// All about tags
 	r.HandleFunc("/api/tags/", serveTagList).Methods("GET")

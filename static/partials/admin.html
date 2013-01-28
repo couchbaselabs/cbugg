@@ -3,21 +3,41 @@
 
   <h3>Administrators</h3>
 
-  <ul class="unstyled" ng-repeat="u in admins">
+  <ul class="unstyled" ng-repeat="(e, u) in special['admin']">
     <li>
       <img ng-src="http://www.gravatar.com/avatar/{{u.md5}}?s=24">
-      {{u.email}}
+      {{e}}
+      <a class="killuser" ng-click="rmAdmin(e)">
+        <i class="icon-remove"></i>
+      </a>
     </li>
   </ul>
+
+  <form ng-submit="addAdmin()">
+    <label>Add
+      <input type="text" class="adminbox userbox input-medium">
+      <button type="submit" class="btn">Add</button>
+    </label>
+  </form>
 
   <h3>Internal Users</h3>
 
-  <ul class="unstyled" ng-repeat="u in internal">
+  <ul class="unstyled" ng-repeat="(e, u) in special['internal']">
     <li>
       <img ng-src="http://www.gravatar.com/avatar/{{u.md5}}?s=24">
-      {{u.email}}
+      {{e}}
+      <a class="killuser" ng-click="rmInternal(e)">
+        <i class="icon-remove"></i>
+      </a>
     </li>
   </ul>
+
+  <form ng-submit="addInternal()">
+    <label>Add
+      <input type="text" class="internalbox userbox input-medium">
+      <button type="submit" class="btn">Add</button>
+    </label>
+  </form>
 
 </div>
 <div ng-hide="me.admin">

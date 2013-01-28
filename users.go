@@ -7,8 +7,6 @@ import (
 	"net/http"
 	"sort"
 	"strings"
-
-	"github.com/gorilla/mux"
 )
 
 var NotAUser = errors.New("not a user")
@@ -33,6 +31,56 @@ func serveMe(w http.ResponseWriter, r *http.Request) {
 	me.AuthToken = ""
 
 	mustEncode(w, me)
+}
+
+func serveAdminUserMod(w http.ResponseWriter, r *http.Request) {
+	me := whoami(r)
+
+	if !me.Admin {
+		showError(w, r, "Must be admin to do this", 403)
+		return
+	}
+
+	email := r.FormValue("email")
+	if email == "" {
+		showError(w, r, "no email given", 400)
+		return
+	}
+
+	key := "u-" + email
+
+	err := db.Update(key, 0, func(current []byte) ([]byte, error) {
+		var user User
+		if len(current) > 0 {
+			err := json.Unmarshal(current, &user)
+			if err != nil {
+				return nil, err
+			}
+		}
+
+		// Common fields
+		user.Id = email
+		user.Type = "user"
+
+		adminVal := r.FormValue("admin")
+		if adminVal != "" {
+			user.Admin = adminVal == "true"
+		}
+
+		internalVal := r.FormValue("internal")
+		if internalVal != "" {
+			user.Internal = internalVal == "true"
+		}
+
+		return json.Marshal(user)
+	})
+
+	if err != nil {
+		showError(w, r, err.Error(), 500)
+		return
+	}
+
+	mustEncode(w, Email(email))
 }
 
 func serveSetMyPrefs(w http.ResponseWriter, r *http.Request) {
@@ -152,40 +200,36 @@ func serveUserList(w http.ResponseWriter, r *http.Request) {
 }
 
 func serveSpecialUserList(w http.ResponseWriter, r *http.Request) {
-	rv := []Email{}
-	t := mux.Vars(r)["type"]
 	me := whoami(r)
 
-	if !me.Admin {
-		showError(w, r, "You are not an admin", 403)
+	if !(me.Admin || me.Internal) {
+		showError(w, r, "You are not allowed to see this list", 403)
 		return
 	}
 
 	args := map[string]interface{}{
 		"reduce": false,
-		"key":    t,
 	}
 
 	viewRes := struct {
 		Rows []struct {
-			Value string
+			Key, Value string
 		}
 	}{}
 
-	emails := []string{}
 	err := db.ViewCustom("cbugg", "special_users", args, &viewRes)
 	if err != nil {
 		showError(w, r, err.Error(), 500)
 		return
 	}
 
+	rv := map[string]map[string]Email{}
 	for _, r := range viewRes.Rows {
-		emails = append(emails, r.Value)
-	}
-	sort.Strings(emails)
-
-	for _, e := range emails {
-		rv = append(rv, Email(e))
+		_, ok := rv[r.Key]
+		if !ok {
+			rv[r.Key] = map[string]Email{}
+		}
+		rv[r.Key][r.Value] = Email(r.Value)
 	}
 
 	mustEncode(w, rv)
