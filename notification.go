@@ -336,7 +336,7 @@ func updateSubscription(bugid, email string, add bool) error {
 		bug.Subscribers = removeFromList(bug.Subscribers, email)
 		bug.ModifiedAt = time.Now().UTC()
 
-		if add {
+		if add && emailIsInternal(email) {
 			bug.Subscribers = append(bug.Subscribers, email)
 		}
 
