@@ -233,6 +233,27 @@ func serveAttachment(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func deleteAttachmentFile(url string) error {
+	log.Printf("Deleting attachment file at %v", url)
+	req, err := http.NewRequest("DELETE", url, nil)
+	if err != nil {
+		log.Printf("Error creating DELETE request: %v", err)
+		return err
+	}
+
+	res, err := http.DefaultClient.Do(req)
+	if err != nil {
+		log.Printf("Error sending DELETE request to cbfs: %v", err)
+		return err
+	}
+	defer res.Body.Close()
+	if res.StatusCode != 204 {
+		log.Printf("Deletion failed: %v", res.Status)
+		return fmt.Errorf("Deletion failed: %v", res.Status)
+	}
+	return nil
+}
+
 func serveDeleteAttachment(w http.ResponseWriter, r *http.Request) {
 	attid := mux.Vars(r)["attid"]
 	me := whoami(r)
@@ -265,19 +286,5 @@ func serveDeleteAttachment(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(204)
 
 	// Then delete it from CBFS
-	req, err := http.NewRequest("DELETE", att.Url, nil)
-	if err != nil {
-		log.Printf("Error creating DELETE request: %v", err)
-		return
-	}
-
-	res, err := http.DefaultClient.Do(req)
-	if err != nil {
-		log.Printf("Error sending DELETE request to cbfs: %v", err)
-		return
-	}
-	defer res.Body.Close()
-	if res.StatusCode != 204 {
-		log.Printf("Deletion failed: %v", res.Status)
-	}
+	go deleteAttachmentFile(att.Url)
 }

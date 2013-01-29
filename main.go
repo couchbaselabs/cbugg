@@ -182,8 +182,12 @@ func authRequired(r *http.Request, rm *mux.RouteMatch) bool {
 	return whoami(r).Id != ""
 }
 
+func adminRequired(r *http.Request, rm *mux.RouteMatch) bool {
+	return whoami(r).Admin
+}
+
 func notAuthed(w http.ResponseWriter, r *http.Request) {
-	showError(w, r, "You are not authenticated", 401)
+	showError(w, r, "You are not authorized", 401)
 }
 
 func RewriteURL(to string, h http.Handler) http.Handler {
@@ -231,7 +235,9 @@ func main() {
 	r.HandleFunc("/api/bug/{bugid}", serveBug).Methods("GET")
 	r.HandleFunc("/api/bug/{bugid}",
 		serveBugUpdate).Methods("POST").MatcherFunc(authRequired)
-	r.HandleFunc("/api/bug/{bugid}", notAuthed).Methods("POST")
+	r.HandleFunc("/api/bug/{bugid}",
+		serveBugDeletion).Methods("DELETE").MatcherFunc(adminRequired)
+	r.HandleFunc("/api/bug/{bugid}", notAuthed).Methods("POST", "DELETE")
 
 	r.HandleFunc("/api/bug/{bugid}/attachments/",
 		serveFileUpload).Methods("POST").MatcherFunc(authRequired)

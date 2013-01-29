@@ -473,3 +473,89 @@ func serveBugPing(w http.ResponseWriter, r *http.Request) {
 
 	mustEncode(w, Email(to))
 }
+
+func deleteDocsMatching(ddoc, view string, args map[string]interface{},
+	deleted chan couchbase.ViewRow, cherr chan error) {
+
+	viewres, err := db.View(ddoc, view, args)
+	if err != nil {
+		cherr <- err
+		return
+	}
+
+	for _, r := range viewres.Rows {
+		err = db.Delete(r.ID)
+		if err != nil {
+			cherr <- err
+			return
+		}
+		deleted <- r
+	}
+
+	cherr <- nil
+}
+
+func serveBugDeletion(w http.ResponseWriter, r *http.Request) {
+	me := whoami(r)
+	bugid := mux.Vars(r)["bugid"]
+	_, err := getBugOrDisplayErr(bugid, me, w, r)
+	if err != nil {
+		return
+	}
+
+	cherr := make(chan error)
+	deleted := make(chan couchbase.ViewRow)
+	delatt := make(chan couchbase.ViewRow)
+
+	go deleteDocsMatching("cbugg", "comments",
+		map[string]interface{}{
+			"stale":     false,
+			"reduce":    false,
+			"start_key": []interface{}{bugid},
+			"end_key":   []interface{}{bugid, map[string]string{}},
+		}, deleted, cherr)
+
+	go deleteDocsMatching("cbugg", "attachments",
+		map[string]interface{}{
+			"stale":        false,
+			"reduce":       false,
+			"start_key":    []interface{}{bugid},
+			"end_key":      []interface{}{bugid, map[string]string{}},
+			"include_docs": true,
+		}, delatt, cherr)
+
+	go deleteDocsMatching("cbugg", "bug_history",
+		map[string]interface{}{
+			"stale":     false,
+			"reduce":    false,
+			"start_key": []interface{}{bugid},
+			"end_key":   []interface{}{bugid, map[string]string{}},
+		}, deleted, cherr)
+
+	todo := 3
+	for todo > 0 {
+		select {
+		case del := <-deleted:
+			log.Printf("Deleted %v", del.ID)
+		case del := <-delatt:
+			log.Printf("Deleted attachment %v", del.ID)
+			mo := (*del.Doc).(map[string]interface{})
+			mi := mo["json"].(map[string]interface{})
+			u := mi["url"].(string)
+			err := deleteAttachmentFile(u)
+			if err != nil {
+				log.Printf("Error deleting attachment %v: %v",
+					u, err)
+			}
+		case err := <-cherr:
+			todo--
+			if err != nil {
+				log.Printf("Error:  %v", err)
+			}
+		}
+	}
+
+	log.Printf("Done deleting children.")
+
+	w.WriteHeader(204)
+}

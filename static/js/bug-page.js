@@ -271,6 +271,14 @@ function BugCtrl($scope, $routeParams, $http, $rootScope, $timeout, $location, b
         return false;
     };
 
+    $scope.delete_bug = function() {
+        if (confirm("Are you sure you want to completely and irreversibly destroy this bug?")) {
+            $http.delete('/api/bug/' + $scope.bug.id);
+            $location.path("/");
+        }
+        return false;
+    };
+
     $scope.unsubscribe = function() {
         $http.delete('/api/bug/' + $scope.bug.id + '/sub/');
         $scope.subscribed = false;

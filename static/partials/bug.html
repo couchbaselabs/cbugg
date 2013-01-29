@@ -39,6 +39,12 @@
   {{bug.creator.email}}.
 </p>
 
+<div ng-show="currentuser.admin" class="btn-group pull-right">
+  <button type="button" ng-click="delete_bug()" class="btn btn-small btn-delete">
+    <span>Delete <i class="icon-trash"></i></span>
+  </button>
+</div>
+
 <div ng-show="currentuser.internal" class="btn-group pull-right" bs-buttons-checkbox>
   <button type="button" class="btn btn-small btn-private" ng-model="bug.private">
     <span ng-show="bug.private">Private <i class="icon-lock"></i></span>
