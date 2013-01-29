@@ -133,7 +133,7 @@ func updateCommentDeleted(w http.ResponseWriter, r *http.Request, to bool) {
 				comment.Type)
 		}
 
-		if comment.User != me.Id {
+		if !(me.Admin || comment.User == me.Id) {
 			return nil, fmt.Errorf("You can only delete your own comments")
 		}
 

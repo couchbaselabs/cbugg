@@ -270,7 +270,7 @@ func serveDeleteAttachment(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if att.User != me.Id {
+	if !(me.Admin || att.User == me.Id) {
 		showError(w, r, "not your attachment", 400)
 		return
 	}
