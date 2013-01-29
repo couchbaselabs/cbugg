@@ -8,9 +8,11 @@ import (
 	"net/http"
 	"sort"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/couchbaselabs/go-couchbase"
+	"github.com/dustin/gomemcached"
 	"github.com/gorilla/mux"
 )
 
@@ -475,7 +477,9 @@ func serveBugPing(w http.ResponseWriter, r *http.Request) {
 }
 
 func deleteDocsMatching(ddoc, view string, args map[string]interface{},
-	deleted chan couchbase.ViewRow, cherr chan error) {
+	deleted chan couchbase.ViewRow, cherr chan error, wg *sync.WaitGroup) {
+
+	defer wg.Done()
 
 	viewres, err := db.View(ddoc, view, args)
 	if err != nil {
@@ -487,7 +491,6 @@ func deleteDocsMatching(ddoc, view string, args map[string]interface{},
 		err = db.Delete(r.ID)
 		if err != nil {
 			cherr <- err
-			return
 		}
 		deleted <- r
 	}
@@ -507,14 +510,18 @@ func serveBugDeletion(w http.ResponseWriter, r *http.Request) {
 	deleted := make(chan couchbase.ViewRow)
 	delatt := make(chan couchbase.ViewRow)
 
+	wg := &sync.WaitGroup{}
+
+	wg.Add(1)
 	go deleteDocsMatching("cbugg", "comments",
 		map[string]interface{}{
 			"stale":     false,
 			"reduce":    false,
 			"start_key": []interface{}{bugid},
 			"end_key":   []interface{}{bugid, map[string]string{}},
-		}, deleted, cherr)
+		}, deleted, cherr, wg)
 
+	wg.Add(1)
 	go deleteDocsMatching("cbugg", "attachments",
 		map[string]interface{}{
 			"stale":        false,
@@ -522,18 +529,24 @@ func serveBugDeletion(w http.ResponseWriter, r *http.Request) {
 			"start_key":    []interface{}{bugid},
 			"end_key":      []interface{}{bugid, map[string]string{}},
 			"include_docs": true,
-		}, delatt, cherr)
+		}, delatt, cherr, wg)
 
+	wg.Add(1)
 	go deleteDocsMatching("cbugg", "bug_history",
 		map[string]interface{}{
 			"stale":     false,
 			"reduce":    false,
 			"start_key": []interface{}{bugid},
 			"end_key":   []interface{}{bugid, map[string]string{}},
-		}, deleted, cherr)
+		}, deleted, cherr, wg)
 
-	todo := 3
-	for todo > 0 {
+	go func() {
+		wg.Wait()
+		close(cherr)
+	}()
+
+	running := true
+	for running {
 		select {
 		case del := <-deleted:
 			log.Printf("Deleted %v", del.ID)
@@ -547,8 +560,10 @@ func serveBugDeletion(w http.ResponseWriter, r *http.Request) {
 				log.Printf("Error deleting attachment %v: %v",
 					u, err)
 			}
-		case err := <-cherr:
-			todo--
+		case err, ok := <-cherr:
+			if !ok {
+				running = false
+			}
 			if err != nil {
 				log.Printf("Error:  %v", err)
 			}
@@ -556,6 +571,13 @@ func serveBugDeletion(w http.ResponseWriter, r *http.Request) {
 	}
 
 	log.Printf("Done deleting children.")
+
+	// This bug should already be deleted as a bug is also bug
+	// history.  But give it a go anyway for clarity.
+	err = db.Delete(bugid)
+	if err != nil && !gomemcached.IsNotFound(err) {
+		log.Printf("Error deleting the bug.")
+	}
 
 	w.WriteHeader(204)
 }
