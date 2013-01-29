@@ -29,7 +29,8 @@ func moveOldInboxItems(t time.Time) error {
 
 	for _, row := range viewRes.Rows {
 		log.Printf("Moving %v from inbox to new", row.ID)
-		_, err = updateBug(row.ID, "status", "new", User{Id: *mailFrom})
+		_, err = updateBug(row.ID, "status", "new",
+			User{Id: *mailFrom, Internal: true, Admin: true})
 		if err != nil {
 			return err
 		}
