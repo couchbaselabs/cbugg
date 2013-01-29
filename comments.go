@@ -14,6 +14,7 @@ func serveNewComment(w http.ResponseWriter, r *http.Request) {
 	me := whoami(r)
 
 	bugid := mux.Vars(r)["bugid"]
+
 	id := "c-" + bugid + "-" + time.Now().UTC().Format(time.RFC3339Nano)
 
 	c := Comment{
@@ -50,13 +51,7 @@ func serveNewComment(w http.ResponseWriter, r *http.Request) {
 func serveCommentList(w http.ResponseWriter, r *http.Request) {
 	bugid := mux.Vars(r)["bugid"]
 
-	bug, err := getBug(bugid)
-	if err != nil {
-		showError(w, r, err.Error(), 500)
-		return
-	}
-	if !bug.Visible(whoami(r)) {
-		showError(w, r, bugNotVisible.Error(), 401)
+	if _, err := getBugOrDisplayErr(bugid, whoami(r), w, r); err != nil {
 		return
 	}
 
@@ -76,7 +71,7 @@ func serveCommentList(w http.ResponseWriter, r *http.Request) {
 		}
 	}{}
 
-	err = db.ViewCustom("cbugg", "comments", args, &viewRes)
+	err := db.ViewCustom("cbugg", "comments", args, &viewRes)
 	if err != nil {
 		showError(w, r, err.Error(), 500)
 		return

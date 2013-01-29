@@ -74,16 +74,28 @@ func getBug(bugid string) (Bug, error) {
 	return bug, err
 }
 
+func getBugFor(bugid string, u User) (Bug, error) {
+	bug, err := getBug(bugid)
+	if err == nil && !bug.Visible(u) {
+		return Bug{}, bugNotVisible
+	}
+	return bug, err
+}
+
+func getBugOrDisplayErr(bugid string, u User,
+	w http.ResponseWriter, r *http.Request) (Bug, error) {
+
+	bug, err := getBugFor(bugid, u)
+	if err != nil {
+		showError(w, r, err.Error(), errorCode(err))
+	}
+	return bug, err
+}
+
 func serveBugHistory(w http.ResponseWriter, r *http.Request) {
 	id := mux.Vars(r)["bugid"]
 
-	bug, err := getBug(id)
-	if err != nil {
-		showError(w, r, err.Error(), 500)
-		return
-	}
-	if !bug.Visible(whoami(r)) {
-		showError(w, r, bugNotVisible.Error(), 401)
+	if _, err := getBugOrDisplayErr(id, whoami(r), w, r); err != nil {
 		return
 	}
 
@@ -97,14 +109,8 @@ func serveBugHistory(w http.ResponseWriter, r *http.Request) {
 }
 
 func serveBug(w http.ResponseWriter, r *http.Request) {
-	bug, err := getBug(mux.Vars(r)["bugid"])
+	bug, err := getBugOrDisplayErr(mux.Vars(r)["bugid"], whoami(r), w, r)
 	if err != nil {
-		showError(w, r, err.Error(), 404)
-		return
-	}
-
-	if !bug.Visible(whoami(r)) {
-		showError(w, r, bugNotVisible.Error(), 401)
 		return
 	}
 

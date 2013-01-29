@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"github.com/couchbaselabs/go-couchbase"
+	"github.com/dustin/gomemcached"
 	"github.com/gorilla/mux"
 )
 
@@ -53,6 +54,17 @@ func checkLastModified(w http.ResponseWriter, r *http.Request, modtime time.Time
 	w.Header().Set("Last-Modified", modtime.UTC().Format(http.TimeFormat))
 	return false
 }
+
+func errorCode(err error) int {
+	switch {
+	case err == bugNotVisible:
+		return 401
+	case gomemcached.IsNotFound(err):
+		return 404
+	}
+	return 500
+}
+
 func showError(w http.ResponseWriter, r *http.Request,
 	msg string, code int) {
 	log.Printf("Reporting error %v/%v", code, msg)
