@@ -1,0 +1,11 @@
+<h3>Realtime Changes</h3>
+
+<div ng-show="errorMessage != null" class="alert alert-error">{{errorMessage}}</div>
+
+<ul class="unstyled">
+  <li ng-repeat="change in changes">      
+    <img ng-src="http://www.gravatar.com/avatar/{{change.user.md5}}?s=16">
+      {{change.user.email}} {{change.action}}
+      <a class="status-{{change.bug.status}}"
+         title="{{change.bug.title}}" href="/bug/{{change.bug.id}}">{{change.bug.id}}</a> {{change.bug.modified_at | relDate}}</li>
+</ul>

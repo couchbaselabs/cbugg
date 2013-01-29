@@ -319,6 +319,9 @@ func main() {
 	r.HandleFunc("/api/state-counts", serveStateCounts)
 	r.HandleFunc("/auth/login", serveLogin).Methods("POST")
 	r.HandleFunc("/auth/logout", serveLogout).Methods("POST")
+
+	r.Handle("/api/changes/", wsServeChanges)
+
 	r.PathPrefix("/static/").Handler(http.StripPrefix("/static/",
 		myFileHandler{http.FileServer(http.Dir(*staticPath))}))
 
@@ -333,6 +336,7 @@ func main() {
 		"/tags/",
 		"/navigator/",
 		"/admin/",
+		"/changes/",
 	}
 
 	for _, p := range appPages {
