@@ -12,8 +12,11 @@ import (
 
 func serveNewComment(w http.ResponseWriter, r *http.Request) {
 	me := whoami(r)
-
 	bugid := mux.Vars(r)["bugid"]
+
+	if _, err := getBugOrDisplayErr(bugid, me, w, r); err != nil {
+		return
+	}
 
 	id := "c-" + bugid + "-" + time.Now().UTC().Format(time.RFC3339Nano)
 

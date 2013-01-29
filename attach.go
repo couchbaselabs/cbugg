@@ -63,6 +63,10 @@ func serveFileUpload(w http.ResponseWriter, r *http.Request) {
 	}
 
 	bugid := mux.Vars(r)["bugid"]
+	me := whoami(r)
+	if _, err := getBugOrDisplayErr(bugid, me, w, r); err != nil {
+		return
+	}
 
 	f, fh, err := r.FormFile("uploadedFile")
 	if err != nil {
@@ -103,7 +107,7 @@ func serveFileUpload(w http.ResponseWriter, r *http.Request) {
 		Size:        cr.n,
 		ContentType: fh.Header.Get("Content-Type"),
 		Filename:    fh.Filename,
-		User:        whoami(r).Id,
+		User:        me.Id,
 		CreatedAt:   time.Now().UTC(),
 	}
 
@@ -130,6 +134,10 @@ func serveFileUpload(w http.ResponseWriter, r *http.Request) {
 
 func serveAttachmentList(w http.ResponseWriter, r *http.Request) {
 	bugid := mux.Vars(r)["bugid"]
+	me := whoami(r)
+	if _, err := getBugOrDisplayErr(bugid, me, w, r); err != nil {
+		return
+	}
 
 	args := map[string]interface{}{
 		"stale":        false,
@@ -186,6 +194,11 @@ func serveAttachmentList(w http.ResponseWriter, r *http.Request) {
 
 func serveAttachment(w http.ResponseWriter, r *http.Request) {
 	attid := mux.Vars(r)["attid"]
+	bugid := mux.Vars(r)["bugid"]
+	me := whoami(r)
+	if _, err := getBugOrDisplayErr(bugid, me, w, r); err != nil {
+		return
+	}
 
 	att := Attachment{}
 	err := db.Get(attid, &att)

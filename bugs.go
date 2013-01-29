@@ -442,14 +442,15 @@ func serveUnsubscribeBug(w http.ResponseWriter, r *http.Request) {
 }
 
 func serveBugPing(w http.ResponseWriter, r *http.Request) {
+	me := whoami(r)
+
 	id := mux.Vars(r)["bugid"]
-	bug, err := getBug(id)
+	bug, err := getBugOrDisplayErr(id, me, w, r)
 	if err != nil {
-		showError(w, r, err.Error(), 404)
 		return
 	}
 
-	from := whoami(r).Id
+	from := me.Id
 	to := r.FormValue("to")
 	if !strings.Contains(to, "@") {
 		showError(w, r, "Invalid 'to' parameter", 400)
