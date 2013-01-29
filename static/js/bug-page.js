@@ -200,6 +200,9 @@ function BugCtrl($scope, $routeParams, $http, $rootScope, $timeout, $location, b
             } else {
                 ob.mine = false;
             }
+            if ($scope.currentuser && $scope.currentuser.admin) {
+                ob.mine = true;
+            }
             return ob;
         });
     };
@@ -211,6 +214,10 @@ function BugCtrl($scope, $routeParams, $http, $rootScope, $timeout, $location, b
         checkSubscribed();
         $http.get("/api/me/").success(function(data) {
             $scope.currentuser = data;
+            if (data.admin) {
+                $scope.comments = checkOwnership($scope.comments);
+                $scope.attachments = checkOwnership($scope.attachments);
+            }
         });
     });
 
