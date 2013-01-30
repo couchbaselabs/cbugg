@@ -336,7 +336,7 @@ func main() {
 		"/tags/",
 		"/navigator/",
 		"/admin/",
-		"/changes/",
+		"/marty/",
 	}
 
 	for _, p := range appPages {
