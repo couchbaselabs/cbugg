@@ -83,7 +83,7 @@ func (c *connection) writer() {
 					log.Print("Failed to marshall notification to JSON, ignoring")
 					continue
 				}
-				log.Printf("sending notifications %v, string(bytes)")
+				log.Printf("sending notifications %s, string(bytes)", bytes)
 				err = websocket.Message.Send(c.ws, string(bytes))
 				if err != nil {
 					break
