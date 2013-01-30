@@ -41,7 +41,7 @@ angular.module('cbugg', ['cbuggFilters', 'cbuggAuth', 'cbuggEditor', 'cbuggAlert
                                      controller: 'BugsByUserStateCtrl'}).
             when('/search/:query', {templateUrl: '/static/partials/searchresults.html',
                                          controller: 'SearchResultsCtrl'}).
-            when('/changes/', {templateUrl: '/static/partials/changes.html',
+            when('/marty/', {templateUrl: '/static/partials/changes.html',
                                          controller: 'ChangesCtrl'}).
             when('/navigator/:tab', {templateUrl: '/static/partials/navigator.html',
                                           controller: 'NavigatorCtrl'}).
