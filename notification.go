@@ -135,7 +135,7 @@ func sendAttachmentNotification(a Attachment) {
 		return
 	}
 
-	to := removeFromList(b.Subscribers, a.User)
+	to := filterUnprivelegedEmails(b, removeFromList(b.Subscribers, a.User))
 
 	sendNotifications("attach_notification", to,
 		map[string]interface{}{
@@ -151,17 +151,8 @@ func sendCommentNotification(c Comment) {
 		return
 	}
 
-	subs := b.Subscribers
-	if c.Private {
-		subs = subs[:0]
-		for _, e := range b.Subscribers {
-			if emailIsInternal(e) {
-				subs = append(subs, e)
-			}
-		}
-	}
-
-	sendNotifications("comment_notification", subs,
+	sendNotifications("comment_notification",
+		filterUnprivelegedEmails(c, b.Subscribers),
 		map[string]interface{}{
 			"Comment": c,
 			"Bug":     b,
@@ -188,7 +179,7 @@ func sendBugNotification(bugid string, fields []string,
 	}
 
 	to := []string{}
-	for _, e := range b.Subscribers {
+	for _, e := range filterUnprivelegedEmails(b, b.Subscribers) {
 		if !exclude[e] {
 			to = append(to, e)
 		}
@@ -310,7 +301,7 @@ func sendTagNotification(bugid, tagName, actor string) {
 		return
 	}
 
-	to := removeFromList(b.Subscribers, actor)
+	to := filterUnprivelegedEmails(b, removeFromList(tag.Subscribers, actor))
 
 	sendNotifications("tag_notification", to,
 		map[string]interface{}{

@@ -11,7 +11,7 @@ func isVisible(ob interface{}, u User) bool {
 	return true
 }
 
-func filterUnprivelegedUsers(ob interface{}, emails []string) []string {
+func filterUnprivelegedEmails(ob interface{}, emails []string) []string {
 	rv := []string{}
 
 	for _, e := range emails {
