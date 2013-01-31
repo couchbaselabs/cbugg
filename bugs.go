@@ -78,7 +78,7 @@ func getBug(bugid string) (Bug, error) {
 
 func getBugFor(bugid string, u User) (Bug, error) {
 	bug, err := getBug(bugid)
-	if err == nil && !bug.Visible(u) {
+	if err == nil && !isVisible(bug, u) {
 		return Bug{}, bugNotVisible
 	}
 	return bug, err
@@ -194,7 +194,7 @@ func updateBug(id, field, val string, me User) ([]byte, error) {
 			return nil, err
 		}
 
-		if !bug.Visible(me) {
+		if !isVisible(bug, me) {
 			return nil, bugNotVisible
 		}
 
@@ -459,7 +459,12 @@ func serveBugPing(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if bug.Private && !emailIsInternal(to) {
+	// This may error on an unkown user, but will return a User
+	// object that is not considered special (internal, admin), so
+	// for these purposes, the error is not required.
+	recipient, _ := getUser(to)
+
+	if !isVisible(bug, recipient) {
 		showError(w, r, "Cannot ping a user who can't see the bug", 403)
 		return
 	}

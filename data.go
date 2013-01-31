@@ -37,6 +37,14 @@ type Comment struct {
 	Private   bool      `json:"private"`
 }
 
+func (c Comment) IsVisibleTo(u User) bool {
+	return u.Internal || (!c.Private)
+}
+
+func (c APIComment) IsVisibleTo(u User) bool {
+	return u.Internal || (!c.Private)
+}
+
 type Attachment struct {
 	Id          string    `json:"id"`
 	BugId       string    `json:"bugId"`
@@ -166,8 +174,12 @@ func (b Bug) Url() string {
 	return "/bug/" + b.Id
 }
 
-func (b Bug) Visible(u User) bool {
-	return u.Internal || (!b.Private)
+func (b Bug) IsVisibleTo(u User) bool {
+	return u.Internal || !b.Private
+}
+
+func (b APIBug) IsVisibleTo(u User) bool {
+	return u.Internal || !b.Private
 }
 
 func (a Attachment) DownloadUrl() string {

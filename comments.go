@@ -110,7 +110,7 @@ func serveCommentList(w http.ResponseWriter, r *http.Request) {
 			parseTo = &APIPing{}
 		}
 
-		if me.Internal || !t.Private {
+		if isVisible(parseTo, me) {
 			err = json.Unmarshal([]byte(*row.Doc.Json), parseTo)
 			if err != nil {
 				showError(w, r, err.Error(), 500)

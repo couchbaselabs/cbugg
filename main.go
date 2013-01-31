@@ -162,8 +162,7 @@ func serveRecent(w http.ResponseWriter, r *http.Request) {
 
 	me := whoami(r)
 	for _, r := range viewRes.Rows {
-		isPrivate := bugs[r.Value.BugId].Private
-		if me.Internal || !isPrivate {
+		if isVisible(bugs[r.Value.BugId], me) {
 			output = append(output,
 				OutType{r.Key,
 					Email(r.Value.Actor),
@@ -171,7 +170,7 @@ func serveRecent(w http.ResponseWriter, r *http.Request) {
 					r.Value.BugId,
 					bugs[r.Value.BugId].Status,
 					bugs[r.Value.BugId].Title,
-					isPrivate,
+					bugs[r.Value.BugId].Private,
 				})
 		}
 	}
