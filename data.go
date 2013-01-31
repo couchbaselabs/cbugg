@@ -8,10 +8,6 @@ import (
 
 type Email string
 
-type Typed struct {
-	Type string `json:"type"`
-}
-
 type Bug struct {
 	Id          string    `json:"id"`
 	Type        string    `json:"type"`
@@ -38,6 +34,7 @@ type Comment struct {
 	User      string    `json:"user"`
 	Text      string    `json:"text"`
 	CreatedAt time.Time `json:"created_at"`
+	Private   bool      `json:"private"`
 }
 
 type Attachment struct {

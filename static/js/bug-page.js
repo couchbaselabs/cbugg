@@ -22,6 +22,7 @@ function BugCtrl($scope, $routeParams, $http, $rootScope, $timeout, $location, b
     $scope.comments = [];
     $scope.attachments = [];
     $scope.draftcomment = "";
+    $scope.draftcommentpriv = false;
     $scope.subscribed = false;
     $scope.currentuser = null;
     $scope.privateclass = "";
@@ -309,12 +310,15 @@ function BugCtrl($scope, $routeParams, $http, $rootScope, $timeout, $location, b
 
     $scope.postComment = function() {
         $http.post('/api/bug/' + $routeParams.bugId + '/comments/',
-                    'body=' + encodeURIComponent($scope.draftcomment),
+                    'body=' + encodeURIComponent($scope.draftcomment) +
+                   '&private=' + $scope.draftcommentpriv,
                   {headers: {"Content-Type": "application/x-www-form-urlencoded"}}).
             success(function(data) {
+                console.log("Posting comment", $scope.draftcomment, $scope.draftcommentpriv);
                 data.mine = true;
                 $scope.comments.push(data);
                 $scope.draftcomment="";
+                $scope.draftcommentpriv=false;
                 $timeout(function() { $scope.addingcomment = false; });
                 if (!$scope.subscribed) {
                     $scope.subcount++;

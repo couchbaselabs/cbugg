@@ -135,7 +135,7 @@
 
 <h3>Comments</h3>
 <div class="comments">
-  <div class="comment well well-small" ng-repeat="comment in comments">
+  <div class="comment well well-small private-{{comment.private}}" ng-repeat="comment in comments">
     <div ng-show="comment.type == 'comment'">
       <div ng-hide="comment.deleted">
         <div class="author">
@@ -178,6 +178,7 @@
   <button ng-click="postComment()" class="btn pull-right btn-success">
     Post Comment
   </button>
+  <label><input type="checkbox" ng-model="draftcommentpriv" name="private" /> Private</label>
 </div>
 
 <h3>History</h3>

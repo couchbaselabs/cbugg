@@ -27,6 +27,7 @@ func serveNewComment(w http.ResponseWriter, r *http.Request) {
 		User:      me.Id,
 		Text:      r.FormValue("body"),
 		CreatedAt: time.Now().UTC(),
+		Private:   r.FormValue("private") == "true",
 	}
 
 	added, err := db.Add(c.Id, 0, c)
@@ -52,9 +53,10 @@ func serveNewComment(w http.ResponseWriter, r *http.Request) {
 }
 
 func serveCommentList(w http.ResponseWriter, r *http.Request) {
+	me := whoami(r)
 	bugid := mux.Vars(r)["bugid"]
 
-	if _, err := getBugOrDisplayErr(bugid, whoami(r), w, r); err != nil {
+	if _, err := getBugOrDisplayErr(bugid, me, w, r); err != nil {
 		return
 	}
 
@@ -80,6 +82,11 @@ func serveCommentList(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	type innerThing struct {
+		Type    string `json:"type"`
+		Private bool   `json:"private"`
+	}
+
 	// Below we mix comments and pings together for the "comment"
 	// UI, but we can't just pass the document body straight to
 	// the client because we want gravatars calculated and
@@ -87,7 +94,7 @@ func serveCommentList(w http.ResponseWriter, r *http.Request) {
 	// the type and then parse it into the correct target type.
 	rv := []interface{}{}
 	for _, row := range viewRes.Rows {
-		t := Typed{}
+		t := innerThing{}
 		err := json.Unmarshal([]byte(*row.Doc.Json), &t)
 		if err != nil {
 			showError(w, r, err.Error(), 500)
@@ -103,13 +110,15 @@ func serveCommentList(w http.ResponseWriter, r *http.Request) {
 			parseTo = &APIPing{}
 		}
 
-		err = json.Unmarshal([]byte(*row.Doc.Json), parseTo)
-		if err != nil {
-			showError(w, r, err.Error(), 500)
-			return
-		}
+		if me.Internal || !t.Private {
+			err = json.Unmarshal([]byte(*row.Doc.Json), parseTo)
+			if err != nil {
+				showError(w, r, err.Error(), 500)
+				return
+			}
 
-		rv = append(rv, parseTo)
+			rv = append(rv, parseTo)
+		}
 	}
 
 	mustEncode(w, rv)
