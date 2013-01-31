@@ -7,5 +7,5 @@
     <img ng-src="http://www.gravatar.com/avatar/{{change.user.md5}}?s=16">
       {{change.user.email}} {{change.action}}
       <a class="status-{{change.bug.status}}"
-         title="{{change.bug.title}}" href="/bug/{{change.bug.id}}">{{change.bug.id}}</a> {{change.bug.modified_at | relDate}}</li>
+         title="{{change.bug.title}}" href="/bug/{{change.bug.id}}">{{change.bug.id}}</a> {{change.at | relDate}}</li>
 </ul>

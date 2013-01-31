@@ -1,8 +1,8 @@
 package main
 
 import (
-	"github.com/igm/sockjs-go/sockjs"
 	"encoding/json"
+	"github.com/igm/sockjs-go/sockjs"
 	"log"
 )
 
@@ -84,8 +84,7 @@ func (c *connection) writer() {
 					log.Print("Failed to marshall notification to JSON, ignoring")
 					continue
 				}
-				log.Printf("sending notifications %s, string(bytes)", bytes)
-				_,err = c.ws.WriteMessage(bytes)
+				_, err = c.ws.WriteMessage(bytes)
 				if err != nil {
 					break
 				}
@@ -107,13 +106,13 @@ func convertMessageToChangeNotifications(message interface{}) []map[string]inter
 					"user":   user,
 					"bug":    bug,
 					"action": "changed " + v,
+					"at":     bug.ModifiedAt,
 				}
 				result = append(result, change)
 			}
 			return result
 		}
 	case Comment:
-		log.Printf("see comment")
 		user := Email(message.User)
 		bug, err := getBug(message.BugId)
 		if err == nil {
@@ -122,6 +121,7 @@ func convertMessageToChangeNotifications(message interface{}) []map[string]inter
 				"user":   user,
 				"bug":    bug,
 				"action": "commented on",
+				"at":     message.CreatedAt,
 			}
 			result = append(result, change)
 			return result
