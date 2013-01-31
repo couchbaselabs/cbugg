@@ -8,8 +8,8 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/mattbaird/elastigo/api"
-	"github.com/mattbaird/elastigo/core"
+	"github.com/mschoch/elastigo/api"
+	"github.com/mschoch/elastigo/core"
 )
 
 // by default we only want documents of elasticsearch type "couchbaseDocument"
