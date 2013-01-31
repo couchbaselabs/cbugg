@@ -151,7 +151,17 @@ func sendCommentNotification(c Comment) {
 		return
 	}
 
-	sendNotifications("comment_notification", b.Subscribers,
+	subs := b.Subscribers
+	if c.Private {
+		subs = subs[:0]
+		for _, e := range b.Subscribers {
+			if emailIsInternal(e) {
+				subs = append(subs, e)
+			}
+		}
+	}
+
+	sendNotifications("comment_notification", subs,
 		map[string]interface{}{
 			"Comment": c,
 			"Bug":     b,
