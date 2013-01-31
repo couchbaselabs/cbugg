@@ -20,26 +20,15 @@ function ChangesCtrl($scope, $routeParams, $http, $rootScope, cbuggAuth) {
         $scope.$apply();
      }, 30000);
 
-    var loc = window.location, new_uri;
-    if (loc.protocol === "https:") {
-        new_uri = "wss:";
-    } else {
-        new_uri = "ws:";
-    }
-    new_uri += "//" + loc.host;
-    new_uri += "/api/changes/";
+    var loc = window.location;
+    var new_uri = loc.protocol + "//" + loc.host + "/api/changes";
 
-    if (window["WebSocket"]) {
-        conn = new WebSocket(new_uri);
-        conn.onclose = function(evt) {
-            $scope.displayErrorMessage("Your WebSocket was disconnected");
-        }
-        conn.onmessage = function(evt) {
-            change = JSON.parse(evt.data)
-            $scope.appendLog(change)
-        }
-    } else {
-        $scope.displayErrorMessage("Your browser does not support WebSockets");
-    }
+    var sock = new SockJS(new_uri);
+    sock.onmessage = function(e) {
+        $scope.appendLog(e.data)
+    };
+    sock.onclose = function() {
+        $scope.displayErrorMessage("Your realtime stream was disconnected");
+    };
 
 }

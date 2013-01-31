@@ -1,7 +1,7 @@
 package main
 
 import (
-	"code.google.com/p/go.net/websocket"
+	"github.com/igm/sockjs-go/sockjs"
 	"encoding/json"
 	"log"
 )
@@ -55,7 +55,7 @@ func (h *broadcast_hub) run() {
 
 type connection struct {
 	// The websocket connection.
-	ws *websocket.Conn
+	ws sockjs.Conn
 
 	// Buffered channel of outbound messages.
 	send chan interface{}
@@ -63,9 +63,10 @@ type connection struct {
 
 func (c *connection) reader() {
 	for {
-		var message string
-		err := websocket.Message.Receive(c.ws, &message)
-		if err != nil {
+
+		if _, err := c.ws.ReadMessage(); err == nil {
+			// do nothing
+		} else {
 			break
 		}
 		// we simply eat these?
@@ -84,7 +85,7 @@ func (c *connection) writer() {
 					continue
 				}
 				log.Printf("sending notifications %s, string(bytes)", bytes)
-				err = websocket.Message.Send(c.ws, string(bytes))
+				_,err = c.ws.WriteMessage(bytes)
 				if err != nil {
 					break
 				}
@@ -129,10 +130,8 @@ func convertMessageToChangeNotifications(message interface{}) []map[string]inter
 	return nil
 }
 
-var wsServeChanges = websocket.Handler(serveChanges)
-
-func serveChanges(ws *websocket.Conn) {
-	c := &connection{send: make(chan interface{}, 256), ws: ws}
+func ChangesHandler(conn sockjs.Conn) {
+	c := &connection{send: make(chan interface{}, 256), ws: conn}
 	changes_broadcaster.register <- c
 	defer func() { changes_broadcaster.unregister <- c }()
 	go c.writer()

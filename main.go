@@ -13,6 +13,7 @@ import (
 	"github.com/couchbaselabs/go-couchbase"
 	"github.com/dustin/gomemcached"
 	"github.com/gorilla/mux"
+	"github.com/igm/sockjs-go/sockjs"
 )
 
 var db *couchbase.Bucket
@@ -320,7 +321,7 @@ func main() {
 	r.HandleFunc("/auth/login", serveLogin).Methods("POST")
 	r.HandleFunc("/auth/logout", serveLogout).Methods("POST")
 
-	r.Handle("/api/changes/", wsServeChanges)
+	sockjs.Install("/api/changes", ChangesHandler, sockjs.DefaultConfig)
 
 	r.PathPrefix("/static/").Handler(http.StripPrefix("/static/",
 		myFileHandler{http.FileServer(http.Dir(*staticPath))}))
