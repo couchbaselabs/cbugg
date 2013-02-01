@@ -19,6 +19,7 @@
                         </a>
                         <div class="btn-group">
                             <button class="btn dropdown-toggle" data-toggle="dropdown">
+                                <span ng-controller="RealtimeStatusCtrl"><i class="icon-circle {{connected}}" title="{{message}}"></i></span>
                                 {{auth.username}}
                                 <span class="caret"></span>
                             </button>
@@ -76,7 +77,8 @@
                      'moment.min',
                      'marked',
                      'codemirror',
-                     'sockjs-0.3.2.min'], 'libs');
+                     'sockjs-0.3.2.min',
+                     'jquery.cookie'], 'libs');
         })
         $script.ready('libs', function() {
             $script('codemirror/overlay', 'cm-overlay');
@@ -89,6 +91,8 @@
                      '../js/tag-cloud',
                      '../js/alert',
                      '../js/auth',
+                     '../js/realtime',
+                     '../js/realtimestatus',
                      '../bootstrap/js/bootstrap.min'], 'app');
         });
         $script.ready('cm-overlay', function() {

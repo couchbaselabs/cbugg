@@ -28,7 +28,7 @@ angular.module('cbuggFilters', []).
         };
     });
 
-angular.module('cbugg', ['cbuggFilters', 'cbuggAuth', 'cbuggEditor', 'cbuggAlert',
+angular.module('cbugg', ['cbuggFilters', 'cbuggAuth', 'cbuggRealtime', 'cbuggEditor', 'cbuggAlert',
                          'ui', '$strap.directives']).
     config(['$routeProvider', '$locationProvider',
             function($routeProvider, $locationProvider) {
@@ -74,6 +74,13 @@ function StatesByCountCtrl($scope, $http, $rootScope) {
             });
     $http.get('/api/recent/').success(function(data) {
         $scope.recent = _.first(data, 10);
+    });
+
+    $scope.$on('Change', function(event, change) {
+        $scope.recent.unshift(change);
+        if($scope.recent.length > 10) {
+            $scope.recent.length = 10;
+        }
     });
 }
 
