@@ -34,14 +34,23 @@ func initSecureCookie(hashKey []byte) {
 	secureCookie = securecookie.New(hashKey, nil)
 }
 
+func userFromCookie(cookie string) (User, error) {
+	val := browserIdData{}
+	err := secureCookie.Decode("user", cookie, &val)
+	if err == nil {
+		u, err := getUser(val.Email)
+		if err != nil {
+			u.Id = val.Email
+		}
+		return u, nil
+	}
+	return User{}, err
+}
+
 func whoami(r *http.Request) User {
 	if cookie, err := r.Cookie(AUTH_COOKIE); err == nil {
-		val := browserIdData{}
-		if err = secureCookie.Decode("user", cookie.Value, &val); err == nil {
-			u, err := getUser(val.Email)
-			if err != nil {
-				u.Id = val.Email
-			}
+		u, err := userFromCookie(cookie.Value)
+		if err == nil {
 			return u
 		}
 	}
