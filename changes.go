@@ -2,8 +2,9 @@ package main
 
 import (
 	"encoding/json"
-	"github.com/igm/sockjs-go/sockjs"
 	"log"
+
+	"github.com/igm/sockjs-go/sockjs"
 )
 
 func init() {
@@ -109,17 +110,15 @@ func (c *connection) reader() {
 func (c *connection) writer() {
 	for message := range c.send {
 		changes := convertMessageToChangeNotifications(message, c.user)
-		if changes != nil {
-			for _, change := range changes {
-				bytes, err := json.Marshal(change)
-				if err != nil {
-					log.Print("Failed to marshall notification to JSON, ignoring")
-					continue
-				}
-				_, err = c.ws.WriteMessage(bytes)
-				if err != nil {
-					break
-				}
+		for _, change := range changes {
+			bytes, err := json.Marshal(change)
+			if err != nil {
+				log.Print("Failed to marshall notification to JSON, ignoring")
+				continue
+			}
+			_, err = c.ws.WriteMessage(bytes)
+			if err != nil {
+				break
 			}
 		}
 	}
@@ -130,12 +129,7 @@ func convertMessageToChangeNotifications(message interface{}, connUser User) []m
 	switch message := message.(type) {
 	case bugChange:
 		user := Email(message.actor)
-		bug, err := getBug(message.bugid)
-
-		if !isVisible(bug, connUser) {
-			log.Printf("this bug not visiable to this user")
-			return nil
-		}
+		bug, err := getBugFor(message.bugid, connUser)
 
 		if err == nil {
 			result := []map[string]interface{}{}
@@ -162,12 +156,7 @@ func convertMessageToChangeNotifications(message interface{}, connUser User) []m
 		}
 
 		user := Email(message.User)
-		bug, err := getBug(message.BugId)
-
-		if !isVisible(bug, connUser) {
-			log.Printf("this bug not visiable to this user")
-			return nil
-		}
+		bug, err := getBugFor(message.BugId, connUser)
 
 		if err == nil {
 			result := []map[string]interface{}{}
