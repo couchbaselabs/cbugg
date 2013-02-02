@@ -7,52 +7,7 @@ import (
 	"github.com/igm/sockjs-go/sockjs"
 )
 
-func init() {
-	go changes_broadcaster.run()
-}
-
-type broadcast_hub struct {
-	// Registered connections.
-	connections map[*connection]bool
-
-	// Inbound messages from the connections.
-	broadcast chan interface{}
-
-	// Register requests from the connections.
-	register chan *connection
-
-	// Unregister requests from connections.
-	unregister chan *connection
-}
-
-var changes_broadcaster = broadcast_hub{
-	broadcast:   make(chan interface{}),
-	register:    make(chan *connection),
-	unregister:  make(chan *connection),
-	connections: make(map[*connection]bool),
-}
-
-func (h *broadcast_hub) run() {
-	for {
-		select {
-		case c := <-h.register:
-			h.connections[c] = true
-		case c := <-h.unregister:
-			delete(h.connections, c)
-			close(c.send)
-		case m := <-h.broadcast:
-			for c := range h.connections {
-				select {
-				case c.send <- m:
-				default:
-					delete(h.connections, c)
-					close(c.send)
-					go c.ws.Close()
-				}
-			}
-		}
-	}
-}
+var changes_broadcaster = newBroadcaster(100)
 
 type connection struct {
 	// The websocket connection.
@@ -179,8 +134,8 @@ func convertMessageToChangeNotifications(message interface{}, connUser User) []m
 
 func ChangesHandler(conn sockjs.Conn) {
 	c := &connection{send: make(chan interface{}, 256), ws: conn}
-	changes_broadcaster.register <- c
-	defer func() { changes_broadcaster.unregister <- c }()
+	changes_broadcaster.Register(c.send)
+	defer changes_broadcaster.Unregister(c.send)
 	go c.writer()
 	c.reader()
 }

@@ -353,12 +353,12 @@ func notificationLoop() {
 		case bp := <-pingChan:
 			sendBugPingNotification(bp)
 		case c := <-commentChan:
-			changes_broadcaster.broadcast <- c
+			changes_broadcaster.Submit(c)
 			sendCommentNotification(c)
 		case bugid := <-assignedChan:
 			sendBugAssignedNotification(bugid)
 		case c := <-bugChan:
-			changes_broadcaster.broadcast <- c
+			changes_broadcaster.Submit(c)
 			addBugNotification(c)
 		case t := <-tagChan:
 			sendTagNotification(t.bugid, t.tag, t.actor)
