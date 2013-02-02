@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"log"
+	"time"
 
 	"github.com/igm/sockjs-go/sockjs"
 )
@@ -80,53 +81,56 @@ func (c *connection) writer() {
 	c.ws.Close()
 }
 
-func convertMessageToChangeNotifications(message interface{}, connUser User) []map[string]interface{} {
+func convertMessageToChangeNotifications(message interface{}, connUser User) []interface{} {
+
+	type rtChange struct {
+		User    Email     `json:"user"`
+		Bug     APIBug    `json:"bug"`
+		BugID   string    `json:"bugid"`
+		Action  string    `json:"action"`
+		Status  string    `json:"status"`
+		Title   string    `json:"title"`
+		Time    time.Time `json:"timetitle"`
+		Private bool      `json:"private"`
+	}
+
 	switch message := message.(type) {
 	case bugChange:
-		user := Email(message.actor)
 		bug, err := getBugFor(message.bugid, connUser)
 
 		if err == nil {
-			result := []map[string]interface{}{}
+			result := []interface{}{}
 			for _, v := range message.fields {
-				change := map[string]interface{}{
-					"user":    user,
-					"bug":     bug,
-					"bugid":   bug.Id,
-					"action":  "changed " + v,
-					"status":  bug.Status,
-					"title":   bug.Title,
-					"time":    bug.ModifiedAt,
-					"private": bug.Private,
-				}
-				result = append(result, change)
+				result = append(result, rtChange{
+					User:    Email(message.actor),
+					Bug:     APIBug(bug),
+					BugID:   bug.Id,
+					Action:  "changed " + v,
+					Status:  bug.Status,
+					Title:   bug.Title,
+					Time:    bug.ModifiedAt,
+					Private: bug.Private,
+				})
 			}
 			return result
 		}
 	case Comment:
-
 		if !isVisible(message, connUser) {
 			log.Printf("this comment not visiable to this user")
 			return nil
 		}
 
-		user := Email(message.User)
-		bug, err := getBugFor(message.BugId, connUser)
-
-		if err == nil {
-			result := []map[string]interface{}{}
-			change := map[string]interface{}{
-				"user":    user,
-				"bug":     bug,
-				"bugid":   bug.Id,
-				"action":  "commented on",
-				"status":  bug.Status,
-				"title":   bug.Title,
-				"time":    message.CreatedAt,
-				"private": bug.Private,
-			}
-			result = append(result, change)
-			return result
+		if bug, err := getBugFor(message.BugId, connUser); err == nil {
+			return []interface{}{rtChange{
+				User:    Email(message.User),
+				Bug:     APIBug(bug),
+				BugID:   bug.Id,
+				Action:  "commented on",
+				Status:  bug.Status,
+				Title:   bug.Title,
+				Time:    message.CreatedAt,
+				Private: bug.Private,
+			}}
 		}
 	}
 	return nil
