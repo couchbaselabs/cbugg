@@ -1,4 +1,4 @@
-function NavigatorCtrl($scope, $routeParams, $http, $rootScope, cbuggAuth) {
+function NavigatorCtrl($scope, $routeParams, $http, $rootScope, cbuggAuth, cbuggPage) {
     $rootScope.$watch('loggedin', function() {
         $scope.auth = cbuggAuth.get();
         
@@ -49,7 +49,7 @@ function NavigatorCtrl($scope, $routeParams, $http, $rootScope, cbuggAuth) {
     $scope.pageSizes = [ 10, 30, 50, 100 ];
     $scope.filterStatus = [];
     $scope.filterTags = [];
-    $rootScope.title = "Search";
+    cbuggPage.setTitle("Navigator");
     $scope.maxPagesToShow = 7;
 
     $scope.jumpToTabPage = function(tab, pageNum, $event) {

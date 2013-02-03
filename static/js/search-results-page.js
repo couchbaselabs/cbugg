@@ -1,4 +1,4 @@
-function SearchResultsCtrl($scope, $routeParams, $http, $rootScope) {
+function SearchResultsCtrl($scope, $routeParams, $http, cbuggPage) {
 
     $scope.searchInProgress = true;
     $scope.searchError = false;
@@ -7,7 +7,7 @@ function SearchResultsCtrl($scope, $routeParams, $http, $rootScope) {
     $scope.pageSizes = [ 10, 30, 50, 100 ];
     $scope.filterStatus = [];
     $scope.filterTags = [];
-    $rootScope.title = "Search";
+    cbuggPage.setTitle("Search");
 
     $scope.jumpToPage = function(pageNum, $event) {
         if ($event) {

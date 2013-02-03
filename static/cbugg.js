@@ -29,7 +29,7 @@ angular.module('cbuggFilters', []).
     });
 
 angular.module('cbugg', ['cbuggFilters', 'cbuggAuth', 'cbuggRealtime', 'cbuggEditor', 'cbuggAlert',
-                         'ui', '$strap.directives']).
+                         'cbuggPage', 'ui', '$strap.directives']).
     config(['$routeProvider', '$locationProvider',
             function($routeProvider, $locationProvider) {
         $routeProvider.
@@ -61,8 +61,8 @@ angular.module('cbugg', ['cbuggFilters', 'cbuggAuth', 'cbuggRealtime', 'cbuggEdi
         $locationProvider.hashPrefix('!');
     }]);
 
-function StatesByCountCtrl($scope, $http, $rootScope) {
-    $rootScope.title = "Home";
+function StatesByCountCtrl($scope, $http, cbuggPage) {
+    cbuggPage.setTitle("Home");
     $http.get('/api/state-counts').success(function(stateCounts) {
         $http.get("/api/states/").success(function(allstates) {
             var scopeMap = _.object(_.pluck(allstates, 'name'), allstates);
@@ -91,16 +91,16 @@ function bugListDataPrep(data) {
     return _.sortBy(grouped, function(n) { return nameMap[n[0]]; });
 }
 
-function BugsByStateCtrl($scope, $routeParams, $http, $rootScope) {
-    $rootScope.title = "State " + $routeParams.stateId;
+function BugsByStateCtrl($scope, $routeParams, $http, cbuggPage) {
+    cbuggPage.setTitle("State " + $routeParams.stateId);
     $scope.liststate = $routeParams.stateId;
     $http.get('/api/bug/?state=' + $routeParams.stateId).success(function(data) {
         $scope.grouped_bugs = bugListDataPrep(data);
     });
 }
 
-function BugsByUserStateCtrl($scope, $routeParams, $http, $rootScope) {
-    $rootScope.title = "User " + $routeParams.userId + " State " + $routeParams.stateId;
+function BugsByUserStateCtrl($scope, $routeParams, $http, cbuggPage) {
+    cbuggPage.setTitle("User " + $routeParams.userId + " State " + $routeParams.stateId);
     $scope.listuser = $routeParams.userId;
     $scope.liststate = $routeParams.stateId;
     $http.get('/api/bug/?user=' + $routeParams.userId +
@@ -131,7 +131,7 @@ function SearchCtrl($scope, $http, $rootScope, $location, cbuggAuth) {
     };
 }
 
-function SimilarBugCtrl($scope, $http, $rootScope, $location) {
+function SimilarBugCtrl($scope, $http, $location) {
 
     $scope.similarBugs = [];
     $scope.debouncedLookupSimilar = _.debounce(function(){$scope.lookupSimilar();}, 500);
@@ -198,14 +198,15 @@ function RemindCtrl($scope, $rootScope, $http, bAlert, cbuggAuth) {
     };
 }
 
-function TagsCtrl($scope, $routeParams, $http, $rootScope) {
+function TagsCtrl($scope, $routeParams, $http, cbuggPage) {
+    cbuggPage.setTitle("All Tags");
     $http.get("/api/tags/").success(function(tags) {
         $scope.tags = cloudify(tags);
     });
 }
 
-function TagCtrl($scope, $routeParams, $http, $rootScope, $timeout, $location, bAlert, cbuggAuth) {
-    $rootScope.title = "Tag " + $routeParams.tagname;
+function TagCtrl($scope, $routeParams, $http, $rootScope, $timeout, $location, bAlert, cbuggAuth, cbuggPage) {
+    cbuggPage.setTitle("Tag " + $routeParams.tagname);
     $scope.tag = null;
     $scope.states = [];
     $scope.subscribed = false;
@@ -253,7 +254,7 @@ function TagCtrl($scope, $routeParams, $http, $rootScope, $timeout, $location, b
     });
 }
 
-function AdminCtrl($scope, $http, $rootScope, cbuggAuth) {
+function AdminCtrl($scope, $http, cbuggAuth) {
     $http.get("/api/me/").success(function(me) {
         $scope.me = me;
     });

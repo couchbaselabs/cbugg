@@ -1,4 +1,4 @@
-function BugCtrl($scope, $routeParams, $http, $rootScope, $timeout, $location, bAlert, cbuggAuth) {
+function BugCtrl($scope, $routeParams, $http, $rootScope, $timeout, $location, bAlert, cbuggAuth, cbuggPage) {
     $rootScope.$watch('loggedin', function() { $scope.auth = cbuggAuth.get(); });
     var updateBug = function(field, newValue) {
         var bug = $scope.bug;
@@ -145,7 +145,7 @@ function BugCtrl($scope, $routeParams, $http, $rootScope, $timeout, $location, b
         });
     };
 
-    $rootScope.title = $routeParams.bugId;
+    cbuggPage.setTitle($routeParams.bugId);
 
     $http.get('/api/bug/' + $routeParams.bugId).success(function(data) {
         $scope.bug = data;
