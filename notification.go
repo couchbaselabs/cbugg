@@ -12,6 +12,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/couchbaselabs/go-couchbase"
 	"github.com/dustin/gomemcached"
 )
 
@@ -319,6 +320,9 @@ func sendBugPingNotification(bp bugPing) {
 }
 
 func updateSubscription(bugid, email string, add bool) error {
+	// Don't need error, just checking for privilege
+	u, _ := getUser(email)
+
 	return db.Update(bugid, 0, func(current []byte) ([]byte, error) {
 		if len(current) == 0 {
 			return nil, NotFound
@@ -334,13 +338,23 @@ func updateSubscription(bugid, email string, add bool) error {
 				bug.Type)
 		}
 
-		bug.Subscribers = removeFromList(bug.Subscribers, email)
+		// Turn this into a delete if the user can't see the bug
+		add = add && isVisible(bug, u)
+
+		if add {
+			for _, e := range bug.Subscribers {
+				if e == email {
+					// Already subscribed
+					return nil, couchbase.UpdateCancel
+				}
+			}
+			bug.Subscribers = append(bug.Subscribers, email)
+		} else {
+			bug.Subscribers = removeFromList(bug.Subscribers, email)
+		}
+
 		bug.ModType = "subscribers"
 		bug.ModifiedAt = time.Now().UTC()
-
-		if add && emailIsInternal(email) {
-			bug.Subscribers = append(bug.Subscribers, email)
-		}
 
 		return json.Marshal(bug)
 	})
