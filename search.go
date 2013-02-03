@@ -65,10 +65,17 @@ func findSimilarBugs(w http.ResponseWriter, r *http.Request) {
 			}
 		}
 
-		searchresponse, err := core.Search(false, *esIndex, "couchbaseDocument", query, "")
+		searchresponse, err := core.SearchRequest(false, *esIndex, "couchbaseDocument", query, "")
 		if err != nil {
 			showError(w, r, err.Error(), 500)
 			return
+		}
+
+		if *debugEs {
+			searchresponseJson, err := json.Marshal(searchresponse)
+			if err == nil {
+				log.Printf("Elasticsearch response: %v", string(searchresponseJson))
+			}
 		}
 
 		ourresponse := convertElasticSearchResponse(searchresponse)
@@ -149,10 +156,17 @@ func searchBugs(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	searchresponse, err := core.Search(false, *esIndex, "couchbaseDocument", query, "")
+	searchresponse, err := core.SearchRequest(false, *esIndex, "couchbaseDocument", query, "")
 	if err != nil {
 		showError(w, r, err.Error(), 500)
 		return
+	}
+
+	if *debugEs {
+		searchresponseJson, err := json.Marshal(searchresponse)
+		if err == nil {
+			log.Printf("Elasticsearch response: %v", string(searchresponseJson))
+		}
 	}
 
 	ourresponse := convertElasticSearchResponse(searchresponse)
