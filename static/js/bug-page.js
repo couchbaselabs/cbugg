@@ -379,8 +379,10 @@ function BugCtrl($scope, $routeParams, $http, $rootScope, $timeout, $location, b
     };
 
     $scope.editOwner = function() {
-        $(".ownerbox").typeahead({source: $scope.getUsers});
-        $scope.editingowner = true;
+        if ($scope.auth && $scope.auth.loggedin) {
+            $(".ownerbox").typeahead({source: $scope.getUsers});
+            $scope.editingowner = true;
+        }
     };
 
     $scope.setOwnerToMe = function() {
