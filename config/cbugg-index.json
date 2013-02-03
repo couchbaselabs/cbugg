@@ -1,0 +1,43 @@
+{
+    "settings" : {
+		"index.mapping.ignore_malformed": true
+    },
+    "mappings" : {
+		"couchbaseDocument" : {
+			"properties" : {
+				"doc" : {
+					"properties": { 
+						"type": {
+						    "type": "string", 
+							"index" : "not_analyzed"
+						},
+						"parent": { 
+							"type": "string", 
+							"index" : "not_analyzed"
+						},
+						"status": { 
+							"type": "string", 
+							"index" : "not_analyzed"
+						},
+						"creator": { 
+							"type": "string", 
+							"index" : "not_analyzed"
+						},
+						"owner": {
+							"type": "string", 
+							"index" : "not_analyzed"
+						},
+						"tags": {
+							"type": "string", 
+							"index" : "not_analyzed"
+						},
+						"subscribers": {
+							"type": "string", 
+							"index" : "not_analyzed"
+						}
+					}
+				}
+			}
+		}
+    }
+}
