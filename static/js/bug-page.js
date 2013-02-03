@@ -149,7 +149,6 @@ function BugCtrl($scope, $routeParams, $http, $rootScope, $timeout, $location, b
 
     $http.get('/api/bug/' + $routeParams.bugId).success(function(data) {
         $scope.bug = data;
-        console.log("bug's private is", $scope.bug.private);
 
         $scope.$watch('bug.private', function(next, prev) {
             $scope.privateclass = next ? "private" : "";
