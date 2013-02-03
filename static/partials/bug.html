@@ -12,9 +12,10 @@
     <a title="Click to stop watching this bug" ng-show="subscribed" ng-click="unsubscribe()">
       <i class="icon-star starred"></i>
     </a>
-    <a title="Click to watch this bug."  ng-hide="subscribed" ng-click="subscribe()">
+    <a title="Click to watch this bug." ng-hide="subscribed || !auth.loggedin" ng-click="subscribe()">
       <i class="icon-star-empty muted"></i>
     </a>
+    <i ng-hide="auth.loggedin" class="icon-star-empty muted"></i>
     ({{subcount}})
   </div>
 </div>
