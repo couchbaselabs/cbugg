@@ -1,0 +1,31 @@
+<table class="table-bordered table-striped table-condensed" width="100%">
+	<tbody>
+		<tr ng-repeat="result in results">
+			<td class="bugCheckbox"><input type="checkbox" /></td>
+			<td class="bugId"><a class="status-{{result.source.doc.status}}"
+				href="/bug/{{result._id}}">{{result._id}}</a></td>
+			<td>
+				<div style="float: left; width: 38em;">
+					<p class="bugTitle ellipsis" title="{{result.source.doc.title}}">{{result.source.doc.title}}
+					</p>
+					<div class="searchResultRowFooter">
+						Created by <img
+							ng-src="http://www.gravatar.com/avatar/{{result.source.doc.creator.md5}}?s=12">
+						{{result.source.doc.creator.email}} {{result.source.doc.created_at
+						| relDate}}. Updated by <img
+							ng-src="http://www.gravatar.com/avatar/{{result.source.doc.modified_by.md5}}?s=12">
+						{{result.source.doc.modified_by.email}}
+						{{result.source.doc.modified_at | relDate}} <a
+							class="buglist-tag tag-{{t}}"
+							ng-repeat="t in result.source.doc.tags" href="/tag/{{t}}">{{t}}</a>
+					</div>
+				</div>
+				<div class="searchResultStar">
+					<i
+						ng-show="isSubscribed(auth.gravatar, result.source.doc.subscribers)"
+						class="icon-star starred"></i>
+				</div>
+			</td>
+		</tr>
+	</tbody>
+</table>

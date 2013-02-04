@@ -1,0 +1,11 @@
+<ul>
+	<li><a ng-show="page > 1"
+		ng-click="jumpToPage(page-1, $event)" href="#">Prev</a><span
+		ng-hide="page > 1">Prev</span></li>
+	<li ng-repeat="i in validPages"><a ng-show="i != page" href="#"
+		ng-click="jumpToPage(i, $event)">{{i}}</a><span
+		ng-hide="i != page">{{i}}</span></li>
+	<li><a ng-show="page < numPages"
+		ng-click="jumpToPage(page+1, $event)" href="#">Next</a><span
+		ng-hide="page < numPages">Next</span></li>
+</ul>

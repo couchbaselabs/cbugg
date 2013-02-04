@@ -1,0 +1,21 @@
+<form>
+	<div class="well sidebar-nav filter">
+		<ul class="nav nav-list">
+			<li ng-hide="facets.statuses.terms == null" class="nav-header">Status</li>
+			<li ng-repeat="status in facets.statuses.terms"><input
+				ng-show="filterStatus.indexOf(status.term) === -1" type="checkbox"
+				value="{{status.term}}" ng-click="updateStatusFilter(status.term)" />
+				<input ng-hide="filterStatus.indexOf(status.term) === -1"
+				type="checkbox" value="{{status.term}}"
+				ng-click="updateStatusFilter(status.term)" checked />
+				{{status.term}} ({{status.count}})</li>
+			<li ng-hide="facets.tags.terms == null" class="nav-header">Tags</li>
+			<li ng-repeat="tag in facets.tags.terms"><input
+				ng-show="filterTags.indexOf(tag.term) === -1" type="checkbox"
+				value="{{tag.term}}" ng-click="updateTagFilter(tag.term)" /><input
+				ng-hide="filterTags.indexOf(tag.term) === -1" type="checkbox"
+				value="{{tag.term}}" ng-click="updateTagFilter(tag.term)" checked />
+				{{tag.term}} ({{tag.count}})</li>
+		</ul>
+	</div>
+</form>

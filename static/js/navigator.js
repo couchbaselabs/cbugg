@@ -52,6 +52,10 @@ function NavigatorCtrl($scope, $routeParams, $http, $rootScope, cbuggAuth, cbugg
     cbuggPage.setTitle("Navigator");
     $scope.maxPagesToShow = 7;
 
+    $scope.jumpToPage = function(pageNum, $event) {
+        $scope.jumpToTabPage($scope.selectedTab, pageNum, $event)
+    }
+
     $scope.jumpToTabPage = function(tab, pageNum, $event) {
         if ($event != null) {
             $event.preventDefault();
@@ -104,10 +108,7 @@ function NavigatorCtrl($scope, $routeParams, $http, $rootScope, cbuggAuth, cbugg
         if ($scope.validPages.length > $scope.maxPagesToShow) {
             numPagesToRemove = $scope.validPages.length - $scope.maxPagesToShow;
             frontPagesToRemove = backPagesToRemove = 0;
-            console.log("start");
             while (numPagesToRemove - frontPagesToRemove - backPagesToRemove > 0) {
-                console.log("front pages to remove is " + frontPagesToRemove);
-                console.log("back pages to remove is " + backPagesToRemove);
                 numPagesBefore = $scope.page - 1 - frontPagesToRemove;
                 numPagesAfter = $scope.validPages.length - $scope.page
                         - backPagesToRemove;
@@ -117,17 +118,10 @@ function NavigatorCtrl($scope, $routeParams, $http, $rootScope, cbuggAuth, cbugg
                     frontPagesToRemove++;
                 }
             }
-            console.log("done");
-            console.log("front pages to remove is " + frontPagesToRemove);
-            console.log("back pages to remove is " + backPagesToRemove);
 
             // remove from the end first, to keep indexes simpler
             $scope.validPages.splice(-backPagesToRemove, backPagesToRemove);
-            console.log("removed back now pages is");
-            console.log($scope.validPages);
             $scope.validPages.splice(0, frontPagesToRemove);
-            console.log("removed front now pages is");
-            console.log($scope.validPages);
         }
 
         // now compute the first and last result shown on this page

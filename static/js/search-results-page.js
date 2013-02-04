@@ -1,4 +1,8 @@
-function SearchResultsCtrl($scope, $routeParams, $http, cbuggPage) {
+function SearchResultsCtrl($scope, $routeParams, $http, $rootScope, cbuggAuth, cbuggPage) {
+
+    $rootScope.$watch('loggedin', function() {
+        $scope.auth = cbuggAuth.get();
+    });
 
     $scope.searchInProgress = true;
     $scope.searchError = false;
@@ -42,11 +46,34 @@ function SearchResultsCtrl($scope, $routeParams, $http, cbuggPage) {
     };
 
     $scope.computeValidPages = function() {
+        // compute the valid pages
         $scope.numPages = Math.ceil($scope.total / $scope.rpp);
-        $scope.validPages = [];
+        $scope.validPages = new Array();
         for (i = 1; i <= $scope.numPages; i++) {
             $scope.validPages.push(i);
         }
+
+        // now see if we have too many pages
+        if ($scope.validPages.length > $scope.maxPagesToShow) {
+            numPagesToRemove = $scope.validPages.length - $scope.maxPagesToShow;
+            frontPagesToRemove = backPagesToRemove = 0;
+            while (numPagesToRemove - frontPagesToRemove - backPagesToRemove > 0) {
+                numPagesBefore = $scope.page - 1 - frontPagesToRemove;
+                numPagesAfter = $scope.validPages.length - $scope.page
+                        - backPagesToRemove;
+                if (numPagesAfter > numPagesBefore) {
+                    backPagesToRemove++;
+                } else {
+                    frontPagesToRemove++;
+                }
+            }
+
+            // remove from the end first, to keep indexes simpler
+            $scope.validPages.splice(-backPagesToRemove, backPagesToRemove);
+            $scope.validPages.splice(0, frontPagesToRemove);
+        }
+
+        // now compute the first and last result shown on this page
         $scope.firstResult = (($scope.page - 1) * $scope.rpp) + 1;
         if ($scope.firstResult > $scope.total) {
             $scope.firstResult = $scope.total;
@@ -81,6 +108,18 @@ function SearchResultsCtrl($scope, $routeParams, $http, cbuggPage) {
         $scope.rpp = size;
         $scope.jumpToPage(1, $event);
     };
+
+    $scope.isSubscribed = function(userhash, subscribers) {
+
+        for (i in subscribers) {
+            subscriber = subscribers[i];
+            if (subscriber.md5 == userhash) {
+                return true;
+            }
+        }
+
+        return false;
+    }
 
     $scope.query = $routeParams.query;
     $scope.jumpToPage(1, null);
