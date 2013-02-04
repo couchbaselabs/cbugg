@@ -12,6 +12,7 @@ function SearchResultsCtrl($scope, $routeParams, $http, $rootScope, cbuggAuth, c
     $scope.filterStatus = [];
     $scope.filterTags = [];
     cbuggPage.setTitle("Search");
+    $scope.maxPagesToShow = 7;
 
     $scope.jumpToPage = function(pageNum, $event) {
         if ($event) {
