@@ -14,7 +14,15 @@
 </div>
 
 <div ng-hide="searchError || searchInProgress">
-	<h3>Query: {{query}}</h3>
+
+    <div ng-controller="SearchCtrl">
+        <form ng-submit="search()" method="GET">
+	       <h3>Search
+	           <input ng-model="query" ng-required="true" type="text" class="search-query search-results-form" placeholder="Search">
+           </h3>
+        </form>
+    </div>
+
 	<div ng-show="searchWarning != null" class="alert alert-error">
 		<span class="label label-important">Warning</span> {{searchWarning}}
 	</div>
@@ -35,11 +43,11 @@
 
 				<!-- search results table -->
 				<div class="span9">
-                    <div ng-include src="'/static/partials/search-results-table.html'"></div>
+					<div ng-include src="'/static/partials/search-results-table.html'"></div>
 					<h5 class="pull-left">Displaying {{firstResult}} -
 						{{lastResult}} of {{total}} matching bugs</h5>
-                    <div class="pagination pull-right" ng-include src="'/static/partials/search-results-pager.html'">
-                    </div>
+					<div class="pagination pull-right" ng-include
+						src="'/static/partials/search-results-pager.html'"></div>
 				</div>
 			</div>
 		</div>
