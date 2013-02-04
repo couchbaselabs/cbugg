@@ -354,6 +354,7 @@ func updateSubscription(bugid, email string, add bool) error {
 		}
 
 		bug.ModType = "subscribers"
+		bug.ModBy = email
 		bug.ModifiedAt = time.Now().UTC()
 
 		return json.Marshal(bug)
