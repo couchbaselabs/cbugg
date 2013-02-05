@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"regexp"
 	"strings"
 	"time"
 	"unicode"
@@ -16,9 +17,21 @@ import (
 var ghUser = flag.String("ghuser", "", "github username")
 var ghPass = flag.String("ghpass", "", "github password")
 
+var bugRefRE *regexp.Regexp
+
+func init() {
+	bugRefRE = regexp.MustCompile(`[Cc][Bb][Uu][Gg][Gg]:\s*(clos\w+)?\s*(bug-\d+)`)
+}
+
 type githubUser struct {
 	Avatar string `json:"avatar_url"`
 	Login  string
+}
+
+type githubAuthor struct {
+	Email    string
+	Name     string
+	Username string
 }
 
 type GithubRepository struct {
@@ -60,6 +73,23 @@ type githubPullRequestHook struct {
 	} `json:"pull_request"`
 	Repository GithubRepository
 	Sender     githubUser
+}
+
+type githubCommit struct {
+	Added     []string
+	Modified  []string
+	Removed   []string
+	Author    githubAuthor
+	Committer githubAuthor
+	Id        string
+	Message   string
+	URL       string
+	Timestamp time.Time
+}
+
+type githubPushHook struct {
+	Commits    []githubCommit
+	Repository GithubRepository
 }
 
 func cleanupPatchTitle(t string) string {
@@ -332,6 +362,89 @@ func serveGithubPullRequest(w http.ResponseWriter, r *http.Request) {
 
 	go closeGithubIssue(bug, hookdata.PullRequest.CommentsURL,
 		hookdata.PullRequest.EditURL)
+
+	w.WriteHeader(204)
+}
+
+type githubCBRef struct {
+	bugid  string
+	closed bool
+}
+
+func extractRefsFromGithub(msg string) []githubCBRef {
+	matches := bugRefRE.FindAllStringSubmatch(msg, 100000)
+
+	rv := []githubCBRef{}
+	for _, x := range matches {
+		rv = append(rv, githubCBRef{
+			x[2], strings.HasPrefix(strings.ToLower(x[1]), "clos"),
+		})
+	}
+
+	return rv
+}
+
+func refBug(hookdata githubPushHook, commit githubCommit, ref githubCBRef) {
+	bugid := ref.bugid
+
+	me, _ := getUser(commit.Author.Email)
+	me.Id = commit.Author.Email // Update the author for when getUser fails
+
+	if _, err := getBugFor(bugid, me); err != nil {
+		return
+	}
+
+	commentMsg := "Commit [" + commit.Id + "](" + commit.URL + ")\n\n" +
+		commit.Message
+
+	id := "c-" + bugid + "-" + time.Now().UTC().Format(time.RFC3339Nano)
+
+	c := Comment{
+		Id:        id,
+		BugId:     bugid,
+		Type:      "comment",
+		User:      me.Id,
+		Text:      commentMsg,
+		CreatedAt: time.Now().UTC(),
+	}
+
+	added, err := db.Add(c.Id, 0, c)
+	if err != nil {
+		log.Printf("Error adding new comment from github: %v", err)
+		return
+	}
+	if !added {
+		log.Printf("Failed to add new comment (this is a bug)")
+		return
+	}
+
+	notifyComment(c)
+
+	if ref.closed {
+		updateBug(bugid, "status", "resolved", me)
+	}
+}
+
+func processPushHook(hookdata githubPushHook) {
+	for _, commit := range hookdata.Commits {
+		for _, ref := range extractRefsFromGithub(commit.Message) {
+			refBug(hookdata, commit, ref)
+		}
+	}
+}
+
+func serveGithubPush(w http.ResponseWriter, r *http.Request) {
+	hookdata := githubPushHook{}
+	err := json.Unmarshal([]byte(r.FormValue("payload")), &hookdata)
+
+	if err != nil {
+		showError(w, r, err.Error(), 500)
+		return
+	}
+
+	log.Printf("Got push hook: %+v", hookdata)
+
+	go processPushHook(hookdata)
 
 	w.WriteHeader(204)
 }
