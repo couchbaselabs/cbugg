@@ -19,6 +19,8 @@ var ghPass = flag.String("ghpass", "", "github password")
 
 var bugRefRE *regexp.Regexp
 
+var failedToAdd = errors.New("Failed to add value")
+
 func init() {
 	bugRefRE = regexp.MustCompile(`[Cc][Bb][Uu][Gg][Gg]:\s*(clos\w+)?\s*(bug-\d+)`)
 }
@@ -384,8 +386,25 @@ func extractRefsFromGithub(msg string) []githubCBRef {
 	return rv
 }
 
+func markRefBug(commit, bugid string) error {
+	added, err := db.Add("mark-"+commit+"."+bugid, 900, "")
+	if err != nil {
+		return err
+	}
+	if !added {
+		return failedToAdd
+	}
+	return nil
+}
+
 func refBug(hookdata githubPushHook, commit githubCommit, ref githubCBRef) {
 	bugid := ref.bugid
+
+	if err := markRefBug(commit.Id, bugid); err != nil {
+		log.Printf("Could not mark ref bug for %v/%v: %v",
+			commit.Id, bugid, err)
+		return
+	}
 
 	me, _ := getUser(commit.Author.Email)
 	me.Id = commit.Author.Email // Update the author for when getUser fails
