@@ -20,13 +20,14 @@
   </div>
 </div>
 
-<cb-editor editing="editingDesc" editfn="editDesc" source="bug.description">
-<div ng-show="editing" class="clearfix">
-  <button ng-click="save()" class="btn pull-right">Save</button>
-</div>
+<cb-editor live="1" editing="editingDesc" editfn="editDesc" source="bug.description">
 </cb-editor>
-<div class="description" ng-hide="editingDesc">
-  <button ng-show="auth.loggedin" class="btn btn-mini pull-right" ng-click="editDesc()">
+<div ng-show="editingDesc" class="clearfix">
+  <button ng-click="saveDesc()" class="btn pull-right">Save</button>
+</div>
+<div class="description">
+  <button ng-show="auth.loggedin && !editingDesc"
+          class="editbtn btn btn-mini pull-right" ng-click="editDesc()">
     <i class="icon-edit"></i> Edit
   </button>
   <div ng-bind-html-unsafe="bug.description | markdownify"></div>

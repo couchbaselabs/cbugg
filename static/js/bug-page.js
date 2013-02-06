@@ -158,11 +158,6 @@ function BugCtrl($scope, $routeParams, $http, $rootScope, $timeout, $location, b
         });
 
         $scope.subcount = data.subscribers.length;
-        $scope.$watch('bug.description', function(next, prev) {
-            if($scope.bug && next !== prev) {
-                updateBug("description");
-            }
-        });
         $scope.$watch('bug.status', function(next, prev) {
             if(next) { updateAvailableStates(next); }
             if($scope.bug && next !== prev) {
@@ -177,6 +172,11 @@ function BugCtrl($scope, $routeParams, $http, $rootScope, $timeout, $location, b
         error(function(data, code) {
             bAlert("Error " + code, "could not fetch bug info: " + data, "error");
         });
+
+    $scope.saveDesc = function() {
+        updateBug("description");
+        $timeout(function() { $scope.editingDesc = false; });
+    };
 
 
     $http.get("/api/bug/" + $routeParams.bugId + "/history/").success(function(data) {
