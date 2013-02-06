@@ -23,8 +23,13 @@ Counts by state for bugs tagged {{tag.name}}.
 <div ng-show="currentuser.internal">
   <h2>Styling</h2>
 
-  Foreground Color: <input ng-model="tag.fgcolor" ng-change="cssdirty = true"><br/>
-  Background Color: <input ng-model="tag.bgcolor" ng-change="cssdirty = true"><br/>
+  <style id="dynamicstyle">
+  </style>
+
+  <p>The tags look like this:  <span class="bugpage-tag tag-{{tag.name}}">{{tag.name}}</span></p>
+
+  Foreground Color: <input ng-model="tag.fgcolor" ng-change="csschanged()"><br/>
+  Background Color: <input ng-model="tag.bgcolor" ng-change="csschanged()"><br/>
 
   <button ng-show="cssdirty" ng-click="updatecss()">Save</button>
 

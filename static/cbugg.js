@@ -244,6 +244,18 @@ function TagCtrl($scope, $routeParams, $http, $rootScope, $timeout, $location, b
             });
     };
 
+    $scope.csschanged = function() {
+        $scope.cssdirty = true;
+        var val = "";
+        if ($scope.tag.fgcolor != "" && $scope.tag.bgcolor != "") {
+            val = ".tag-" + $scope.tag.name + " {" +
+                " background: " + $scope.tag.bgcolor + "; " +
+                " color: " + $scope.tag.fgcolor + ";}";
+        }
+
+        document.getElementById("dynamicstyle").innerText = val;
+    };
+
     $scope.subscribe = function() {
         $http.post('/api/tags/' + $scope.tag.name + '/sub/');
         $scope.subscribed = true;
