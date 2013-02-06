@@ -29,10 +29,11 @@ var staticPath = flag.String("static", "static", "Path to the static content")
 
 var bugStates = []BugState{
 	{"inbox", 5, nil},
-	{"new", 10, []string{"open", "resolved", "closed"}},
-	{"open", 20, []string{"resolved", "closed"}},
-	{"resolved", 30, []string{"open", "closed"}},
-	{"closed", 40, []string{"open"}},
+	{"new", 10, []string{"open", "inprogress", "resolved", "closed"}},
+	{"open", 20, []string{"inprogress", "resolved", "closed"}},
+	{"inprogress", 30, []string{"open", "resolved", "closed"}},
+	{"resolved", 40, []string{"open", "closed"}},
+	{"closed", 50, []string{"open"}},
 }
 
 func checkLastModified(w http.ResponseWriter, r *http.Request, modtime time.Time) bool {
