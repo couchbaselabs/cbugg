@@ -211,6 +211,12 @@ function TagCtrl($scope, $routeParams, $http, $rootScope, $timeout, $location, b
     $scope.states = [];
     $scope.subscribed = false;
     $scope.subcount = 0;
+    $scope.currentuser = null;
+    $scope.cssdirty = false;
+
+    $http.get("/api/me/").success(function(data) {
+        $scope.currentuser = data;
+    });
 
     var checkSubscribed = function() {
         if($scope.tag) {
@@ -225,6 +231,18 @@ function TagCtrl($scope, $routeParams, $http, $rootScope, $timeout, $location, b
         $scope.auth = cbuggAuth.get();
         checkSubscribed();
     });
+
+    $scope.updatecss = function() {
+        $http.post("/api/tags/" + $scope.tag.name + "/css/",
+                   "fgcolor=" + encodeURIComponent($scope.tag.fgcolor) +
+                   "&bgcolor=" + encodeURIComponent($scope.tag.bgcolor),
+                   {headers: {"Content-Type": "application/x-www-form-urlencoded"}})
+            .error(function(data, code) {
+                bAlert("Error " + code, "Failed to update the tag css.");})
+            .success(function() {
+                $scope.cssdirty = false;
+            });
+    };
 
     $scope.subscribe = function() {
         $http.post('/api/tags/' + $scope.tag.name + '/sub/');

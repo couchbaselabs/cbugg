@@ -20,4 +20,15 @@ Counts by state for bugs tagged {{tag.name}}.
 
 <hr />
 
+<div ng-show="currentuser.internal">
+  <h2>Styling</h2>
+
+  Foreground Color: <input ng-model="tag.fgcolor" ng-change="cssdirty = true"><br/>
+  Background Color: <input ng-model="tag.bgcolor" ng-change="cssdirty = true"><br/>
+
+  <button ng-show="cssdirty" ng-click="updatecss()">Save</button>
+
+  <hr />
+</div>
+
 <div ng-include src="'/static/partials/newbug.html'"></div>

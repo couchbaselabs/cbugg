@@ -15,7 +15,7 @@ type viewMarker struct {
 }
 
 const ddocKey = "/@cbuggddocVersion"
-const ddocVersion = 34
+const ddocVersion = 35
 const designDoc = `
 {
     "spatialInfos": [],
@@ -115,6 +115,9 @@ const designDoc = `
         "special_users": {
             "map": "function (doc, meta) {\n  if (doc.type === 'user') {\n    if (doc.admin) {\n      emit(\"admin\", doc.id);\n    }\n    if (doc.internal) {\n      emit(\"internal\", doc.id);\n    }\n  }\n}",
             "reduce": "_count"
+        },
+        "tag_info": {
+            "map": "function (doc, meta) {\n  if (doc.type === 'tag') {\n    emit(doc.name, null);\n  }\n}"
         },
         "tags": {
             "map": "function (doc, meta) {\n  if (doc.type === 'bug' && doc.tags) {\n    for (var i = 0; i < doc.tags.length; i++) {\n      emit([doc.tags[i], doc.status], 1);\n    }\n  } else if(doc.type === 'tag') {\n    emit([doc.name, \"inbox\"], 0);\n  }\n}",

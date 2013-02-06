@@ -183,6 +183,10 @@ func authRequired(r *http.Request, rm *mux.RouteMatch) bool {
 	return whoami(r).Id != ""
 }
 
+func internalRequired(r *http.Request, rm *mux.RouteMatch) bool {
+	return whoami(r).Internal
+}
+
 func adminRequired(r *http.Request, rm *mux.RouteMatch) bool {
 	return whoami(r).Admin
 }
@@ -290,11 +294,14 @@ func main() {
 	// All about tags
 	r.HandleFunc("/api/tags/", serveTagList).Methods("GET")
 	r.HandleFunc("/api/tags/{tag}/", serveTagStates).Methods("GET")
+	r.HandleFunc("/api/tags/{tag}/css/",
+		serveTagCSSUpdate).Methods("POST").MatcherFunc(internalRequired)
 	r.HandleFunc("/api/tags/{tag}/sub/",
 		serveSubscribeTag).Methods("POST").MatcherFunc(authRequired)
 	r.HandleFunc("/api/tags/{tag}/sub/",
 		serveUnsubscribeTag).Methods("DELETE").MatcherFunc(authRequired)
 	r.HandleFunc("/api/tags/{tag}/sub/", notAuthed).Methods("POST", "DELETE")
+	r.HandleFunc("/tags.css", serveTagCSS).Methods("GET")
 
 	r.HandleFunc("/api/recent/", serveRecent).Methods("GET")
 	r.HandleFunc("/api/states/", serveStates).Methods("GET")

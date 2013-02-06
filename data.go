@@ -92,6 +92,8 @@ type Tag struct {
 	Name        string   `json:"name"`
 	Type        string   `json:"type"`
 	Subscribers []string `json:"subscribers,omitempty"`
+	FGColor     string   `json:"fgcolor,omitempty"`
+	BGColor     string   `json:"bgcolor,omitempty"`
 }
 
 type APIComment Comment
