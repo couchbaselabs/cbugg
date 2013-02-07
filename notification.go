@@ -306,8 +306,9 @@ func sendTagNotification(bugid, tagName, actor string) {
 
 	sendNotifications("tag_notification", to,
 		map[string]interface{}{
-			"Bug": b,
-			"Tag": tagName,
+			"Bug":   b,
+			"Tag":   tagName,
+			"Actor": actor,
 		})
 }
 

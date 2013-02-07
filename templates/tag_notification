@@ -1,7 +1,7 @@
 Subject: Bug tagged {{.Tag}} - [{{.Bug.Id}}] {{.Bug.Title}}
 
 As a subscriber of tag "{{.Tag}}," I thought I should let you know that
-a new bug has been given that tag.
+a new bug has been given that tag by {{.Actor}}.
 
 You are not automatically subscribed to this bug, so if you're
 interested, you may want to go look at it and subscribe yourself.
