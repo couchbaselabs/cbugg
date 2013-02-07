@@ -230,12 +230,10 @@ func main() {
 	var err error
 
 	r := mux.NewRouter()
-	// Bugs are fancy
+	// Bug CRUD
 	r.HandleFunc("/api/bug/", serveNewBug).Methods("POST").MatcherFunc(authRequired)
 	r.HandleFunc("/api/bug/", notAuthed).Methods("POST")
 	r.HandleFunc("/api/bug/", serveBugList).Methods("GET")
-
-	r.HandleFunc("/api/bug/{bugid}/history/", serveBugHistory).Methods("GET")
 
 	r.HandleFunc("/api/bug/{bugid}", serveBug).Methods("GET")
 	r.HandleFunc("/api/bug/{bugid}",
@@ -244,6 +242,10 @@ func main() {
 		serveBugDeletion).Methods("DELETE").MatcherFunc(adminRequired)
 	r.HandleFunc("/api/bug/{bugid}", notAuthed).Methods("POST", "DELETE")
 
+	// Bug history
+	r.HandleFunc("/api/bug/{bugid}/history/", serveBugHistory).Methods("GET")
+
+	// Attachments
 	r.HandleFunc("/api/bug/{bugid}/attachments/",
 		serveFileUpload).Methods("POST").MatcherFunc(authRequired)
 	r.HandleFunc("/api/bug/{bugid}/attachments/", notAuthed).Methods("POST")
@@ -267,8 +269,10 @@ func main() {
 	r.HandleFunc("/api/bug/{bugid}/comments/{commid}/undel",
 		serveUnDelComment).Methods("POST").MatcherFunc(authRequired)
 	r.HandleFunc("/api/bug/{bugid}/comments/{commid}/undel", notAuthed).Methods("POST")
+	// NODOC
 	r.HandleFunc("/api/bug/{bugid}/comments/{commid}",
 		serveCommentUpdate).Methods("POST").MatcherFunc(authRequired)
+
 	// Bug subscriptions
 	r.HandleFunc("/api/bug/{bugid}/sub/",
 		serveSubscribeBug).Methods("POST").MatcherFunc(authRequired)
@@ -287,6 +291,7 @@ func main() {
 	r.HandleFunc("/api/bug/{bugid}/remindme/",
 		notAuthed).Methods("POST")
 
+	// User list
 	r.HandleFunc("/api/users/", serveUserList).Methods("GET")
 	r.HandleFunc("/api/users/special/", serveSpecialUserList).Methods("GET")
 	r.HandleFunc("/api/users/mod/", serveAdminUserMod).Methods("POST")
