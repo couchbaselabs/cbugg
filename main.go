@@ -269,7 +269,6 @@ func main() {
 	r.HandleFunc("/api/bug/{bugid}/comments/{commid}/undel",
 		serveUnDelComment).Methods("POST").MatcherFunc(authRequired)
 	r.HandleFunc("/api/bug/{bugid}/comments/{commid}/undel", notAuthed).Methods("POST")
-	// NODOC
 	r.HandleFunc("/api/bug/{bugid}/comments/{commid}",
 		serveCommentUpdate).Methods("POST").MatcherFunc(authRequired)
 
