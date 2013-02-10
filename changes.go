@@ -10,18 +10,55 @@ import (
 
 var changes_broadcaster = newBroadcaster(100)
 
+var recentChanges = newChangeRing(100)
+
+func init() {
+	go rememberChanges()
+}
+
+func rememberChanges() {
+	changes_broadcaster.Register(recentChanges.chin)
+}
+
 type changeRing struct {
 	start int
 	items []interface{}
+	chin  chan interface{}
+	req   chan chan []interface{}
 }
 
 func newChangeRing(size int) *changeRing {
-	return &changeRing{
+	rv := &changeRing{
 		items: make([]interface{}, 0, size),
+		chin:  make(chan interface{}),
+		req:   make(chan chan []interface{}),
 	}
+	go rv.process()
+	return rv
 }
 
 func (cr *changeRing) Add(i interface{}) {
+	cr.chin <- i
+}
+
+func (cr *changeRing) Slice() []interface{} {
+	ch := make(chan []interface{}, 1)
+	cr.req <- ch
+	return <-ch
+}
+
+func (cr *changeRing) process() {
+	for {
+		select {
+		case i := <-cr.chin:
+			cr.addItem(i)
+		case r := <-cr.req:
+			r <- cr.slice()
+		}
+	}
+}
+
+func (cr *changeRing) addItem(i interface{}) {
 	if len(cr.items) < cap(cr.items) {
 		cr.items = append(cr.items, i)
 	} else {
@@ -33,7 +70,7 @@ func (cr *changeRing) Add(i interface{}) {
 	}
 }
 
-func (cr *changeRing) Slice() []interface{} {
+func (cr *changeRing) slice() []interface{} {
 	rv := make([]interface{}, 0, cap(cr.items))
 	for i := cr.start; i < len(cr.items); i++ {
 		rv = append(rv, cr.items[i])
