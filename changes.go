@@ -10,6 +10,40 @@ import (
 
 var changes_broadcaster = newBroadcaster(100)
 
+type changeRing struct {
+	start int
+	items []interface{}
+}
+
+func newChangeRing(size int) *changeRing {
+	return &changeRing{
+		items: make([]interface{}, 0, size),
+	}
+}
+
+func (cr *changeRing) Add(i interface{}) {
+	if len(cr.items) < cap(cr.items) {
+		cr.items = append(cr.items, i)
+	} else {
+		if cr.start == cap(cr.items) {
+			cr.start = 0
+		}
+		cr.items[cr.start] = i
+		cr.start++
+	}
+}
+
+func (cr *changeRing) Slice() []interface{} {
+	rv := make([]interface{}, 0, cap(cr.items))
+	for i := cr.start; i < len(cr.items); i++ {
+		rv = append(rv, cr.items[i])
+	}
+	for i := 0; i < cr.start; i++ {
+		rv = append(rv, cr.items[i])
+	}
+	return rv
+}
+
 type connection struct {
 	// The websocket connection.
 	ws sockjs.Conn
