@@ -9,7 +9,9 @@ before_script:
 
 script:
   - testacular start config/testacular.conf.js
+  - go test -v
 
 notifications:
   email:
     - dustin@couchbase.com
+    - marty.schoch@gmail.com
