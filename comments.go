@@ -159,6 +159,12 @@ func updateCommentDeleted(w http.ResponseWriter, r *http.Request, to bool) {
 	w.WriteHeader(204)
 }
 
+func getComment(commid string) (Comment, error) {
+	comment := Comment{}
+	err := db.Get(commid, &comment)
+	return comment, err
+}
+
 func serveCommentUpdate(w http.ResponseWriter, r *http.Request) {
 	me := whoami(r)
 	commid := mux.Vars(r)["commid"]

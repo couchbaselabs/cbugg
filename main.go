@@ -378,6 +378,8 @@ func main() {
 		log.Fatalf("Error connecting to couchbase: %v", err)
 	}
 
+	go loadRecent()
+
 	log.Printf("Listening on %v", *addr)
 	log.Fatal(http.ListenAndServe(*addr, nil))
 }

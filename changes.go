@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"log"
 	"time"
 
@@ -203,6 +204,8 @@ func convertMessageToChangeNotifications(message interface{}, connUser User) []i
 				Private: bug.Private,
 			}}
 		}
+	default:
+		log.Printf("Unhandled RT Change message type: %T", message)
 	}
 	return nil
 }
@@ -211,6 +214,66 @@ func ChangesHandler(conn sockjs.Conn) {
 	c := &connection{send: make(chan interface{}, 256), ws: conn}
 	changes_broadcaster.Register(c.send)
 	defer changes_broadcaster.Unregister(c.send)
+	go func() {
+		for _, change := range recentChanges.Slice() {
+			select {
+			case c.send <- change:
+			default:
+			}
+		}
+	}()
 	go c.writer()
 	c.reader()
+}
+
+func loadObject(doctype, docid string) (interface{}, error) {
+	switch doctype {
+	case "bug", "bughistory":
+		bug, err := getBug(docid)
+		if err != nil {
+			return bug, err
+		}
+		return bugChange{bug.Id,
+			bug.ModBy,
+			[]string{bug.ModType},
+			"",
+		}, nil
+	case "comment":
+		return getComment(docid)
+	}
+	return nil, fmt.Errorf("Unhandled type: %v", doctype)
+}
+
+func loadRecent() {
+	args := map[string]interface{}{
+		"descending": true,
+		"limit":      20,
+	}
+
+	viewRes := struct {
+		Rows []struct {
+			ID    string
+			Key   string
+			Value struct {
+				Type string
+			}
+		}
+	}{}
+
+	err := db.ViewCustom("cbugg", "changes", args, &viewRes)
+	if err != nil {
+		log.Printf("Error initializing recent changes: %v", err)
+		return
+	}
+
+	for _, r := range viewRes.Rows {
+		change, err := loadObject(r.Value.Type, r.ID)
+		if err == nil {
+			recentChanges.Add(change)
+		} else {
+			log.Printf("Error loading %v/%v: %v",
+				r.Value.Type, r.ID, err)
+		}
+	}
+
 }
