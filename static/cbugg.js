@@ -62,6 +62,7 @@ angular.module('cbugg', ['cbuggFilters', 'cbuggAuth', 'cbuggRealtime', 'cbuggEdi
     }]);
 
 function StatesByCountCtrl($scope, $http, cbuggPage) {
+    $scope.recent = [];
     cbuggPage.setTitle("Home");
     $http.get('/api/state-counts').success(function(stateCounts) {
         $http.get("/api/states/").success(function(allstates) {
@@ -71,9 +72,6 @@ function StatesByCountCtrl($scope, $http, cbuggPage) {
                                          return scopeMap[n[0]].order;
                                      });
         });
-            });
-    $http.get('/api/recent/').success(function(data) {
-        $scope.recent = _.first(data, 10);
     });
 
     $scope.$on('Change', function(event, change) {
