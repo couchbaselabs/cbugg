@@ -1,5 +1,13 @@
 language: go
 
+before_script:
+  - export DISPLAY=:99.0
+  - sh -e /etc/init.d/xvfb start
+  - npm install -g testacular
+
+script:
+  - testacular start config/testacular.conf.js
+
 notifications:
   email:
     - dustin@couchbase.com
