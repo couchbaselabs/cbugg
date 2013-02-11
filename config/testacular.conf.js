@@ -11,6 +11,6 @@ files = [
 
 singleRun = true;
 
-browsers = ['Chrome'];
+browsers = ['Firefox'];
 
 
