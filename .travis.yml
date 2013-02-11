@@ -1,4 +1,6 @@
 language: go
+node_js:
+  - 0.8
 
 before_script:
   - export DISPLAY=:99.0
