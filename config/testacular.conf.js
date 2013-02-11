@@ -13,4 +13,4 @@ singleRun = true;
 
 browsers = ['Firefox'];
 
-
+reporters = ['dots'];
