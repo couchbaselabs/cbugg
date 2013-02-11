@@ -35,7 +35,7 @@ describe("Search Service", function() {
     	$httpBackend.expectPOST('/api/search/?query=bug&from=0&size=10&status=&tags=').respond(successfulEmtpySearchResponse);
         result = service.query("bug");
         $httpBackend.flush();
-        expect(result.inProgress).toBe(true);
+        expect(result.inProgress).toBe(false);
         expect(result.errorMessage).toBe("");
         expect(result.warningMessage).toBe("");
         expect(result.hits.length).toBe(0);
