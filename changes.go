@@ -226,7 +226,7 @@ func ChangesHandler(conn sockjs.Conn) {
 	c.reader()
 }
 
-func loadObject(doctype, docid string) (interface{}, error) {
+func loadChangeObject(doctype, docid string) (interface{}, error) {
 	switch doctype {
 	case "bug", "bughistory":
 		bug, err := getBug(docid)
@@ -267,7 +267,7 @@ func loadRecent() {
 	}
 
 	for _, r := range viewRes.Rows {
-		change, err := loadObject(r.Value.Type, r.ID)
+		change, err := loadChangeObject(r.Value.Type, r.ID)
 		if err == nil {
 			recentChanges.Add(change)
 		} else {
