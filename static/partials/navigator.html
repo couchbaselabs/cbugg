@@ -11,7 +11,7 @@
 	<div class="tab-content">
 		<div class="tab-pane active">
 
-			<div ng-show="result.searchInProgress">
+			<div ng-show="result.inProgress">
 
 				<h3>Search for "{{query}}" in progress...</h3>
 				<div class="progress progress-striped active">
@@ -26,7 +26,7 @@
 				<span class="label label-important">Error</span> {{result.errorMessage}}
 			</div>
 
-			<div ng-hide="result.errorMessage || result.searchInProgress">
+			<div ng-hide="result.errorMessage || result.inProgress">
 				<div ng-show="result.warningMessage" class="alert alert-error">
 					<span class="label label-important">Warning</span>
 					{{result.warningMessage}}

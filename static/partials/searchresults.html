@@ -1,4 +1,4 @@
-<div ng-show="result.searchInProgress">
+<div ng-show="result.inProgress">
 
 	<h3>Search for "{{result.query_string}}" in progress...</h3>
 	<div class="progress progress-striped active">
@@ -13,7 +13,7 @@
 	<span class="label label-important">Error</span> {{result.errorMessage}}
 </div>
 
-<div ng-hide="result.errorMessage || result.searchInProgress">
+<div ng-hide="result.errorMessage || result.inProgress">
 
     <div ng-controller="SearchCtrl">
         <form ng-submit="search()" method="GET">
