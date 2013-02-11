@@ -11,7 +11,7 @@
 	<div class="tab-content">
 		<div class="tab-pane active">
 
-			<div ng-show="searchInProgress">
+			<div ng-show="result.searchInProgress">
 
 				<h3>Search for "{{query}}" in progress...</h3>
 				<div class="progress progress-striped active">
@@ -21,24 +21,24 @@
 
 			</div>
 
-			<div ng-show="searchError && searchWarning != null"
+			<div ng-show="result.errorMessage"
 				class="alert alert-error">
-				<span class="label label-important">Error</span> {{searchWarning}}
+				<span class="label label-important">Error</span> {{result.errorMessage}}
 			</div>
 
-			<div ng-hide="searchError || searchInProgress">
-				<div ng-show="searchWarning" class="alert alert-error">
+			<div ng-hide="result.errorMessage || result.searchInProgress">
+				<div ng-show="result.warningMessage" class="alert alert-error">
 					<span class="label label-important">Warning</span>
-					{{searchWarning}}
+					{{result.warningMessage}}
 				</div>
 
 				<!-- no results -->
-				<div ng-hide="total > 0" id="searchResultContainer" class="clearfix">
+				<div ng-hide="result.pager.totalResults > 0" id="searchResultContainer" class="clearfix">
 					<h5>No bugs match this query</h5>
 				</div>
 
 				<!-- some results -->
-				<div ng-show="total > 0" id="searchResultContainer" class="clearfix">
+				<div ng-show="result.pager.totalResults > 0" id="searchResultContainer" class="clearfix">
 					<div class="container-fluid">
 						<div class="row-fluid">
 
@@ -72,8 +72,8 @@
 
                                 <div ng-include src="'/static/partials/search-results-table.html'"></div>
 
-								<h5 class="pull-left">Displaying {{firstResult}} -
-									{{lastResult}} of {{total}} matching bugs</h5>
+								<h5 class="pull-left">Displaying {{result.pager.firstResult}} -
+									{{result.pager.lastResult}} of {{result.pager.totalResults}} matching bugs</h5>
 								<div class="pagination pull-right" ng-include src="'/static/partials/search-results-pager.html'">
 								</div>
 							</div>

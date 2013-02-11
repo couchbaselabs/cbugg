@@ -1,28 +1,28 @@
 <table class="table-bordered table-striped table-condensed" width="100%">
 	<tbody>
-		<tr ng-repeat="result in results">
+		<tr ng-repeat="hit in result.hits">
 			<td class="bugCheckbox"><input type="checkbox" /></td>
-			<td class="bugId"><a class="status-{{result.source.doc.status}}"
-				href="/bug/{{result._id}}">{{result._id}}</a></td>
+			<td class="bugId"><a class="status-{{hit.source.doc.status}}"
+				href="/bug/{{hit._id}}">{{hit._id}}</a></td>
 			<td>
 				<div style="float: left; width: 38em;">
-					<p class="bugTitle ellipsis" title="{{result.source.doc.title}}">{{result.source.doc.title}}
+					<p class="bugTitle ellipsis" title="{{hit.source.doc.title}}">{{hit.source.doc.title}}
 					</p>
 					<div class="searchResultRowFooter">
 						Created by <img
-							ng-src="http://www.gravatar.com/avatar/{{result.source.doc.creator.md5}}?s=12">
-						{{result.source.doc.creator.email}} {{result.source.doc.created_at
+							ng-src="http://www.gravatar.com/avatar/{{hit.source.doc.creator.md5}}?s=12">
+						{{hit.source.doc.creator.email}} {{hit.source.doc.created_at
 						| relDate}}. Updated by <img
-							ng-src="http://www.gravatar.com/avatar/{{result.source.doc.modified_by.md5}}?s=12">
-						{{result.source.doc.modified_by.email}}
-						{{result.source.doc.modified_at | relDate}} <a
+							ng-src="http://www.gravatar.com/avatar/{{hit.source.doc.modified_by.md5}}?s=12">
+						{{hit.source.doc.modified_by.email}}
+						{{hit.source.doc.modified_at | relDate}} <a
 							class="buglist-tag tag-{{t}}"
-							ng-repeat="t in result.source.doc.tags" href="/tag/{{t}}">{{t}}</a>
+							ng-repeat="t in hit.source.doc.tags" href="/tag/{{t}}">{{t}}</a>
 					</div>
 				</div>
 				<div class="searchResultStar">
 					<i
-						ng-show="isSubscribed(auth.gravatar, result.source.doc.subscribers)"
+						ng-show="isSubscribed(auth.gravatar, hit.source.doc.subscribers)"
 						class="icon-star starred"></i>
 				</div>
 			</td>
