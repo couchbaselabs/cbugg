@@ -39,7 +39,7 @@ type Comment struct {
 
 func (c Comment) changeObject() Change {
 	rv := Change{
-		Email:   Email(c.User),
+		User:    Email(c.User),
 		Action:  "commented on",
 		BugID:   c.BugId,
 		Time:    c.CreatedAt,

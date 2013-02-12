@@ -22,8 +22,9 @@ func rememberChanges() {
 }
 
 type Change struct {
-	Email   Email     `json:"email"`
+	User    Email     `json:"user"`
 	Action  string    `json:"action"`
+	Bug     APIBug    `json:"bug"`
 	BugID   string    `json:"bugid"`
 	Time    time.Time `json:"time"`
 	Status  string    `json:"string"`
@@ -176,18 +177,6 @@ func (c *connection) writer() {
 }
 
 func convertMessageToChangeNotifications(message interface{}, connUser User) []interface{} {
-
-	type rtChange struct {
-		User    Email     `json:"user"`
-		Bug     APIBug    `json:"bug"`
-		BugID   string    `json:"bugid"`
-		Action  string    `json:"action"`
-		Status  string    `json:"status"`
-		Title   string    `json:"title"`
-		Time    time.Time `json:"time"`
-		Private bool      `json:"private"`
-	}
-
 	switch message := message.(type) {
 	case bugChange:
 		bug, err := getBugFor(message.bugid, connUser)
@@ -195,7 +184,7 @@ func convertMessageToChangeNotifications(message interface{}, connUser User) []i
 		if err == nil {
 			result := []interface{}{}
 			for _, v := range message.fields {
-				result = append(result, rtChange{
+				result = append(result, Change{
 					User:    Email(message.actor),
 					Bug:     APIBug(bug),
 					BugID:   bug.Id,
@@ -215,7 +204,7 @@ func convertMessageToChangeNotifications(message interface{}, connUser User) []i
 		}
 
 		if bug, err := getBugFor(message.BugId, connUser); err == nil {
-			return []interface{}{rtChange{
+			return []interface{}{Change{
 				User:    Email(message.User),
 				Bug:     APIBug(bug),
 				BugID:   bug.Id,

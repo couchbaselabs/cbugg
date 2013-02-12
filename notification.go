@@ -33,7 +33,7 @@ func (b bugChange) IsVisibleTo(u User) bool {
 
 func (b bugChange) changeObject() Change {
 	rv := Change{
-		Email:  Email(b.actor),
+		User:   Email(b.actor),
 		Action: "changed " + strings.Join(b.fields, ", "),
 		BugID:  b.bugid,
 	}
