@@ -113,66 +113,17 @@ func serveStates(w http.ResponseWriter, r *http.Request) {
 }
 
 func serveRecent(w http.ResponseWriter, r *http.Request) {
-	args := map[string]interface{}{
-		"descending": true,
-		"limit":      20,
-	}
-
-	viewRes := struct {
-		Rows []struct {
-			ID    string
-			Key   string
-			Value struct {
-				Actor  string
-				Action string
-				BugId  string
-			}
-		}
-	}{}
-
-	err := db.ViewCustom("cbugg", "changes", args, &viewRes)
-	if err != nil {
-		showError(w, r, err.Error(), 500)
-		return
-	}
-
-	bugs := map[string]Bug{}
-
-	for _, r := range viewRes.Rows {
-		bugs[r.Value.BugId] = Bug{}
-	}
-
-	for k := range bugs {
-		b, err := getBug(k)
-		if err == nil {
-			bugs[k] = b
-		}
-	}
-
-	type OutType struct {
-		Time    string `json:"time"`
-		User    Email  `json:"user"`
-		Action  string `json:"action"`
-		BugId   string `json:"bugid"`
-		Status  string `json:"status"`
-		Title   string `json:"title"`
-		Private bool   `json:"private"`
-	}
-
-	output := []OutType{}
+	output := []interface{}{}
 
 	me := whoami(r)
-	for _, r := range viewRes.Rows {
-		if isVisible(bugs[r.Value.BugId], me) {
-			output = append(output,
-				OutType{r.Key,
-					Email(r.Value.Actor),
-					r.Value.Action,
-					r.Value.BugId,
-					bugs[r.Value.BugId].Status,
-					bugs[r.Value.BugId].Title,
-					bugs[r.Value.BugId].Private,
-				})
+	for _, r := range recentChanges.Slice() {
+		if isVisible(r, me) {
+			co, ok := r.(changeEligible)
+			if ok {
+				output = append(output, co.changeObject())
+			} else {
+				log.Printf("%T isn't changeEligible", r)
+			}
 		}
 	}
 

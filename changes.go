@@ -21,6 +21,20 @@ func rememberChanges() {
 	changes_broadcaster.Register(recentChanges.chin)
 }
 
+type Change struct {
+	Email   Email     `json:"email"`
+	Action  string    `json:"action"`
+	BugID   string    `json:"bugid"`
+	Time    time.Time `json:"time"`
+	Status  string    `json:"string"`
+	Title   string    `json:"title"`
+	Private bool      `json:"private"`
+}
+
+type changeEligible interface {
+	changeObject() Change
+}
+
 type changeRing struct {
 	start int
 	items []interface{}
@@ -240,6 +254,7 @@ func loadChangeObject(doctype, docid string) (interface{}, error) {
 			bug.ModBy,
 			[]string{bug.ModType},
 			"",
+			&bug,
 		}, nil
 	case "comment":
 		return getComment(docid)

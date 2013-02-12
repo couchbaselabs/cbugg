@@ -37,6 +37,24 @@ type Comment struct {
 	Private   bool      `json:"private"`
 }
 
+func (c Comment) changeObject() Change {
+	rv := Change{
+		Email:   Email(c.User),
+		Action:  "commented on",
+		BugID:   c.BugId,
+		Time:    c.CreatedAt,
+		Private: c.Private,
+	}
+	bug, err := getBug(c.BugId)
+	if err == nil {
+		rv.Status = bug.Status
+		rv.Title = bug.Title
+		rv.Private = c.Private || bug.Private
+	}
+
+	return rv
+}
+
 func (c Comment) IsVisibleTo(u User) bool {
 	return u.Internal || (!c.Private)
 }

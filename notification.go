@@ -21,6 +21,30 @@ type bugChange struct {
 	actor     string
 	fields    []string
 	exception string
+	bug       *Bug
+}
+
+func (b bugChange) IsVisibleTo(u User) bool {
+	if b.bug != nil {
+		return b.bug.IsVisibleTo(u)
+	}
+	return true
+}
+
+func (b bugChange) changeObject() Change {
+	rv := Change{
+		Email:  Email(b.actor),
+		Action: "changed " + strings.Join(b.fields, ", "),
+		BugID:  b.bugid,
+	}
+	if b.bug != nil {
+		rv.Time = b.bug.ModifiedAt
+		rv.Status = b.bug.Status
+		rv.Title = b.bug.Title
+		rv.Private = b.bug.Private
+	}
+
+	return rv
 }
 
 type bugPing struct {
