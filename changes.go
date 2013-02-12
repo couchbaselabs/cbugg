@@ -176,47 +176,17 @@ func (c *connection) writer() {
 	c.ws.Close()
 }
 
-func convertMessageToChangeNotifications(message interface{}, connUser User) []interface{} {
-	switch message := message.(type) {
-	case bugChange:
-		bug, err := getBugFor(message.bugid, connUser)
+func convertMessageToChangeNotifications(message interface{},
+	connUser User) []interface{} {
 
+	co, ok := message.(changeEligible)
+	if ok {
+		c, err := co.changeObjectFor(connUser)
 		if err == nil {
-			result := []interface{}{}
-			for _, v := range message.fields {
-				result = append(result, Change{
-					User:    Email(message.actor),
-					Bug:     APIBug(bug),
-					BugID:   bug.Id,
-					Action:  "changed " + v,
-					Status:  bug.Status,
-					Title:   bug.Title,
-					Time:    bug.ModifiedAt,
-					Private: bug.Private,
-				})
-			}
-			return result
+			return []interface{}{c}
 		}
-	case Comment:
-		if !isVisible(message, connUser) {
-			log.Printf("this comment not visiable to this user")
-			return nil
-		}
-
-		if bug, err := getBugFor(message.BugId, connUser); err == nil {
-			return []interface{}{Change{
-				User:    Email(message.User),
-				Bug:     APIBug(bug),
-				BugID:   bug.Id,
-				Action:  "commented on",
-				Status:  bug.Status,
-				Title:   bug.Title,
-				Time:    message.CreatedAt,
-				Private: bug.Private,
-			}}
-		}
-	default:
-		log.Printf("Unhandled RT Change message type: %T", message)
+	} else {
+		log.Printf("%T isn't changeEligible", message)
 	}
 	return nil
 }
