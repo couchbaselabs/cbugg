@@ -31,20 +31,25 @@ func (b bugChange) IsVisibleTo(u User) bool {
 	return true
 }
 
-func (b bugChange) changeObject() Change {
-	rv := Change{
-		User:   Email(b.actor),
-		Action: "changed " + strings.Join(b.fields, ", "),
-		BugID:  b.bugid,
+func (b bugChange) changeObjectFor(u User) (Change, error) {
+	if b.bug == nil {
+		bug, err := getBugFor(b.bugid, u)
+		if err != nil {
+			return Change{}, err
+		}
+		b.bug = &bug
 	}
-	if b.bug != nil {
-		rv.Time = b.bug.ModifiedAt
-		rv.Status = b.bug.Status
-		rv.Title = b.bug.Title
-		rv.Private = b.bug.Private
+	rv := Change{
+		User:    Email(b.actor),
+		Action:  "changed " + strings.Join(b.fields, ", "),
+		BugID:   b.bugid,
+		Time:    b.bug.ModifiedAt,
+		Status:  b.bug.Status,
+		Title:   b.bug.Title,
+		Private: b.bug.Private,
 	}
 
-	return rv
+	return rv, nil
 }
 
 type bugPing struct {

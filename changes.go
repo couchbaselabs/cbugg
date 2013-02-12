@@ -33,7 +33,7 @@ type Change struct {
 }
 
 type changeEligible interface {
-	changeObject() Change
+	changeObjectFor(u User) (Change, error)
 }
 
 type changeRing struct {

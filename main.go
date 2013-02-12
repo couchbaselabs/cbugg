@@ -117,13 +117,14 @@ func serveRecent(w http.ResponseWriter, r *http.Request) {
 
 	me := whoami(r)
 	for _, r := range recentChanges.Slice() {
-		if isVisible(r, me) {
-			co, ok := r.(changeEligible)
-			if ok {
-				output = append(output, co.changeObject())
-			} else {
-				log.Printf("%T isn't changeEligible", r)
+		co, ok := r.(changeEligible)
+		if ok {
+			c, err := co.changeObjectFor(me)
+			if err == nil {
+				output = append(output, c)
 			}
+		} else {
+			log.Printf("%T isn't changeEligible", r)
 		}
 	}
 
