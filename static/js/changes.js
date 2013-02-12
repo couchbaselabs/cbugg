@@ -6,13 +6,13 @@ function ChangesCtrl($scope, $routeParams, $http, $rootScope, cbuggAuth) {
         $scope.$apply(function(scope) {
             scope.changes.unshift(change);
           });
-    }
+    };
 
     $scope.displayErrorMessage = function(message) {
         $scope.$apply(function(scope) {
             scope.errorMessage = message;
           });
-    }
+    };
 
     // this reapplies the page every 30 seconds
     // so that the relative times don't get stale
@@ -25,7 +25,7 @@ function ChangesCtrl($scope, $routeParams, $http, $rootScope, cbuggAuth) {
 
     var sock = new SockJS(new_uri);
     sock.onmessage = function(e) {
-        $scope.appendLog(e.data)
+        $scope.appendLog(e.data);
     };
     sock.onclose = function() {
         $scope.displayErrorMessage("Your realtime stream was disconnected");
