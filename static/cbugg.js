@@ -61,7 +61,7 @@ angular.module('cbugg', ['cbuggFilters', 'cbuggAuth', 'cbuggRealtime', 'cbuggEdi
         $locationProvider.hashPrefix('!');
     }]);
 
-function StatesByCountCtrl($scope, $http, cbuggPage) {
+function StatesByCountCtrl($scope, $http, cbuggPage, cbuggRealtime) {
     $scope.recent = [];
     cbuggPage.setTitle("Home");
     $http.get('/api/state-counts').success(function(stateCounts) {
@@ -74,12 +74,7 @@ function StatesByCountCtrl($scope, $http, cbuggPage) {
         });
     });
 
-    $scope.$on('Change', function(event, change) {
-        $scope.recent.unshift(change);
-        if($scope.recent.length > 10) {
-            $scope.recent.length = 10;
-        }
-    });
+    $scope.recent = cbuggRealtime.recentChanges();
 }
 
 function bugListDataPrep(data) {

@@ -2,6 +2,8 @@ var cbuggRealtime = angular.module('cbuggRealtime', []);
 
 cbuggRealtime.factory('cbuggRealtime', function($rootScope, $http, $location, $timeout) {
 
+    var recentChanges = [];
+
     // if the loggedin status changes, we want to restart the socket
     $rootScope.$watch('loggedin', function() {
         sock.close();
@@ -16,6 +18,11 @@ cbuggRealtime.factory('cbuggRealtime', function($rootScope, $http, $location, $t
     var nextRetry = 30;
 
     var onOpen = function() {
+
+        // clear out any old changes buffered
+        // do not create new array
+        // (we may have already returned reference to it)
+        recentChanges.length = 0;
 
         // onOpen we need to send our auth cookie
         var authMessage = {
@@ -52,6 +59,12 @@ cbuggRealtime.factory('cbuggRealtime', function($rootScope, $http, $location, $t
 
     var onMessage = function(e) {
         $rootScope.$apply(function() {
+            // keep a buffer of the last 10 changes we've seen
+            recentChanges.unshift(e.data);
+            if(recentChanges.length > 10) {
+                recentChanges.length = 10;
+            }
+
             $rootScope.$broadcast('Change', e.data);
         });
     };
@@ -61,5 +74,7 @@ cbuggRealtime.factory('cbuggRealtime', function($rootScope, $http, $location, $t
     sock.onmessage = onMessage;
     sock.onclose = onClose;
 
-    return {}; // currently we don't support anything here
+    return {
+        recentChanges: function() { return recentChanges; }
+    };
 });
