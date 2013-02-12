@@ -266,7 +266,8 @@ func loadRecent() {
 		return
 	}
 
-	for _, r := range viewRes.Rows {
+	for i := range viewRes.Rows {
+		r := viewRes.Rows[len(viewRes.Rows)-i-1]
 		change, err := loadChangeObject(r.Value.Type, r.ID)
 		if err == nil {
 			recentChanges.Add(change)
