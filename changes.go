@@ -162,7 +162,7 @@ func convertMessageToChangeNotifications(message interface{}, connUser User) []i
 		Action  string    `json:"action"`
 		Status  string    `json:"status"`
 		Title   string    `json:"title"`
-		Time    time.Time `json:"timetitle"`
+		Time    time.Time `json:"time"`
 		Private bool      `json:"private"`
 	}
 
