@@ -48,6 +48,14 @@ func (cr *changeRing) Slice() []interface{} {
 	return <-ch
 }
 
+func (cr *changeRing) Latest(n int) []interface{} {
+	r := cr.Slice()
+	if len(r) > n {
+		r = r[len(r)-n:]
+	}
+	return r
+}
+
 func (cr *changeRing) process() {
 	for {
 		select {
@@ -212,16 +220,11 @@ func convertMessageToChangeNotifications(message interface{}, connUser User) []i
 
 func ChangesHandler(conn sockjs.Conn) {
 	c := &connection{send: make(chan interface{}, 256), ws: conn}
+	for _, change := range recentChanges.Latest(cap(c.send)) {
+		c.send <- change
+	}
 	changes_broadcaster.Register(c.send)
 	defer changes_broadcaster.Unregister(c.send)
-	go func() {
-		for _, change := range recentChanges.Slice() {
-			select {
-			case c.send <- change:
-			default:
-			}
-		}
-	}()
 	go c.writer()
 	c.reader()
 }
