@@ -33,6 +33,9 @@
                                 <li ng-show="me.internal">
                                   <a href="/user/special/">List Special Users</a>
                                 </li>
+                                <li ng-show="me.admin">
+                                  <a href="/admin/">Admin</a>
+                                </li>
                                 <li class="divider"></li>
                                 <li ng-show="authtoken">{{authtoken}}</li>
                                 <li ng-hide="authtoken">
