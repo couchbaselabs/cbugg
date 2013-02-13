@@ -225,6 +225,7 @@ func loadRecent() {
 	args := map[string]interface{}{
 		"descending": true,
 		"limit":      20,
+		"stale":      false,
 	}
 
 	viewRes := struct {
