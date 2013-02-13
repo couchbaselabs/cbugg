@@ -27,7 +27,7 @@ type Change struct {
 	Bug     APIBug    `json:"bug"`
 	BugID   string    `json:"bugid"`
 	Time    time.Time `json:"time"`
-	Status  string    `json:"string"`
+	Status  string    `json:"status"`
 	Title   string    `json:"title"`
 	Private bool      `json:"private"`
 }
