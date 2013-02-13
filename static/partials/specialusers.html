@@ -1,0 +1,25 @@
+<div ng-show="me.admin || me.internal">
+  <h2>Special Users</h2>
+
+  <h3>Administrators</h3>
+
+  <ul class="unstyled" ng-repeat="(e, u) in special['admin']">
+    <li>
+      <img ng-src="http://www.gravatar.com/avatar/{{u.md5}}?s=24">
+      {{e}}
+    </li>
+  </ul>
+
+  <h3>Internal Users</h3>
+
+  <ul class="unstyled" ng-repeat="(e, u) in special['internal']">
+    <li>
+      <img ng-src="http://www.gravatar.com/avatar/{{u.md5}}?s=24">
+      {{e}}
+    </li>
+  </ul>
+
+</div>
+<div ng-hide="me.admin || me.internal">
+  You are not allowed to see stuff here.
+</div>

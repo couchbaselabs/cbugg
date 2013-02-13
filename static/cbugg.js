@@ -37,6 +37,8 @@ angular.module('cbugg', ['cbuggFilters', 'cbuggAuth', 'cbuggRealtime', 'cbuggEdi
                                  controller: 'BugCtrl'}).
             when('/state/:stateId', {templateUrl: '/static/partials/buglist.html',
                                      controller: 'BugsByStateCtrl'}).
+            when("/user/special/", {templateUrl: '/static/partials/specialusers.html',
+                                    controller: 'SpecialUsersCtrl'}).
             when('/user/:userId/:stateId', {templateUrl: '/static/partials/buglist.html',
                                      controller: 'BugsByUserStateCtrl'}).
             when('/search/:query', {templateUrl: '/static/partials/searchresults.html',
@@ -104,6 +106,10 @@ function BugsByUserStateCtrl($scope, $routeParams, $http, cbuggPage) {
 
 function LoginCtrl($scope, $http, $rootScope, bAlert, cbuggAuth) {
     $rootScope.$watch('loggedin', function() { $scope.auth = cbuggAuth.get(); });
+
+    $http.get("/api/me/").success(function(me) {
+        $scope.me = me;
+    });
 
     $scope.getAuthToken = function() {
         $http.get("/api/me/token/").
@@ -274,6 +280,15 @@ function TagCtrl($scope, $routeParams, $http, $rootScope, $timeout, $location, b
 
             $scope.subcount = taginfo.subscribers.length;
         });
+    });
+}
+
+function SpecialUsersCtrl($scope, $http, cbuggAuth) {
+    $http.get("/api/me/").success(function(me) {
+        $scope.me = me;
+    });
+    $http.get("/api/users/special/").success(function(a) {
+        $scope.special = a;
     });
 }
 

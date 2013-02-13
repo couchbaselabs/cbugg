@@ -30,6 +30,9 @@
                                   <a href="/search/subscribers:{{auth.username}}%20AND%20status:(open%20OR%20inprogress%20OR%20new)">Open
                                     Starred Bugs</a>
                                 </li>
+                                <li ng-show="me.internal">
+                                  <a href="/user/special/">List Special Users</a>
+                                </li>
                                 <li class="divider"></li>
                                 <li ng-show="authtoken">{{authtoken}}</li>
                                 <li ng-hide="authtoken">
