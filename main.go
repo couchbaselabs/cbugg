@@ -7,7 +7,6 @@ import (
 	"io"
 	"log"
 	"net/http"
-	"os"
 	"time"
 
 	"github.com/couchbaselabs/go-couchbase"
@@ -172,8 +171,8 @@ func main() {
 	cbBucket := flag.String("bucket", "cbugg", "couchbase bucket")
 	secCookKey := flag.String("cookieKey", "youcandobetter",
 		"The secure cookie auth code.")
-	quitPath := flag.String("quitpath", "",
-		"a path that will shut down the service if requested")
+	rebuildPath := flag.String("rebuildpath", "",
+		"a path that will cause a rebuild and restart if requested")
 
 	flag.Parse()
 
@@ -309,12 +308,11 @@ func main() {
 			http.FileServer(http.Dir(*staticPath))))
 	}
 
-	if *quitPath != "" {
-		r.HandleFunc(*quitPath, func(w http.ResponseWriter, r *http.Request) {
-			time.AfterFunc(time.Second, func() {
-				log.Printf("Quitting per user request.")
-				os.Exit(0)
-			})
+	if *rebuildPath != "" && *buildCmd != "" {
+		ch := make(chan bool, 1)
+		go rebuilder(ch)
+		r.HandleFunc(*rebuildPath, func(w http.ResponseWriter, r *http.Request) {
+			ch <- true
 			w.WriteHeader(202)
 		})
 	}
