@@ -42,13 +42,13 @@ angular.module('cbugg', ['cbuggFilters', 'cbuggAuth', 'cbuggRealtime', 'cbuggEdi
             when('/user/:userId/:stateId', {templateUrl: '/static/partials/buglist.html',
                                      controller: 'BugsByUserStateCtrl'}).
             when('/search/:query', {templateUrl: '/static/partials/searchresults.html',
-                                         controller: 'SearchResultsCtrl'}).
+                                         controller: 'SearchResultsCtrl',
+                                         reloadOnSearch: false}).
             when('/changes/', {templateUrl: '/static/partials/changes.html',
                                          controller: 'ChangesCtrl'}).
             when('/navigator/:tab', {templateUrl: '/static/partials/navigator.html',
-                                          controller: 'NavigatorCtrl'}).
-            when('/navigator/:tab/:page', {templateUrl: '/static/partials/navigator.html',
-                                         controller: 'NavigatorCtrl'}).
+                                          controller: 'NavigatorCtrl',
+                                         reloadOnSearch: false}).
             when('/statecounts/', {templateUrl: '/static/partials/statecounts.html',
                                   controller: 'StatesByCountCtrl'}).
             when('/tags/', {templateUrl: '/static/partials/tags.html',

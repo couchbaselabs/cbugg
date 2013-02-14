@@ -1,13 +1,19 @@
-function NavigatorCtrl($scope, $routeParams, $http, $rootScope, cbuggAuth, cbuggPage, cbuggSearch) {
+function NavigatorCtrl($scope, $routeParams, $http, $location, cbuggAuth, cbuggPage, cbuggSearch) {
 
-    $rootScope.$watch('loggedin', function() {
-        $scope.auth = cbuggAuth.get();
-        
+    $scope.result = cbuggSearch.getDefaultSearchResult();
+    $scope.result.options = cbuggSearch.getDefaultSearchOptions();
+    $scope.auth = cbuggAuth.get();
+
+    $scope.$watch('auth.loggedin', function(newval, oldval) {
         if (!$scope.$eval($scope.defaultTabs[$scope.selectedTab].show)){
-            $scope.result.searchInProgress = false;
-            $scope.result.searchError = "This view cannot be shown.";
+            $scope.result.inProgress = false;
+            $scope.result.errorMessage = "This view cannot be shown.";
         } else {
-            $scope.jumpToTabPage($scope.selectedTab, 1, null);
+            page = $location.search()['page'];
+            if(!page) {
+                page = 1;
+            }
+            $scope.jumpToTabPage($scope.selectedTab, page, null);
         }
     });
 
@@ -38,7 +44,6 @@ function NavigatorCtrl($scope, $routeParams, $http, $rootScope, cbuggAuth, cbugg
     };
 
     $scope.doSearch = function(options) {
-        console.log("querying " + $scope.query);
         $scope.result = cbuggSearch.query($scope.query, options);
     };
 
@@ -59,11 +64,12 @@ function NavigatorCtrl($scope, $routeParams, $http, $rootScope, cbuggAuth, cbugg
 
         if($scope.result) {
             options = $scope.result.options;
-            options.page = pageNum;
-            $scope.doSearch(options);
         } else {
-            $scope.doSearch();
+            options = cbuggSearch.getDefaultSearchOptions();
         }
+        options.page = pageNum;
+        $location.search('page', pageNum);
+        $scope.doSearch(options);
     };
 
     $scope.updateStatusFilter = function(val) {

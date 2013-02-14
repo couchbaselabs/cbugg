@@ -51,16 +51,39 @@ cbuggSearch.factory('cbuggSearch', function($http) {
 		};
 	};
 
+	var defaultSearchOptions = function() {
+		return {
+			"page": 1,
+			"rpp": 10,
+			"status": [],
+			"tags": [],
+			"last_modified": "",
+			"maxPagesToShow": 7
+		};
+	};
+
+	var defaultSearchResult = function() {
+		return {
+			inProgress: true,
+			errorMessage: "",
+			warningMessage: "",
+			query_string: "",
+			options: {},
+			hits: [],
+			facets: {},
+			pager: {}
+		};
+	};
+
 	return {
+		getDefaultSearchOptions: function() {
+			return defaultSearchOptions();
+		},
+		getDefaultSearchResult: function() {
+			return defaultSearchResult();
+		},
 		query: function(query_string, options) {
-			options = (typeof options !== "undefined") ? options : {
-				"page": 1,
-				"rpp": 10,
-				"status": [],
-				"tags": [],
-				"last_modified": "",
-				"maxPagesToShow": 7
-			};
+			options = (typeof options !== "undefined") ? options : defaultSearchOptions();
 
 			query = '/api/search/' +
 			'?query=' + query_string +
@@ -70,16 +93,9 @@ cbuggSearch.factory('cbuggSearch', function($http) {
 			'&tags=' + options.tags.join(',') +
 			'&modified=' + options.last_modified;
 
-			result = {
-				inProgress: true,
-				errorMessage: "",
-				warningMessage: "",
-				query_string: query_string,
-				options: options,
-				hits: [],
-				facets: {},
-				pager: {}
-			};
+			result = defaultSearchResult();
+			result.query_string = query_string;
+			result.options = options;
 
 			$http.post(query).success(function (data) {
 				result.hits = data.hits.hits;

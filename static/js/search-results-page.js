@@ -1,4 +1,4 @@
-function SearchResultsCtrl($scope, $routeParams, cbuggPage, cbuggSearch) {
+function SearchResultsCtrl($scope, $routeParams, $location, cbuggPage, cbuggSearch) {
 
     $scope.doSearch = function(options) {
         $scope.result = cbuggSearch.query($routeParams.query, options);
@@ -9,8 +9,13 @@ function SearchResultsCtrl($scope, $routeParams, cbuggPage, cbuggSearch) {
             $event.preventDefault();
         }
 
-        options = $scope.result.options;
+        if($scope.result) {
+            options = $scope.result.options;
+        } else {
+            options = cbuggSearch.getDefaultSearchOptions();
+        }
         options.page = pageNum;
+        $location.search('page', pageNum);
         $scope.doSearch(options);
     };
 
@@ -62,6 +67,11 @@ function SearchResultsCtrl($scope, $routeParams, cbuggPage, cbuggSearch) {
     };
 
     cbuggPage.setTitle("Search");
-    $scope.doSearch();
+    // look at the request and see what page they requested
+    page = $location.search()['page'];
+    if(!page) {
+        page = 1;
+    }
+    $scope.jumpToPage(page, null);
 
 }
