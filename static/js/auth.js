@@ -25,9 +25,18 @@ cbuggAuth.factory('cbuggAuth', function($rootScope, $http, bAlert) {
                 });
             },
             onlogout: function() {
-                $rootScope.loggedin = false;
-                auth.loggedin = false;
-                auth.authtoken = "";
+                $http.post('/auth/logout').
+                    success(function(res) {
+                        $rootScope.loggedin = false;
+                        auth.loggedin = false;
+                        auth.authtoken = "";
+                        auth.username = "";
+                        auth.gravatar = "";
+                    }).
+                    error(function(res) {
+                        bAlert("Error", "Problem logging out.", "error");
+                        // we failed to log out, do not pretend to have succeeded
+                    });
             }});
     });
     function fetchAuthToken() {
@@ -38,14 +47,6 @@ cbuggAuth.factory('cbuggAuth', function($rootScope, $http, bAlert) {
     }
     function logout() {
         navigator.id.logout();
-        $http.post('/auth/logout').
-            success(function(res) {
-                $rootScope.loggedin = false;
-            }).
-        error(function(res) {
-            bAlert("Error", "Problem logging out.", "error");
-            $rootScope.loggedin = false;
-        });
     }
     function login() {
         navigator.id.request();
