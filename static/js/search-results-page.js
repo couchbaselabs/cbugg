@@ -2,7 +2,7 @@ function SearchResultsCtrl($scope, $routeParams, cbuggPage, cbuggSearch) {
 
     $scope.doSearch = function(options) {
         $scope.result = cbuggSearch.query($routeParams.query, options);
-    }
+    };
 
     $scope.jumpToPage = function(pageNum, $event) {
         if ($event) {
@@ -12,7 +12,7 @@ function SearchResultsCtrl($scope, $routeParams, cbuggPage, cbuggSearch) {
         options = $scope.result.options;
         options.page = pageNum;
         $scope.doSearch(options);
-    }
+    };
 
     $scope.updateStatusFilter = function(val) {
         pos = $scope.result.options.status.indexOf(val);
@@ -34,15 +34,32 @@ function SearchResultsCtrl($scope, $routeParams, cbuggPage, cbuggSearch) {
         $scope.jumpToPage(1, null);
     };
 
+    $scope.updateModifiedFilter = function(val) {
+        if ($scope.result.options.last_modified === val) {
+            $scope.result.options.last_modified = "";
+        } else {
+            $scope.result.options.last_modified = val;
+        }
+        $scope.jumpToPage(1, null);
+    };
+
+    $scope.isModifiedFilter = function(val) {
+        if ($scope.result.options.last_modified === val) {
+            return true;
+        } else {
+            return false;
+        }
+    };
+
     $scope.isSubscribed = function(userhash, subscribers) {
-        for (i in subscribers) {
+        for (var i in subscribers) {
             subscriber = subscribers[i];
             if (subscriber.md5 == userhash) {
                 return true;
             }
         }
         return false;
-    }
+    };
 
     cbuggPage.setTitle("Search");
     $scope.doSearch();

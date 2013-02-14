@@ -126,7 +126,7 @@ function SearchCtrl($scope, $http, $rootScope, $location, cbuggAuth) {
     $rootScope.$watch('loggedin', function() { $scope.auth = cbuggAuth.get(); });
 
     $scope.search = function() {
-        $location.path("/search/" + $scope.query);
+        $location.path("/search/" + $scope.result.query_string);
     };
 }
 

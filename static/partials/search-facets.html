@@ -16,6 +16,20 @@
 				ng-hide="result.options.tags.indexOf(tag.term) === -1" type="checkbox"
 				value="{{tag.term}}" ng-click="updateTagFilter(tag.term)" checked />
 				{{tag.term}} ({{tag.count}})</li>
+			<li ng-hide="result.facets.last_modified.ranges == null" class="nav-header">Modified</li>
+			<li ng-hide="result.facets.last_modified.ranges[0].count == 0">
+				<input ng-show="isModifiedFilter(result.options.last_modified)" type="checkbox" ng-click="updateModifiedFilter('lt7')" />
+				<input ng-hide="isModifiedFilter(result.options.last_modified)" type="checkbox" ng-click="updateModifiedFilter('lt7')" checked />
+				&lt; 7 days ({{result.facets.last_modified.ranges[0].count}})
+			</li>
+			<li ng-hide="result.facets.last_modified.ranges[1].count == 0">
+				<input ng-show="isModifiedFilter(result.options.last_modified)" type="checkbox" ng-click="updateModifiedFilter('7to30')" />
+				<input ng-hide="isModifiedFilter(result.options.last_modified)" type="checkbox" ng-click="updateModifiedFilter('7to30')" checked />
+				7 - 30 days ({{result.facets.last_modified.ranges[1].count}})</li>
+			<li ng-hide="result.facets.last_modified.ranges[2].count == 0">
+				<input ng-show="isModifiedFilter(result.options.last_modified)" type="checkbox" ng-click="updateModifiedFilter('gt30')" />
+				<input ng-hide="isModifiedFilter(result.options.last_modified)" type="checkbox" ng-click="updateModifiedFilter('gt30')" checked />
+				&gt; 30 days ({{result.facets.last_modified.ranges[2].count}})</li>
 		</ul>
 	</div>
 </form>

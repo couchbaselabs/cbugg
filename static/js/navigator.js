@@ -38,13 +38,13 @@ function NavigatorCtrl($scope, $routeParams, $http, $rootScope, cbuggAuth, cbugg
     };
 
     $scope.doSearch = function(options) {
-        console.log("querying " + $scope.query)
+        console.log("querying " + $scope.query);
         $scope.result = cbuggSearch.query($scope.query, options);
-    }
+    };
 
     $scope.jumpToPage = function(pageNum, $event) {
-        $scope.jumpToTabPage($scope.selectedTab, pageNum, $event)
-    }
+        $scope.jumpToTabPage($scope.selectedTab, pageNum, $event);
+    };
 
     $scope.jumpToTabPage = function(tab, pageNum, $event) {
         if ($event) {
@@ -64,7 +64,7 @@ function NavigatorCtrl($scope, $routeParams, $http, $rootScope, cbuggAuth, cbugg
         } else {
             $scope.doSearch();
         }
-    }
+    };
 
     $scope.updateStatusFilter = function(val) {
         pos = $scope.result.options.status.indexOf(val);
@@ -86,15 +86,32 @@ function NavigatorCtrl($scope, $routeParams, $http, $rootScope, cbuggAuth, cbugg
         $scope.jumpToPage(1, null);
     };
 
+    $scope.updateModifiedFilter = function(val) {
+        if ($scope.result.options.last_modified === val) {
+            $scope.result.options.last_modified = "";
+        } else {
+            $scope.result.options.last_modified = val;
+        }
+        $scope.jumpToPage(1, null);
+    };
+
+    $scope.isModifiedFilter = function(val) {
+        if ($scope.result.options.last_modified === val) {
+            return true;
+        } else {
+            return false;
+        }
+    };
+
     $scope.isSubscribed = function(userhash, subscribers) {
-        for (i in subscribers) {
+        for (var i in subscribers) {
             subscriber = subscribers[i];
             if (subscriber.md5 == userhash) {
                 return true;
             }
         }
         return false;
-    }
+    };
 
     cbuggPage.setTitle("Navigator");
 }

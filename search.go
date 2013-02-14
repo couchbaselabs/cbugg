@@ -7,6 +7,7 @@ import (
 	"sort"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/mschoch/elastigo/api"
 	"github.com/mschoch/elastigo/core"
@@ -131,14 +132,37 @@ func searchBugs(w http.ResponseWriter, r *http.Request) {
 		filterComponents = append(filterComponents, tagsFilter)
 	}
 
+	if r.FormValue("modified") != "" {
+
+		now := time.Now()
+		var dateRange Range
+		switch r.FormValue("modified") {
+		case "lt7":
+			sevenDaysAgo := now.Add(time.Duration(24) * time.Hour * -7)
+			dateRange = buildRange(sevenDaysAgo, nil)
+		case "7to30":
+			sevenDaysAgo := now.Add(time.Duration(24) * time.Hour * -7)
+			thirtyDaysAgo := now.Add(time.Duration(24) * time.Hour * -30)
+			dateRange = buildRange(thirtyDaysAgo, sevenDaysAgo)
+		case "gt30":
+			thirtyDaysAgo := now.Add(time.Duration(24) * time.Hour * -30)
+			dateRange = buildRange(nil, thirtyDaysAgo)
+
+		}
+		modifiedFilter := buildRangeFilter("doc.modified_at", dateRange)
+		filterComponents = append(filterComponents, modifiedFilter)
+	}
+
 	filter := buildAndFilter(filterComponents)
 
 	statusFacet := buildTermsFacet("doc.status", filter, 5)
 	tagsFacet := buildTermsFacet("doc.tags", filter, 5)
+	lastModifiedFacet := buildLastModifiedFacet("doc.modified_at", filter)
 
 	facets := Facets{
-		"statuses": statusFacet,
-		"tags":     tagsFacet,
+		"statuses":      statusFacet,
+		"tags":          tagsFacet,
+		"last_modified": lastModifiedFacet,
 	}
 
 	// default to match all query
@@ -276,6 +300,18 @@ func combineSearchHitWithDoc(hit core.Hit, doc interface{}) (map[string]interfac
 	return result, nil
 }
 
+func buildLastModifiedFacet(field string, filter Filter) Facet {
+	now := time.Now()
+	sevenDaysAgo := now.Add(time.Duration(24) * time.Hour * -7)
+	thirtyDaysAgo := now.Add(time.Duration(24) * time.Hour * -30)
+
+	thisWeekRange := buildRange(sevenDaysAgo, nil)
+	thisMonthRange := buildRange(thirtyDaysAgo, sevenDaysAgo)
+	moreThanMonthRange := buildRange(nil, thirtyDaysAgo)
+
+	return buildRangeFacet(field, filter, []Range{thisWeekRange, thisMonthRange, moreThanMonthRange})
+}
+
 // ---------------------------------------
 // Elasticsearch utility functions
 // ---------------------------------------
@@ -285,6 +321,7 @@ type Filters []map[string]interface{}
 type Query map[string]interface{}
 type Facet map[string]interface{}
 type Facets map[string]interface{}
+type Range map[string]interface{}
 
 func buildTermsFilter(field string, terms []string, execution string) Filter {
 	if execution == "" {
@@ -303,6 +340,14 @@ func buildTermFilter(field string, term string) Filter {
 	return Filter{
 		"term": map[string]interface{}{
 			field: term,
+		},
+	}
+}
+
+func buildRangeFilter(field string, r Range) Filter {
+	return Filter{
+		"range": map[string]interface{}{
+			field: r,
 		},
 	}
 }
@@ -334,6 +379,22 @@ func buildTermsFacet(field string, filter Filter, size int) Facet {
 			"size":  size,
 		},
 		"facet_filter": filter,
+	}
+}
+
+func buildRangeFacet(field string, filter Filter, ranges []Range) Facet {
+	return map[string]interface{}{
+		"range": map[string]interface{}{
+			field: ranges,
+		},
+		"facet_filter": filter,
+	}
+}
+
+func buildRange(from, to interface{}) Range {
+	return map[string]interface{}{
+		"from": from,
+		"to":   to,
 	}
 }
 

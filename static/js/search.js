@@ -4,7 +4,7 @@ cbuggSearch.factory('cbuggSearch', function($http) {
 
 	var newPager = function(currentPage, totalResults, resultsPerPage, maxPagesToShow) {
 		numPages = Math.ceil(totalResults / resultsPerPage);
-		validPages = new Array();
+		validPages = [];
 
         for (i = 1; i <= numPages; i++) {
             validPages.push(i);
@@ -17,8 +17,7 @@ cbuggSearch.factory('cbuggSearch', function($http) {
             frontPagesToRemove = backPagesToRemove = 0;
             while (numPagesToRemove - frontPagesToRemove - backPagesToRemove > 0) {
                 numPagesBefore = currentPage - 1 - frontPagesToRemove;
-                numPagesAfter = validPages.length - currentPage
-                        - backPagesToRemove;
+                numPagesAfter = validPages.length - currentPage - backPagesToRemove;
                 if (numPagesAfter > numPagesBefore) {
                     backPagesToRemove++;
                 } else {
@@ -50,25 +49,26 @@ cbuggSearch.factory('cbuggSearch', function($http) {
 			"lastResult": lastResult,
 			"totalResults": totalResults
 		};
-	}
+	};
 
 	return {
 		query: function(query_string, options) {
-			console.log("starting search query")
 			options = (typeof options !== "undefined") ? options : {
 				"page": 1,
 				"rpp": 10,
 				"status": [],
 				"tags": [],
+				"last_modified": "",
 				"maxPagesToShow": 7
 			};
 
-			query = '/api/search/' 
-			+ '?query=' + query_string
-			+ '&from=' + (options.page - 1) * options.rpp 
-			+ '&size=' + options.rpp
-			+ '&status=' + options.status.join(',')
-			+ '&tags=' + options.tags.join(',');
+			query = '/api/search/' +
+			'?query=' + query_string +
+			'&from=' + (options.page - 1) * options.rpp +
+			'&size=' + options.rpp +
+			'&status=' + options.status.join(',') +
+			'&tags=' + options.tags.join(',') +
+			'&modified=' + options.last_modified;
 
 			result = {
 				inProgress: true,
@@ -86,13 +86,12 @@ cbuggSearch.factory('cbuggSearch', function($http) {
 				result.facets = data.facets;
 
 				//build pager
-				result.pager = newPager(options.page, data.hits.total, options.rpp, 
-					options.maxPagesToShow);
+				result.pager = newPager(options.page, data.hits.total, options.rpp, options.maxPagesToShow);
 
 				// check results came from all shards
 				if(data._shards.total !== data._shards.successful) {
-					result.warningMessage = "Search only contains results from "
-					+ data._shards.successful + " of " + data._shards.total + "shards"
+					result.warningMessage = "Search only contains results from " +
+					data._shards.successful + " of " + data._shards.total + "shards";
 				}
 
 				result.inProgress = false;
@@ -102,7 +101,7 @@ cbuggSearch.factory('cbuggSearch', function($http) {
 			});
 
 			return result;
-		},
-	}
+		}
+	};
 
 });
