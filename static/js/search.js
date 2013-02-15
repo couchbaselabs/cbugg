@@ -51,9 +51,10 @@ cbuggSearch.factory('cbuggSearch', function($http) {
 		};
 	};
 
-	var defaultSearchOptions = function() {
+	var defaultSearchOptions = function(overrides) {
+		defaultPage = (overrides && overrides["page"]) ? overrides["page"] : 1;
 		return {
-			"page": 1,
+			"page": defaultPage,
 			"rpp": 10,
 			"status": [],
 			"tags": [],
@@ -76,8 +77,8 @@ cbuggSearch.factory('cbuggSearch', function($http) {
 	};
 
 	return {
-		getDefaultSearchOptions: function() {
-			return defaultSearchOptions();
+		getDefaultSearchOptions: function(overrides) {
+			return defaultSearchOptions(overrides);
 		},
 		getDefaultSearchResult: function() {
 			return defaultSearchResult();
