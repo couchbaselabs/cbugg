@@ -1,4 +1,4 @@
-function SearchResultsCtrl($scope, $routeParams, $location, cbuggPage, cbuggSearch) {
+function SearchResultsCtrl($scope, $routeParams, $location, cbuggPage, cbuggSearch, cbuggAuth) {
 
     $scope.doSearch = function() {
         $scope.result = cbuggSearch.query($routeParams.query, $scope.result.options);
@@ -34,6 +34,7 @@ function SearchResultsCtrl($scope, $routeParams, $location, cbuggPage, cbuggSear
     };
 
     cbuggPage.setTitle("Search");
+    $scope.auth = cbuggAuth.get();
     $scope.result = cbuggSearch.getDefaultSearchResult();
     $scope.result.options = cbuggSearch.getDefaultSearchOptions($location.search());
     $scope.doSearch();
