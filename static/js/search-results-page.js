@@ -14,41 +14,13 @@ function SearchResultsCtrl($scope, $routeParams, $location, cbuggPage, cbuggSear
         $scope.doSearch();
     };
 
-    $scope.updateStatusFilter = function(val) {
-        pos = $scope.result.options.status.indexOf(val);
-        if (pos == -1) {
-            $scope.result.options.status.push(val);
-        } else {
-            $scope.result.options.status.splice(pos, 1);
-        }
+    $scope.updateFilter = function(field, value) {
+        $scope.result.options.updateFilter(field, value);
         $scope.jumpToPage(1, null);
     };
 
-    $scope.updateTagFilter = function(val) {
-        pos = $scope.result.options.tags.indexOf(val);
-        if (pos == -1) {
-            $scope.result.options.tags.push(val);
-        } else {
-            $scope.result.options.tags.splice(pos, 1);
-        }
-        $scope.jumpToPage(1, null);
-    };
-
-    $scope.updateModifiedFilter = function(val) {
-        if ($scope.result.options.last_modified === val) {
-            $scope.result.options.last_modified = "";
-        } else {
-            $scope.result.options.last_modified = val;
-        }
-        $scope.jumpToPage(1, null);
-    };
-
-    $scope.isModifiedFilter = function(val) {
-        if ($scope.result.options.last_modified === val) {
-            return true;
-        } else {
-            return false;
-        }
+    $scope.checkFilter = function(field, value) {
+        return $scope.result.options.checkFilter(field, value);
     };
 
     $scope.isSubscribed = function(userhash, subscribers) {

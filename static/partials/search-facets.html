@@ -2,34 +2,29 @@
 	<div class="well sidebar-nav filter">
 		<ul class="nav nav-list">
 			<li ng-hide="result.facets.statuses.terms == null" class="nav-header">Status</li>
-			<li ng-repeat="status in result.facets.statuses.terms"><input
-				ng-show="result.options.status.indexOf(status.term) === -1" type="checkbox"
-				value="{{status.term}}" ng-click="updateStatusFilter(status.term)" />
-				<input ng-hide="result.options.status.indexOf(status.term) === -1"
-				type="checkbox" value="{{status.term}}"
-				ng-click="updateStatusFilter(status.term)" checked />
-				{{status.term}} ({{status.count}})</li>
+			<li ng-repeat="status in result.facets.statuses.terms">
+				<input data-ng-checked="checkFilter('status', status.term)" type="checkbox" value="{{status.term}}" ng-click="updateFilter('status', status.term)" />
+				{{status.term}} ({{status.count}})
+			</li>
+
 			<li ng-hide="result.facets.tags.terms == null" class="nav-header">Tags</li>
-			<li ng-repeat="tag in result.facets.tags.terms"><input
-				ng-show="result.options.tags.indexOf(tag.term) === -1" type="checkbox"
-				value="{{tag.term}}" ng-click="updateTagFilter(tag.term)" /><input
-				ng-hide="result.options.tags.indexOf(tag.term) === -1" type="checkbox"
-				value="{{tag.term}}" ng-click="updateTagFilter(tag.term)" checked />
-				{{tag.term}} ({{tag.count}})</li>
+			<li ng-repeat="tag in result.facets.tags.terms">
+				<input data-ng-checked="checkFilter('tags', tag.term)" type="checkbox" value="{{tag.term}}" ng-click="updateFilter('tags', tag.term)" />
+				{{tag.term}} ({{tag.count}})
+			</li>
+
 			<li ng-hide="result.facets.last_modified.ranges == null" class="nav-header">Modified</li>
 			<li ng-hide="result.facets.last_modified.ranges[0].count == 0">
-				<input ng-show="isModifiedFilter(result.options.last_modified)" type="checkbox" ng-click="updateModifiedFilter('lt7')" />
-				<input ng-hide="isModifiedFilter(result.options.last_modified)" type="checkbox" ng-click="updateModifiedFilter('lt7')" checked />
+				<input data-ng-checked="checkFilter('last_modified', 'lt7')" type="checkbox" ng-click="updateFilter('last_modified', 'lt7')" />
 				&lt; 7 days ({{result.facets.last_modified.ranges[0].count}})
 			</li>
 			<li ng-hide="result.facets.last_modified.ranges[1].count == 0">
-				<input ng-show="isModifiedFilter(result.options.last_modified)" type="checkbox" ng-click="updateModifiedFilter('7to30')" />
-				<input ng-hide="isModifiedFilter(result.options.last_modified)" type="checkbox" ng-click="updateModifiedFilter('7to30')" checked />
+				<input data-ng-checked="checkFilter('last_modified', '7to30')" type="checkbox" ng-click="updateFilter('last_modified', '7to30')" />
 				7 - 30 days ({{result.facets.last_modified.ranges[1].count}})</li>
 			<li ng-hide="result.facets.last_modified.ranges[2].count == 0">
-				<input ng-show="isModifiedFilter(result.options.last_modified)" type="checkbox" ng-click="updateModifiedFilter('gt30')" />
-				<input ng-hide="isModifiedFilter(result.options.last_modified)" type="checkbox" ng-click="updateModifiedFilter('gt30')" checked />
-				&gt; 30 days ({{result.facets.last_modified.ranges[2].count}})</li>
+				<input data-ng-checked="checkFilter('last_modified', 'gt30')" type="checkbox" ng-click="updateFilter('last_modified', 'gt30')" />
+				&gt; 30 days ({{result.facets.last_modified.ranges[2].count}})
+			</li>
 		</ul>
 	</div>
 </form>

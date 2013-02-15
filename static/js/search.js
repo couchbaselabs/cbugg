@@ -59,7 +59,48 @@ cbuggSearch.factory('cbuggSearch', function($http) {
 			"status": [],
 			"tags": [],
 			"last_modified": "",
-			"maxPagesToShow": 7
+			"maxPagesToShow": 7,
+			updateFilter: function(field, value) {
+				switch(field) {
+					case "status":
+					case "tags":
+						this.updateMultipleValueFilter(field,value);
+					break;
+					case "last_modified":
+						this.updateSingleValueFilter(field, value);
+					break;
+				}
+			},
+			updateMultipleValueFilter: function(field, value) {
+				pos = this[field].indexOf(value);
+				if (pos === -1) {
+					this[field].push(value);
+				} else {
+					this[field].splice(pos, 1);
+				}
+			},
+			updateSingleValueFilter: function(field, value) {
+				if (this[field] === value) {
+					this[field] = "";
+				} else {
+					this[field] = value;
+				}
+			},
+			checkFilter: function(field, value) {
+				switch(field) {
+					case "status":
+					case "tags":
+						return this.checkMultipleValueFilter(field,value);
+					case "last_modified":
+						return this.checkSingleValueFilter(field, value);
+				}
+			},
+			checkMultipleValueFilter: function(field, value) {
+				return this[field].indexOf(value) !== -1;
+			},
+			checkSingleValueFilter: function(field, value) {
+				return this[field] === value;
+			}
 		};
 	};
 
