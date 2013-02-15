@@ -1,12 +1,21 @@
 {
     "settings" : {
-		"index.mapping.ignore_malformed": true
+		"index.mapping.ignore_malformed": true,
+		"index.analysis.analyzer.default.type": "snowball"
     },
     "mappings" : {
 		"couchbaseDocument" : {
 			"properties" : {
 				"doc" : {
 					"properties": { 
+						"title": {
+						    "type": "string",
+							"analyzer" : "snowball"
+						},
+						"description": {
+						    "type": "string",
+							"analyzer" : "snowball"
+						},
 						"type": {
 						    "type": "string", 
 							"index" : "not_analyzed"
