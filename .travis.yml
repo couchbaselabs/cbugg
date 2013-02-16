@@ -8,6 +8,7 @@ before_script:
   - npm install -g testacular
 
 script:
+  - go list -f '{{range .TestImports}}{{.}} {{end}}' ... | xargs go get
   - testacular start config/testacular.conf.js
   - go test -v
 
