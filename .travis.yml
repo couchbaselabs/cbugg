@@ -8,7 +8,7 @@ before_script:
   - npm install -g testacular
 
 script:
-  - go list -f '{{range .TestImports}}{{.}} {{end}}' ... | xargs go get
+  - go get github.com/dustin/go-jsonpointer
   - testacular start config/testacular.conf.js
   - go test -v
 
