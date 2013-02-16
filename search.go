@@ -13,13 +13,11 @@ import (
 	"github.com/mschoch/elastigo/core"
 )
 
-// by default we only want documents of elasticsearch type "couchbaseDocument"
-// and documents with type "bug"
+// by default we only want documents with type "bug"
 func getDefaultFilterComponents(r *http.Request) []Filter {
 
 	// base defaults for all users
 	result := []Filter{
-		buildTypeFilter("couchbaseDocument"),
 		buildTermFilter("doc.type", "bug"),
 	}
 
@@ -66,7 +64,7 @@ func findSimilarBugs(w http.ResponseWriter, r *http.Request) {
 			}
 		}
 
-		searchresponse, err := core.SearchRequest(false, *esIndex, "couchbaseDocument", query, "")
+		searchresponse, err := core.SearchRequest(false, *esIndex, "", query, "")
 		if err != nil {
 			showError(w, r, err.Error(), 500)
 			return
@@ -180,7 +178,7 @@ func searchBugs(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	searchresponse, err := core.SearchRequest(false, *esIndex, "couchbaseDocument", query, "")
+	searchresponse, err := core.SearchRequest(false, *esIndex, "", query, "")
 	if err != nil {
 		showError(w, r, err.Error(), 500)
 		return
