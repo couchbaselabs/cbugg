@@ -1,52 +1,190 @@
 {
-    "settings" : {
+	"settings" : {
 		"index.mapping.ignore_malformed": true,
 		"index.analysis.analyzer.default.type": "snowball"
-    },
-    "mappings" : {
+	},
+	"mappings" : {
 		"bug" : {
 			"properties" : {
 				"doc" : {
 					"properties": { 
 						"title": {
-						    "type": "string",
+							"type": "string",
 							"analyzer" : "snowball"
 						},
 						"description": {
-						    "type": "string",
+							"type": "string",
 							"analyzer" : "snowball"
 						},
 						"type": {
-						    "type": "string", 
+							"type": "string",
 							"index" : "not_analyzed"
 						},
 						"parent": { 
-							"type": "string", 
+							"type": "string",
 							"index" : "not_analyzed"
 						},
 						"status": { 
-							"type": "string", 
+							"type": "string",
 							"index" : "not_analyzed"
 						},
 						"creator": { 
-							"type": "string", 
+							"type": "string",
 							"index" : "not_analyzed"
 						},
 						"owner": {
-							"type": "string", 
+							"type": "string",
 							"index" : "not_analyzed"
 						},
 						"tags": {
-							"type": "string", 
+							"type": "string",
 							"index" : "not_analyzed"
 						},
 						"subscribers": {
-							"type": "string", 
+							"type": "string",
+							"index" : "not_analyzed"
+						}
+					}
+				}
+			}
+		},
+		"bughistory" : {
+			"_parent" : {
+				"type" : "bug"
+			},
+			"properties" : {
+				"doc" : {
+					"properties": {
+						"title": {
+							"type": "string",
+							"analyzer" : "snowball"
+						},
+						"description": {
+							"type": "string",
+							"analyzer" : "snowball"
+						},
+						"type": {
+							"type": "string",
+							"index" : "not_analyzed"
+						},
+						"parent": {
+							"type": "string",
+							"index" : "not_analyzed"
+						},
+						"status": {
+							"type": "string",
+							"index" : "not_analyzed"
+						},
+						"creator": {
+							"type": "string",
+							"index" : "not_analyzed"
+						},
+						"owner": {
+							"type": "string",
+							"index" : "not_analyzed"
+						},
+						"tags": {
+							"type": "string",
+							"index" : "not_analyzed"
+						},
+						"subscribers": {
+							"type": "string",
+							"index" : "not_analyzed"
+						}
+					}
+				}
+			}
+		},
+		"comment": {
+			"_parent" : {
+				"type" : "bug"
+			},
+			"properties": {
+				"doc": {
+					"path" : "just_name",
+					"properties": {
+						"text": {
+							"index_name": "comment",
+							"type": "string",
+							"analyzer": "snowball"
+						},
+						"type": {
+							"type": "string",
+							"index" : "not_analyzed"
+						},
+						"user": {
+							"type": "string",
+							"index" : "not_analyzed"
+						},
+						"bugId": {
+							"type": "string",
+							"index" : "not_analyzed"
+						}
+					}
+				}
+			}
+		},
+		"attachment": {
+			"_parent" : {
+				"type" : "bug"
+			},
+			"properties": {
+				"doc": {
+					"properties": {
+						"filename": {
+							"type": "string",
+							"index" : "not_analyzed"
+						},
+						"url": {
+							"type": "string",
+							"index" : "not_analyzed"
+						},
+						"content_type": {
+							"type": "string",
+							"index" : "not_analyzed"
+						},
+						"type": {
+							"type": "string",
+							"index" : "not_analyzed"
+						},
+						"user": {
+							"type": "string",
+							"index" : "not_analyzed"
+						},
+						"bugId": {
+							"type": "string",
+							"index" : "not_analyzed"
+						}
+					}
+				}
+			}
+		},
+		"ping": {
+			"_parent" : {
+				"type" : "bug"
+			},
+			"properties": {
+				"doc": {
+					"properties": {
+						"to": {
+							"type": "string",
+							"index" : "not_analyzed"
+						},
+						"from": {
+							"type": "string",
+							"index" : "not_analyzed"
+						},
+						"type": {
+							"type": "string",
+							"index" : "not_analyzed"
+						},
+						"bugId": {
+							"type": "string",
 							"index" : "not_analyzed"
 						}
 					}
 				}
 			}
 		}
-    }
+	}
 }

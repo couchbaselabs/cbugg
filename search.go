@@ -55,7 +55,9 @@ func findSimilarBugs(w http.ResponseWriter, r *http.Request) {
 			},
 		}
 
-		query := buildCustomFiltersScoreQuery(r.FormValue("query"), matchFilter, boostFilters, "first")
+		queryStringQuery := buildQueryStringQuery(r.FormValue("query"))
+		customScoreQuery := buildCustomFiltersScoreQuery(queryStringQuery, boostFilters, "first")
+		query := buildTopLevelQuery(customScoreQuery, matchFilter, nil, 0, 10)
 
 		if *debugEs {
 			queryJson, err := json.Marshal(query)
@@ -164,12 +166,23 @@ func searchBugs(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// default to match all query
-	query := buildMatchAllQuery(filter, facets, from, size)
+	insideQuery := buildMatchAllQuery()
 
 	// if they actually provided a query string, run that instead
 	if r.FormValue("query") != "" {
-		query = buildQueryStringQuery(r.FormValue("query"), filter, facets, from, size)
+		insideQuery = buildQueryStringQuery(r.FormValue("query"))
 	}
+
+	shouldQueries := []Query{insideQuery}
+	childTypesToQuery := []string{"comment", "attachment"}
+	for _, typ := range childTypesToQuery {
+		queryComponent := buildHashChildQuery(typ, insideQuery)
+		shouldQueries = append(shouldQueries, queryComponent)
+	}
+
+	booleanQuery := buildBoolQuery(nil, shouldQueries, nil, 1)
+
+	query := buildTopLevelQuery(booleanQuery, filter, facets, from, size)
 
 	if *debugEs {
 		queryJson, err := json.Marshal(query)
@@ -396,46 +409,75 @@ func buildRange(from, to interface{}) Range {
 	}
 }
 
-func buildQueryStringQuery(queryString string, filter Filter, facets Facets, from int, size int) Query {
-	return Query{
-		"query": map[string]interface{}{
-			"query_string": map[string]interface{}{
-				"query": queryString,
-			},
-		},
+func buildTopLevelQuery(query Query, filter Filter, facets Facets, from int, size int) Query {
+	q := Query{
+		"query":  query,
 		"filter": filter,
 		"from":   from,
-		"facets": facets,
 		"size":   size,
+	}
+
+	if facets != nil {
+		q["facets"] = facets
+	}
+
+	return q
+}
+
+func buildQueryStringQuery(queryString string) Query {
+	return Query{
+		"query_string": map[string]interface{}{
+			"query": queryString,
+		},
 	}
 }
 
-func buildMatchAllQuery(filter Filter, facets Facets, from int, size int) Query {
+func buildBoolQuery(must []Query, should []Query, must_not []Query, minimum_number_should_match int) Query {
+	b := map[string]interface{}{
+		"minimum_number_should_match": minimum_number_should_match,
+	}
+
+	if must != nil {
+		b["must"] = must
+	}
+
+	if should != nil {
+		b["should"] = should
+	}
+
+	if must_not != nil {
+		b["must_not"] = must_not
+	}
+
+	q := Query{
+		"bool": b,
+	}
+
+	return q
+}
+
+func buildHashChildQuery(typ string, query Query) Query {
 	return Query{
-		"query": map[string]interface{}{
-			"match_all": map[string]interface{}{},
+		"has_child": map[string]interface{}{
+			"type":  typ,
+			"query": query,
 		},
-		"filter": filter,
-		"from":   from,
-		"facets": facets,
-		"size":   size,
 	}
 }
 
-func buildCustomFiltersScoreQuery(queryString string, matchFilter Filter, boostFilters Filters, scoreMode string) Query {
+func buildMatchAllQuery() Query {
+	return Query{
+		"match_all": map[string]interface{}{},
+	}
+}
+
+func buildCustomFiltersScoreQuery(query Query, boostFilters Filters, scoreMode string) Query {
 
 	return Query{
-		"query": map[string]interface{}{
-			"custom_filters_score": map[string]interface{}{
-				"query": map[string]interface{}{
-					"query_string": map[string]interface{}{
-						"query": queryString,
-					},
-				},
-				"filters":    boostFilters,
-				"score_mode": scoreMode,
-			},
+		"custom_filters_score": map[string]interface{}{
+			"query":      query,
+			"filters":    boostFilters,
+			"score_mode": scoreMode,
 		},
-		"filter": matchFilter,
 	}
 }
