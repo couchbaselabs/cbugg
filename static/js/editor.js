@@ -20,7 +20,11 @@ angular.module('cbuggEditor', [])
                         });
                     }
                     ngModel.$render = function() {
-                        scope.codeMirror.setValue(ngModel.$viewValue);
+                        var viewval = ngModel.$viewValue;
+                        if(!viewval) {
+                            viewval = "";
+                        }
+                        scope.codeMirror.setValue(viewval);
                     };
                 };
                 scope.tearDownMirror = function() {
