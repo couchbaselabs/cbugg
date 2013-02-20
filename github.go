@@ -231,7 +231,7 @@ func serveGithubIssue(w http.ResponseWriter, r *http.Request) {
 
 	log.Printf("Got hook: %+v", hookdata)
 
-	if hookdata.Action != "opened" || hookdata.Callpath != "new" {
+	if hookdata.Action != "opened" {
 		log.Printf("Something other than create happened, skipping")
 		w.WriteHeader(204)
 		return
@@ -310,7 +310,7 @@ func serveGithubPullRequest(w http.ResponseWriter, r *http.Request) {
 
 	log.Printf("Got pull request hook: %+v", hookdata)
 
-	if hookdata.Action != "opened" || hookdata.Callpath != "new" {
+	if hookdata.Action != "opened" {
 		log.Printf("Something other than create happened, skipping")
 		w.WriteHeader(204)
 		return
