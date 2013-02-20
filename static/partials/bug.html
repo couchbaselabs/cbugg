@@ -138,7 +138,7 @@
 <h3>Comments</h3>
 <div class="comments">
   <div class="comment well well-small private-{{comment.private}}" ng-repeat="comment in comments">
-    <div ng-show="comment.type == 'comment' && !(comment.deleted || comment.mine)">
+    <div ng-show="comment.type == 'comment'">
       <div ng-hide="comment.deleted">
         <div class="author">
           <img ng-src="http://www.gravatar.com/avatar/{{comment.user.md5}}?s=16">

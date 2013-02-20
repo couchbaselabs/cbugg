@@ -194,7 +194,7 @@ function BugCtrl($scope, $routeParams, $http, $rootScope, $timeout, $location, b
     };
 
     var checkOwnership = function (objects) {
-        return _.map(objects, function(ob) {
+        var owned = _.map(objects, function(ob) {
             if(ob.user && $rootScope.loggedin && $scope.auth.gravatar == ob.user.md5) {
                 ob.mine = true;
             } else {
@@ -204,6 +204,9 @@ function BugCtrl($scope, $routeParams, $http, $rootScope, $timeout, $location, b
                 ob.mine = true;
             }
             return ob;
+        });
+        return _.filter(owned, function(ob) {
+            return ob.mine || !ob.deleted;
         });
     };
 
