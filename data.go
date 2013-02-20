@@ -9,21 +9,22 @@ import (
 type Email string
 
 type Bug struct {
-	Id          string    `json:"id"`
-	Type        string    `json:"type"`
-	Parent      string    `json:"parent,omitempty"`
-	Title       string    `json:"title,omitempty"`
-	Description string    `json:"description,omitempty"`
-	Status      string    `json:"status,omitempty"`
-	Creator     string    `json:"creator,omitempty"`
-	Owner       string    `json:"owner,omitempty"`
-	Tags        []string  `json:"tags,omitempty"`
-	CreatedAt   time.Time `json:"created_at,omitempty"`
-	ModifiedAt  time.Time `json:"modified_at,omitempty"`
-	ModType     string    `json:"modify_type,omitempty"`
-	ModBy       string    `json:"modified_by,omitempty"`
-	Subscribers []string  `json:"subscribers,omitempty"`
-	Private     bool      `json:"private"`
+	Id            string    `json:"id"`
+	Type          string    `json:"type"`
+	Parent        string    `json:"parent,omitempty"`
+	Title         string    `json:"title,omitempty"`
+	Description   string    `json:"description,omitempty"`
+	Status        string    `json:"status,omitempty"`
+	Creator       string    `json:"creator,omitempty"`
+	Owner         string    `json:"owner,omitempty"`
+	Tags          []string  `json:"tags,omitempty"`
+	CreatedAt     time.Time `json:"created_at,omitempty"`
+	ModifiedAt    time.Time `json:"modified_at,omitempty"`
+	ModType       string    `json:"modify_type,omitempty"`
+	ModBy         string    `json:"modified_by,omitempty"`
+	Subscribers   []string  `json:"subscribers,omitempty"`
+	AlsoVisibleTo []string  `json:"also_visible_to,omitempty"`
+	Private       bool      `json:"private"`
 }
 
 type Comment struct {
@@ -159,10 +160,16 @@ func (b APIBug) MarshalJSON() ([]byte, error) {
 		subs = append(subs, Email(u))
 	}
 
+	avt := []Email{}
+	for _, u := range b.AlsoVisibleTo {
+		avt = append(avt, Email(u))
+	}
+
 	m["creator"] = Email(maybenil(m, "creator"))
 	m["owner"] = Email(maybenil(m, "owner"))
 	m["modified_by"] = Email(maybenil(m, "modified_by"))
 	m["subscribers"] = subs
+	m["also_visible_to"] = avt
 
 	return json.Marshal(m)
 }
@@ -195,12 +202,21 @@ func (b Bug) Url() string {
 	return "/bug/" + b.Id
 }
 
+func contains(hay []string, need string) bool {
+	for _, straw := range hay {
+		if straw == need {
+			return true
+		}
+	}
+	return false
+}
+
 func (b Bug) IsVisibleTo(u User) bool {
-	return u.Internal || !b.Private
+	return u.Internal || !(b.Private && !contains(b.AlsoVisibleTo, u.Id))
 }
 
 func (b APIBug) IsVisibleTo(u User) bool {
-	return u.Internal || !b.Private
+	return Bug(b).IsVisibleTo(u)
 }
 
 func (a Attachment) DownloadUrl() string {

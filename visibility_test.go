@@ -7,11 +7,14 @@ import (
 func TestBugVisibility(t *testing.T) {
 	internalUser := User{Id: "internal user", Internal: true}
 	externalUser := User{Id: "external user"}
+	specialUser := User{Id: "special user"}
 
-	privateBug := Bug{Id: "private bug", Private: true}
+	privateBug := Bug{Id: "private bug", Private: true,
+		AlsoVisibleTo: []string{specialUser.Id}}
 	publicBug := Bug{Id: "public bug"}
 
-	privateAPIBug := APIBug{Id: "private api bug", Private: true}
+	privateAPIBug := APIBug{Id: "private api bug", Private: true,
+		AlsoVisibleTo: []string{specialUser.Id}}
 	publicAPIBug := APIBug{Id: "public api bug"}
 
 	tests := []struct {
@@ -27,6 +30,10 @@ func TestBugVisibility(t *testing.T) {
 		{externalUser, publicBug, true},
 		{externalUser, privateAPIBug, false},
 		{externalUser, publicAPIBug, true},
+		{specialUser, privateBug, true},
+		{specialUser, publicBug, true},
+		{specialUser, privateAPIBug, true},
+		{specialUser, publicAPIBug, true},
 	}
 
 	for _, x := range tests {
