@@ -3,8 +3,8 @@
 
   <h3>Administrators</h3>
 
-  <ul class="unstyled" ng-repeat="(e, u) in special['admin']">
-    <li>
+  <ul class="unstyled">
+    <li ng-repeat="(e, u) in special['admin']">
       <img ng-src="http://www.gravatar.com/avatar/{{u.md5}}?s=24">
       {{e}}
     </li>
@@ -12,8 +12,8 @@
 
   <h3>Internal Users</h3>
 
-  <ul class="unstyled" ng-repeat="(e, u) in special['internal']">
-    <li>
+  <ul class="unstyled">
+    <li ng-repeat="(e, u) in special['internal']">
       <img ng-src="http://www.gravatar.com/avatar/{{u.md5}}?s=24">
       {{e}}
     </li>
