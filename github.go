@@ -50,10 +50,17 @@ type GithubIssue struct {
 	Labels      []struct{ Name string }
 	User        githubUser
 	EditURL     string `json:"url"`
+	Comments    int
 	CommentsURL string `json:"comments_url"`
 	Pull        struct {
 		PatchURL *string `json:"patch_url"`
 	} `json:"pull_request"`
+}
+
+type GithubIssueComment struct {
+	Body      string
+	User      githubUser
+	Timestamp time.Time `json:"updated_at"`
 }
 
 type githubIssueHook struct {
@@ -224,6 +231,41 @@ func getGithubPatch(bug Bug, url string) {
 	}
 }
 
+func getGithubIssueComments(bugid string, url string) {
+	ob := []GithubIssueComment{}
+	err := getGithubObject(url, ob)
+	if err != nil {
+		log.Printf("Error getting github issue: %v", err)
+		return
+	}
+
+	for _, gc := range ob {
+		id := "c-" + bugid + "-" + time.Now().UTC().Format(time.RFC3339Nano)
+
+		body := gc.Body
+		theuser := findEmailByMD5(gc.User.GravatarID)
+		if theuser == "" {
+			theuser = *mailFrom
+			body += "\nby github user: " + gc.User.Login +
+				" ![g](" + gc.User.Avatar + "&s=64)"
+		}
+
+		c := Comment{
+			Id:        id,
+			BugId:     bugid,
+			Type:      "comment",
+			User:      theuser,
+			Text:      body,
+			CreatedAt: gc.Timestamp,
+		}
+
+		_, err := db.Add(c.Id, 0, c)
+		if err != nil {
+			log.Printf("Error adding new comment: %v", err)
+		}
+	}
+}
+
 func makeIssueFromGithub(issue GithubIssue, repository GithubRepository) (Bug, error) {
 	log.Printf("Creating github issue:\n%v\n%v", issue, repository)
 
@@ -284,6 +326,10 @@ func makeIssueFromGithub(issue GithubIssue, repository GithubRepository) (Bug, e
 		go getGithubPatch(bug, *issue.Pull.PatchURL)
 	}
 
+	if issue.Comments > 0 {
+		go getGithubIssueComments(bug.Id, issue.CommentsURL)
+	}
+
 	go closeGithubIssue(bug, issue.CommentsURL, issue.EditURL)
 
 	notifyBugChange(bug.Id, "created", originator)
@@ -319,7 +365,10 @@ func serveGithubIssue(w http.ResponseWriter, r *http.Request) {
 }
 
 func getGithubObject(path string, ob interface{}) error {
-	url := "https://api.github.com/" + path
+	url := path
+	if !strings.HasPrefix(path, "https:") {
+		url = "https://api.github.com/" + path
+	}
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
 		return err
