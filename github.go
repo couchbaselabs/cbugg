@@ -233,7 +233,7 @@ func getGithubPatch(bug Bug, url string) {
 
 func getGithubIssueComments(bugid string, url string) {
 	ob := []GithubIssueComment{}
-	err := getGithubObject(url, ob)
+	err := getGithubObject(url, &ob)
 	if err != nil {
 		log.Printf("Error getting github issue: %v", err)
 		return
