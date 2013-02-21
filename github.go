@@ -26,8 +26,9 @@ func init() {
 }
 
 type githubUser struct {
-	Avatar string `json:"avatar_url"`
-	Login  string
+	Avatar     string `json:"avatar_url"`
+	Login      string
+	GravatarID string `json:"gravatar_id"`
 }
 
 type githubAuthor struct {
@@ -41,22 +42,24 @@ type GithubRepository struct {
 	Name string
 }
 
+type GithubIssue struct {
+	Title       string
+	Body        string
+	CreatedAt   time.Time `json:"created_at"`
+	URL         string    `json:"html_url"`
+	Labels      []struct{ Name string }
+	User        githubUser
+	EditURL     string `json:"url"`
+	CommentsURL string `json:"comments_url"`
+	Pull        struct {
+		PatchURL *string `json:"patch_url"`
+	} `json:"pull_request"`
+}
+
 type githubIssueHook struct {
-	Action   string
-	Callpath string `json:"hook_callpath"`
-	Issue    struct {
-		Title       string
-		Body        string
-		CreatedAt   time.Time `json:"created_at"`
-		URL         string    `json:"html_url"`
-		Labels      []struct{ Name string }
-		User        githubUser
-		EditURL     string `json:"url"`
-		CommentsURL string `json:"comments_url"`
-		Pull        struct {
-			PatchURL *string `json:"patch_url"`
-		} `json:"pull_request"`
-	}
+	Action     string
+	Callpath   string `json:"hook_callpath"`
+	Issue      GithubIssue
 	Repository GithubRepository
 }
 
@@ -220,6 +223,66 @@ func getGithubPatch(bug Bug, url string) {
 	}
 }
 
+func makeIssueFromGithub(issue GithubIssue, repository GithubRepository) (Bug, error) {
+	log.Printf("Creating github issue:\n%v\n%v", issue, repository)
+
+	id, err := newBugId()
+	if err != nil {
+		return Bug{}, err
+	}
+
+	body := issue.Body
+	if body != "" {
+		body += "\n\n----\n"
+	}
+	body += issue.URL +
+		"\nby github user: " + issue.User.Login +
+		" ![g](" + issue.User.Avatar + "&s=64)"
+
+	labels := []string{}
+	for _, l := range issue.Labels {
+		labels = append(labels, strings.ToLower(l.Name))
+	}
+
+	tags := append(labels, "github", repository.Name)
+	if issue.Pull.PatchURL != nil {
+		tags = append(tags, "patch")
+	}
+
+	bug := Bug{
+		Id:          fmt.Sprintf("bug-%v", id),
+		Title:       issue.Title,
+		Description: body,
+		Creator:     *mailFrom,
+		Status:      "inbox",
+		Tags:        tags,
+		Type:        "bug",
+		CreatedAt:   issue.CreatedAt.UTC(),
+		ModifiedAt:  issue.CreatedAt.UTC(),
+		ModBy:       *mailFrom,
+	}
+
+	added, err := db.Add(bug.Id, 0, bug)
+	if err != nil {
+		return bug, err
+	}
+	if !added {
+		return bug, fmt.Errorf("Bug collision on %v", bug.Id)
+	}
+
+	for _, t := range tags {
+		notifyTagAssigned(bug.Id, t, bug.Creator)
+	}
+
+	if issue.Pull.PatchURL != nil {
+		go getGithubPatch(bug, *issue.Pull.PatchURL)
+	}
+
+	go closeGithubIssue(bug, issue.CommentsURL, issue.EditURL)
+
+	return bug, nil
+}
+
 func serveGithubIssue(w http.ResponseWriter, r *http.Request) {
 	hookdata := githubIssueHook{}
 	err := json.Unmarshal([]byte(r.FormValue("payload")), &hookdata)
@@ -238,66 +301,56 @@ func serveGithubIssue(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	id, err := newBugId()
+	_, err = makeIssueFromGithub(hookdata.Issue, hookdata.Repository)
 	if err != nil {
 		showError(w, r, err.Error(), 500)
 		return
 	}
-
-	body := hookdata.Issue.Body
-	if body != "" {
-		body += "\n\n----\n"
-	}
-	body += hookdata.Issue.URL +
-		"\nby github user: " + hookdata.Issue.User.Login +
-		" ![g](" + hookdata.Issue.User.Avatar + "&s=64)"
-
-	labels := []string{}
-	for _, l := range hookdata.Issue.Labels {
-		labels = append(labels, strings.ToLower(l.Name))
-	}
-
-	tags := append(labels, "github", hookdata.Repository.Name)
-	if hookdata.Issue.Pull.PatchURL != nil {
-		tags = append(tags, "patch")
-	}
-
-	bug := Bug{
-		Id:          fmt.Sprintf("bug-%v", id),
-		Title:       hookdata.Issue.Title,
-		Description: body,
-		Creator:     *mailFrom,
-		Status:      "inbox",
-		Tags:        tags,
-		Type:        "bug",
-		CreatedAt:   hookdata.Issue.CreatedAt.UTC(),
-		ModifiedAt:  hookdata.Issue.CreatedAt.UTC(),
-		ModBy:       *mailFrom,
-	}
-
-	added, err := db.Add(bug.Id, 0, bug)
-	if err != nil {
-		showError(w, r, err.Error(), 500)
-		return
-	}
-	if !added {
-		// This is a bug bug
-		showError(w, r, "Bug collision on "+bug.Id, 500)
-		return
-	}
-
-	for _, t := range tags {
-		notifyTagAssigned(bug.Id, t, bug.Creator)
-	}
-
-	if hookdata.Issue.Pull.PatchURL != nil {
-		go getGithubPatch(bug, *hookdata.Issue.Pull.PatchURL)
-	}
-
-	go closeGithubIssue(bug, hookdata.Issue.CommentsURL,
-		hookdata.Issue.EditURL)
 
 	w.WriteHeader(204)
+}
+
+func getGithubObject(path string, ob interface{}) error {
+	url := "https://api.github.com/" + path
+	req, err := http.NewRequest("GET", url, nil)
+	if err != nil {
+		return err
+	}
+	req.SetBasicAuth(*ghUser, *ghPass)
+	req.Header.Set("Content-Type", "application/json")
+
+	res, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return err
+	}
+	defer res.Body.Close()
+	d := json.NewDecoder(res.Body)
+	return d.Decode(ob)
+}
+
+func serveGithubIssueFetch(w http.ResponseWriter, r *http.Request) {
+	repoName := r.FormValue("repo")
+	repo := GithubRepository{}
+	err := getGithubObject("repos/"+repoName, &repo)
+	if err != nil {
+		showError(w, r, err.Error(), 500)
+		return
+	}
+	issue := GithubIssue{}
+	err = getGithubObject("repos/"+repoName+"/issues/"+r.FormValue("issue"),
+		&issue)
+	if err != nil {
+		showError(w, r, err.Error(), 500)
+		return
+	}
+
+	bug, err := makeIssueFromGithub(issue, repo)
+	if err != nil {
+		showError(w, r, err.Error(), 500)
+		return
+	}
+
+	http.Redirect(w, r, bug.Url(), 303)
 }
 
 func serveGithubPullRequest(w http.ResponseWriter, r *http.Request) {
