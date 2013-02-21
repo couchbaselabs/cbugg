@@ -155,7 +155,8 @@ func closeGithubIssue(bug Bug, commentUrl, editUrl string) {
 	preq, err := http.NewRequest("PATCH", editUrl,
 		bytes.NewReader(closeBody))
 	if err != nil {
-		log.Printf("Error creating patch URL: %v", err)
+		log.Printf("Error creating PATCH request: %v", err)
+		return
 	}
 	preq.SetBasicAuth(*ghUser, *ghPass)
 	preq.Header.Set("Content-Type", "application/json")
@@ -170,7 +171,6 @@ func closeGithubIssue(bug Bug, commentUrl, editUrl string) {
 	defer pres.Body.Close()
 	if pres.StatusCode != 200 {
 		log.Printf("Could not close issue: %v", pres.Status)
-		return
 	}
 }
 
