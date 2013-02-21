@@ -102,6 +102,22 @@
       </label>
     </form>
   </div>
+
+  <div ng-show="bug.private && currentuser.internal">
+    <form ng-submit="submitSpecialUser()">
+      <label>Also Visible To: <input type="text" class="newuserbox input-medium"></label>
+      <button type="submit" class="btn">Save</button>
+    </form>
+    <ul>
+      <li class="unstyled" ng-repeat="o in bug.also_visible_to">
+        <img ng-src="http://www.gravatar.com/avatar/{{o.md5}}?s=24">
+        {{o.email}}
+        <a class="killuser" ng-click="rmSpecial(o)">
+          <i class="icon-remove"></i>
+        </a>
+      </li>
+    </ul>
+  </div>
 </div>
 
 <h3>Attachments</h3>

@@ -443,6 +443,92 @@ func serveUnsubscribeBug(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(204)
 }
 
+func updateBugAlsoVisible(bugid string, me User, email string, add bool) error {
+	historyKey := bugid + "-" + time.Now().Format(time.RFC3339Nano)
+
+	return db.Update(bugid, 0, func(current []byte) ([]byte, error) {
+		if len(current) == 0 {
+			return nil, NotFound
+		}
+		bug := Bug{}
+		err := json.Unmarshal(current, &bug)
+		if err != nil {
+			return nil, err
+		}
+
+		if bug.Type != "bug" {
+			return nil, fmt.Errorf("Expected a bug, got %v",
+				bug.Type)
+		}
+
+		history := Bug{
+			Id:            bugid,
+			Type:          "bughistory",
+			ModifiedAt:    bug.ModifiedAt,
+			ModType:       bug.ModType,
+			ModBy:         bug.ModBy,
+			AlsoVisibleTo: bug.AlsoVisibleTo,
+		}
+
+		if add {
+			for _, e := range bug.AlsoVisibleTo {
+				if e == email {
+					// Already subscribed
+					return nil, couchbase.UpdateCancel
+				}
+			}
+			bug.AlsoVisibleTo = append(bug.AlsoVisibleTo, email)
+		} else {
+			old := bug.AlsoVisibleTo
+			bug.AlsoVisibleTo = []string{}
+			for _, e := range old {
+				log.Printf("Checking %v (%v) = %v",
+					e, md5string(e), email)
+				if md5string(e) != email {
+					bug.AlsoVisibleTo = append(bug.AlsoVisibleTo, e)
+				}
+			}
+		}
+
+		err = db.Set(historyKey, 0, &history)
+		if err != nil {
+			return nil, err
+		}
+
+		bug.ModType = "also_visible_to"
+		bug.ModBy = me.Id
+		bug.Parent = historyKey
+		bug.ModifiedAt = time.Now().UTC()
+
+		return json.Marshal(bug)
+	})
+}
+
+func doBugVisibleUpdate(w http.ResponseWriter, r *http.Request, add bool) {
+	bugid := mux.Vars(r)["bugid"]
+	err := updateBugAlsoVisible(bugid, whoami(r),
+		r.FormValue("email"), add)
+	if err != nil && err != couchbase.UpdateCancel {
+		showError(w, r, err.Error(), 500)
+		return
+	}
+
+	bug, err := getBug(bugid)
+	if err != nil {
+		showError(w, r, err.Error(), 500)
+		return
+	}
+	mustEncode(w, APIBug(bug))
+}
+
+func serveRemoveBugViewer(w http.ResponseWriter, r *http.Request) {
+	doBugVisibleUpdate(w, r, false)
+}
+
+func serveAddBugViewer(w http.ResponseWriter, r *http.Request) {
+	doBugVisibleUpdate(w, r, true)
+}
+
 func serveBugPing(w http.ResponseWriter, r *http.Request) {
 	me := whoami(r)
 

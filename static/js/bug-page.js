@@ -404,4 +404,32 @@ function BugCtrl($scope, $routeParams, $http, $rootScope, $timeout, $location, b
         updateBug("owner", $scope.bug.owner.email);
         $scope.editingowner = false;
     };
+
+    $scope.rmSpecial = function(u) {
+        $http.post('/api/bug/' + $routeParams.bugId + '/viewer/remove/',
+                   'email=' + u.md5,
+                  {headers: {"Content-Type": "application/x-www-form-urlencoded"}}).
+            success(function(data) {
+                $scope.bug.also_visible_to = data.also_visible_to;
+            }).
+            error(function(data, code) {
+                bAlert("Error " + code, "could not update visibility", "error");
+            });
+    };
+
+    $scope.submitSpecialUser = function() {
+        var v = $(".newuserbox").val();
+        $(".newuserbox").val("");
+        console.log("Adding", v);
+
+        $http.post('/api/bug/' + $routeParams.bugId + '/viewer/add/',
+                   'email=' + encodeURIComponent(v),
+                   {headers: {"Content-Type": "application/x-www-form-urlencoded"}}).
+            success(function(data) {
+                $scope.bug.also_visible_to = data.also_visible_to;
+            }).
+            error(function(data, code) {
+                bAlert("Error " + code, "could not update visibility", "error");
+            });
+    };
 }

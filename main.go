@@ -230,6 +230,12 @@ func main() {
 		serveUnsubscribeBug).Methods("DELETE").MatcherFunc(authRequired)
 	r.HandleFunc("/api/bug/{bugid}/sub/", notAuthed)
 
+	// Private bug visibility
+	r.HandleFunc("/api/bug/{bugid}/viewer/add/",
+		serveAddBugViewer).Methods("POST").MatcherFunc(internalRequired)
+	r.HandleFunc("/api/bug/{bugid}/viewer/remove/",
+		serveRemoveBugViewer).Methods("POST").MatcherFunc(internalRequired)
+
 	// Bug Pinging
 	r.HandleFunc("/api/bug/{bugid}/ping/",
 		serveBugPing).Methods("POST").MatcherFunc(authRequired)
