@@ -393,21 +393,42 @@ func serveGithubIssueFetch(w http.ResponseWriter, r *http.Request) {
 		showError(w, r, err.Error(), 500)
 		return
 	}
-	issue := GithubIssue{}
-	err = getGithubObject("repos/"+repoName+"/issues/"+r.FormValue("issue"),
-		&issue)
-	if err != nil {
-		showError(w, r, err.Error(), 500)
-		return
-	}
 
-	bug, err := makeIssueFromGithub(issue, repo)
-	if err != nil {
-		showError(w, r, err.Error(), 500)
-		return
-	}
+	issueId := r.FormValue("issue")
+	if issueId == "" {
+		issues := []GithubIssue{}
+		err = getGithubObject("repos/"+repoName+"/issues", &issues)
+		if err != nil {
+			showError(w, r, err.Error(), 500)
+			return
+		}
 
-	http.Redirect(w, r, bug.Url(), 303)
+		for _, issue := range issues {
+			_, err := makeIssueFromGithub(issue, repo)
+			if err != nil {
+				showError(w, r, err.Error(), 500)
+				return
+			}
+		}
+
+		w.WriteHeader(204)
+	} else {
+		issue := GithubIssue{}
+		err = getGithubObject("repos/"+repoName+"/issues/"+issueId,
+			&issue)
+		if err != nil {
+			showError(w, r, err.Error(), 500)
+			return
+		}
+
+		bug, err := makeIssueFromGithub(issue, repo)
+		if err != nil {
+			showError(w, r, err.Error(), 500)
+			return
+		}
+
+		http.Redirect(w, r, bug.Url(), 303)
+	}
 }
 
 func serveGithubPullRequest(w http.ResponseWriter, r *http.Request) {
