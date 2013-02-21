@@ -214,6 +214,7 @@ function BugCtrl($scope, $routeParams, $http, $rootScope, $timeout, $location, b
         // Update delete button available on loggedinnness change
         $scope.comments = checkOwnership($scope.comments);
         $scope.attachments = checkOwnership($scope.attachments);
+        $(".newuserbox").typeahead({source: $scope.getUsers});
         checkSubscribed();
         $http.get("/api/me/").success(function(data) {
             $scope.currentuser = data;
