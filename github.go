@@ -250,17 +250,22 @@ func makeIssueFromGithub(issue GithubIssue, repository GithubRepository) (Bug, e
 		tags = append(tags, "patch")
 	}
 
+	originator := findEmailByMD5(issue.User.GravatarID)
+	if originator == "" {
+		originator = *mailFrom
+	}
+
 	bug := Bug{
 		Id:          fmt.Sprintf("bug-%v", id),
 		Title:       issue.Title,
 		Description: body,
-		Creator:     *mailFrom,
+		Creator:     originator,
 		Status:      "inbox",
 		Tags:        tags,
 		Type:        "bug",
 		CreatedAt:   issue.CreatedAt.UTC(),
 		ModifiedAt:  issue.CreatedAt.UTC(),
-		ModBy:       *mailFrom,
+		ModBy:       originator,
 	}
 
 	added, err := db.Add(bug.Id, 0, bug)

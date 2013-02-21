@@ -168,32 +168,53 @@ func serveUpdateUserAuthToken(w http.ResponseWriter, r *http.Request) {
 	mustEncode(w, map[string]string{"token": user.AuthToken})
 }
 
+func findEmailByMD5(m string) string {
+	rv := ""
+	if ul, err := listUsers(); err == nil {
+		for _, e := range ul {
+			if md5string(e) == m {
+				return e
+			}
+		}
+	}
+	return rv
+}
+
+func listUsers() ([]string, error) {
+	rv := []string{}
+	args := map[string]interface{}{
+		"group_level": 1,
+	}
+
+	viewRes := struct {
+		Rows []struct {
+			Key string
+		}
+	}{}
+
+	err := db.ViewCustom("cbugg", "users", args, &viewRes)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, r := range viewRes.Rows {
+		if strings.Contains(r.Key, "@") {
+			rv = append(rv, r.Key)
+		}
+	}
+	sort.Strings(rv)
+	return rv, nil
+}
+
 func serveUserList(w http.ResponseWriter, r *http.Request) {
 	rv := []string{}
 
 	if whoami(r).Id != "" {
-		args := map[string]interface{}{
-			"group_level": 1,
-		}
-
-		viewRes := struct {
-			Rows []struct {
-				Key string
-			}
-		}{}
-
-		err := db.ViewCustom("cbugg", "users", args, &viewRes)
+		var err error
+		rv, err = listUsers()
 		if err != nil {
 			showError(w, r, err.Error(), 500)
-			return
 		}
-
-		for _, r := range viewRes.Rows {
-			if strings.Contains(r.Key, "@") {
-				rv = append(rv, r.Key)
-			}
-		}
-		sort.Strings(rv)
 	}
 
 	mustEncode(w, rv)
