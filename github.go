@@ -170,7 +170,8 @@ func closeGithubIssue(bug Bug, commentUrl, editUrl string) {
 	}
 	defer pres.Body.Close()
 	if pres.StatusCode != 200 {
-		log.Printf("Could not close issue: %v", pres.Status)
+		log.Printf("Could not close issue at %v: %v",
+			editUrl, pres.Status)
 	}
 }
 
