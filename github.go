@@ -114,6 +114,7 @@ func cleanupPatchTitle(t string) string {
 func closeGithubIssue(bug Bug, commentUrl, editUrl string) {
 	if *ghUser == "" || *ghPass == "" {
 		log.Printf("Github user not configured, not closing")
+		return
 	}
 
 	buf := &bytes.Buffer{}
