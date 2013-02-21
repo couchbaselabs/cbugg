@@ -286,7 +286,7 @@ func makeIssueFromGithub(issue GithubIssue, repository GithubRepository) (Bug, e
 
 	go closeGithubIssue(bug, issue.CommentsURL, issue.EditURL)
 
-	notifyBugChange(bug.Id, originator, "created")
+	notifyBugChange(bug.Id, "created", originator)
 
 	return bug, nil
 }

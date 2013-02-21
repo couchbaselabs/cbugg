@@ -67,7 +67,7 @@ func serveNewBug(w http.ResponseWriter, r *http.Request) {
 		notifyTagAssigned(bug.Id, t, me.Id)
 	}
 
-	notifyBugChange(bug.Id, me.Id, "created")
+	notifyBugChange(bug.Id, "created", me.Id)
 
 	http.Redirect(w, r, bug.Url(), 303)
 }
