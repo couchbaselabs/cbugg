@@ -466,17 +466,22 @@ func serveGithubPullRequest(w http.ResponseWriter, r *http.Request) {
 
 	tags := []string{"pull-request", hookdata.Repository.Name}
 
+	originator := findEmailByMD5(hookdata.PullRequest.User.GravatarID)
+	if originator == "" {
+		originator = *mailFrom
+	}
+
 	bug := Bug{
 		Id:          fmt.Sprintf("bug-%v", id),
 		Title:       hookdata.PullRequest.Title,
 		Description: body,
-		Creator:     *mailFrom,
+		Creator:     originator,
 		Status:      "inbox",
 		Tags:        tags,
 		Type:        "bug",
 		CreatedAt:   hookdata.PullRequest.CreatedAt.UTC(),
 		ModifiedAt:  hookdata.PullRequest.CreatedAt.UTC(),
-		ModBy:       *mailFrom,
+		ModBy:       originator,
 	}
 
 	added, err := db.Add(bug.Id, 0, bug)
