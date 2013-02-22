@@ -288,7 +288,7 @@ func makeIssueFromGithub(issue GithubIssue, repository GithubRepository) (Bug, e
 		labels = append(labels, strings.ToLower(l.Name))
 	}
 
-	tags := append(labels, "github", repository.Name)
+	tags := append(labels, repository.Name)
 	if issue.Pull.PatchURL != nil {
 		tags = append(tags, "patch")
 	}
@@ -464,7 +464,7 @@ func serveGithubPullRequest(w http.ResponseWriter, r *http.Request) {
 		"\nby github user: " + hookdata.PullRequest.User.Login +
 		" ![g](" + hookdata.PullRequest.User.Avatar + "&s=64)"
 
-	tags := []string{"github", "pull-request", hookdata.Repository.Name}
+	tags := []string{"pull-request", hookdata.Repository.Name}
 
 	bug := Bug{
 		Id:          fmt.Sprintf("bug-%v", id),
