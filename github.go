@@ -175,7 +175,7 @@ func closeGithubIssue(bug Bug, commentUrl, editUrl string) {
 	}
 }
 
-func getGithubPatch(bug Bug, url string) {
+func getGithubPatch(bug Bug, url, email string) {
 	gres, err := http.Get(url)
 	if gres != nil && gres.Body != nil {
 		defer gres.Body.Close()
@@ -221,7 +221,7 @@ func getGithubPatch(bug Bug, url string) {
 		Size:        cr.n,
 		ContentType: "text/plain",
 		Filename:    filename,
-		User:        *mailFrom,
+		User:        email,
 		CreatedAt:   time.Now().UTC(),
 	}
 
@@ -324,7 +324,7 @@ func makeIssueFromGithub(issue GithubIssue, repository GithubRepository) (Bug, e
 	}
 
 	if issue.Pull.PatchURL != nil {
-		go getGithubPatch(bug, *issue.Pull.PatchURL)
+		go getGithubPatch(bug, *issue.Pull.PatchURL, originator)
 	}
 
 	if issue.Comments > 0 {
@@ -499,7 +499,7 @@ func serveGithubPullRequest(w http.ResponseWriter, r *http.Request) {
 		notifyTagAssigned(bug.Id, t, bug.Creator)
 	}
 
-	go getGithubPatch(bug, hookdata.PullRequest.PatchURL)
+	go getGithubPatch(bug, hookdata.PullRequest.PatchURL, originator)
 
 	go closeGithubIssue(bug, hookdata.PullRequest.CommentsURL,
 		hookdata.PullRequest.EditURL)
