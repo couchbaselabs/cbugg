@@ -6,10 +6,11 @@ import (
 	"log"
 	"time"
 
+	"github.com/dustin/go-broadcast"
 	"github.com/igm/sockjs-go/sockjs"
 )
 
-var changes_broadcaster = newBroadcaster(100)
+var changes_broadcaster = broadcast.NewBroadcaster(100)
 
 var recentChanges = newChangeRing(100)
 
