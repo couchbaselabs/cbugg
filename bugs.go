@@ -338,6 +338,7 @@ type bugListResult struct {
 		Owner  Email
 		Status string
 		Tags   []string
+		Mod    time.Time
 	}
 }
 
