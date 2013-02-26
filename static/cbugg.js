@@ -83,6 +83,9 @@ function bugListDataPrep(data) {
     var grouped = _.pairs(_.groupBy(data, function(e) { return e.Value.Owner.md5; }));
     var nameMap = _.object(_.map(data, function(e){return e.Value.Owner.md5;}),
                            _.map(data, function(e){return e.Value.Owner.email;}));
+    _.forEach(grouped, function(x) {
+        x[1] = _.sortBy(x[1], function(e) { return e.Value.Mod; }).reverse();
+    });
     return _.sortBy(grouped, function(n) { return nameMap[n[0]]; });
 }
 
