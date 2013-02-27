@@ -1,6 +1,6 @@
 var cbuggSearch = angular.module('cbuggSearch', []);
 
-cbuggSearch.factory('cbuggSearch', function($http) {
+cbuggSearch.factory('cbuggSearch', function($http, $location) {
 
 	var newPager = function(currentPage, totalResults, resultsPerPage, maxPagesToShow) {
 		numPages = Math.ceil(totalResults / resultsPerPage);
@@ -51,14 +51,37 @@ cbuggSearch.factory('cbuggSearch', function($http) {
 		};
 	};
 
-	var defaultSearchOptions = function(overrides) {
-		defaultPage = (overrides && overrides["page"]) ? overrides["page"] : 1;
+	var defaultSearchOptions = function(customOptions) {
+		var defaultPage = 1;
+		var defaultStatus = [];
+		var defaultTags = [];
+		var defaultLastModified = "";
+		if(customOptions) {
+			for(var option in customOptions) {
+				var value = customOptions[option];
+				if(option == "page") {
+					defaultPage = value;
+				} else if (option == "status") {
+					var mv = value.split(",");
+					for(var i in mv) {
+						defaultStatus.push(mv[i]);
+					}
+				} else if (option == "tags") {
+					var mv2 = value.split(",");
+					for(var i2 in mv2) {
+						defaultTags.push(mv2[i2]);
+					}
+				} else if (option == "last_modified") {
+					defaultLastModified = value;
+				}
+			}
+		}
 		return {
 			"page": defaultPage,
 			"rpp": 10,
-			"status": [],
-			"tags": [],
-			"last_modified": "",
+			"status": defaultStatus,
+			"tags": defaultTags,
+			"last_modified": defaultLastModified,
 			"maxPagesToShow": 7,
 			updateFilter: function(field, value) {
 				switch(field) {
@@ -117,6 +140,25 @@ cbuggSearch.factory('cbuggSearch', function($http) {
 		};
 	};
 
+	var updateLocationWithOptions = function(options) {
+		$location.search('page', options.page);
+        if(options.status.length > 0) {
+            $location.search('status', options.status);
+        } else {
+            $location.search('status', null);
+        }
+        if(options.tags.length > 0) {
+            $location.search('tags', options.tags);
+        } else {
+            $location.search('tags', null);
+        }
+        if(options.last_modified) {
+            $location.search('last_modified', options.last_modified);
+        } else {
+            $location.search('last_modified', null);
+        }
+	};
+
 	return {
 		getDefaultSearchOptions: function(overrides) {
 			return defaultSearchOptions(overrides);
@@ -153,6 +195,9 @@ cbuggSearch.factory('cbuggSearch', function($http) {
 				}
 
 				result.inProgress = false;
+
+				//update the location
+				updateLocationWithOptions(result.options);
 			}).error(function(data, status, headers, config) {
 				result.errorMessage = data;
 				result.inProgress = false;

@@ -2,7 +2,6 @@ function SearchResultsCtrl($scope, $routeParams, $location, cbuggPage, cbuggSear
 
     $scope.doSearch = function() {
         $scope.result = cbuggSearch.query($routeParams.query, $scope.result.options);
-        $location.search('page', $scope.result.options.page);
     };
 
     $scope.jumpToPage = function(pageNum, $event) {

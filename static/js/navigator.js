@@ -2,7 +2,6 @@ function NavigatorCtrl($scope, $routeParams, $http, $location, cbuggAuth, cbuggP
 
     $scope.doSearch = function() {
         $scope.result = cbuggSearch.query($scope.query, $scope.result.options);
-        $location.search('page', $scope.result.options.page);
     };
 
     $scope.jumpToPage = function(pageNum, $event) {
