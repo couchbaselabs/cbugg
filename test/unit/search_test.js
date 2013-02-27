@@ -47,7 +47,7 @@ describe("Search Service", function() {
         $httpBackend.flush();
         expect(result.inProgress).toBe(false);
         expect(result.errorMessage).toBe("");
-        expect(result.warningMessage).toBe("Search only contains results from 4 of 5shards");
+        expect(result.warningMessage).toBe("Search only contains results from 4 of 5 shards");
         expect(result.hits.length).toBe(0);
     });
 
