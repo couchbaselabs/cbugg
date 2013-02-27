@@ -61,6 +61,13 @@ angular.module('cbugg', ['cbuggFilters', 'cbuggAuth', 'cbuggRealtime', 'cbuggEdi
             otherwise({redirectTo: '/statecounts/'});
         $locationProvider.html5Mode(true);
         $locationProvider.hashPrefix('!');
+    }]).
+    run(['$rootScope', function($rootScope) {
+        // this reapplies the rootScope every 30 seconds even if nothing has changed
+        // this allows the relDate filter to show dates relative to the curent time
+        setInterval(function(){
+            $rootScope.$apply();
+        }, 30000);
     }]);
 
 function StatesByCountCtrl($scope, $http, cbuggPage, cbuggRealtime) {
