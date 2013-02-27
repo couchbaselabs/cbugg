@@ -149,7 +149,7 @@ cbuggSearch.factory('cbuggSearch', function($http) {
 				// check results came from all shards
 				if(data._shards.total !== data._shards.successful) {
 					result.warningMessage = "Search only contains results from " +
-					data._shards.successful + " of " + data._shards.total + "shards";
+					data._shards.successful + " of " + data._shards.total + " shards";
 				}
 
 				result.inProgress = false;
