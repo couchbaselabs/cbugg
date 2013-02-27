@@ -9,13 +9,14 @@
 					<p class="bugTitle ellipsis" title="{{hit.source.doc.title}}">{{hit.source.doc.title}}
 					</p>
 					<div class="searchResultRowFooter">
-						Created by <img
-							ng-src="http://www.gravatar.com/avatar/{{hit.source.doc.creator.md5}}?s=12">
-						{{hit.source.doc.creator.email}} {{hit.source.doc.created_at
-						| relDate}}. Updated by <img
+						Created {{hit.source.doc.created_at | relDate}}.
+						Last Updated by <img
 							ng-src="http://www.gravatar.com/avatar/{{hit.source.doc.modified_by.md5}}?s=12">
 						{{hit.source.doc.modified_by.email}}
-						{{hit.source.doc.modified_at | relDate}} <a
+						{{hit.source.doc.modified_at | relDate}}.
+						<span ng-show="hit.source.doc.owner.email">Assigned to <img
+							ng-src="http://www.gravatar.com/avatar/{{hit.source.doc.owner.md5}}?s=12">
+						{{hit.source.doc.owner.email}}.</span> <a
 							class="buglist-tag tag-{{t}}"
 							ng-repeat="t in hit.source.doc.tags" href="/tag/{{t}}">{{t}}</a>
 					</div>
