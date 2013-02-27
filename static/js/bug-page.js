@@ -433,4 +433,26 @@ function BugCtrl($scope, $routeParams, $http, $rootScope, $timeout, $location, b
                 bAlert("Error " + code, "could not update visibility", "error");
             });
     };
+
+    $scope.$on('Change', function(event, change) {
+        if(change.bugid != $routeParams.bugId) {
+            // not this bug
+            return;
+        }
+        else if(change.user.md5 == $scope.auth.gravatar) {
+            // wait this is me
+            return;
+        }
+        else if(change.action == "commented on" && $scope.comments.length > 0 && change.time <= $scope.comments[$scope.comments.length-1].created_at) {
+            // this is a comment on this bug, but we've already seen it
+            return;
+        } else if (change.time <= $scope.bug.modified_at) {
+            // this is an update to this bug, but we've already seen it
+            return;
+        }
+        // if we got this far, we should show the change
+        // FIXME - find a more angular way to reload (probably requires using $compile)
+        bAlert("Update", '<img src="http://www.gravatar.com/avatar/' + change.user.md5 + '?s=16"> ' +
+            change.user.email + ' ' + change.action + ' this bug.  <a href="" onclick="location.reload()">Reload</a>' , "info");
+    });
 }
