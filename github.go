@@ -293,15 +293,19 @@ func makeIssueFromGithub(issue GithubIssue, repository GithubRepository) (Bug, e
 		tags = append(tags, "patch")
 	}
 
+	subs := []string{}
 	originator := findEmailByMD5(issue.User.GravatarID)
 	if originator == "" {
 		originator = *mailFrom
+	} else {
+		subs = []string{originator}
 	}
 
 	bug := Bug{
 		Id:          fmt.Sprintf("bug-%v", id),
 		Title:       issue.Title,
 		Description: body,
+		Subscribers: subs,
 		Creator:     originator,
 		Status:      "inbox",
 		Tags:        tags,
@@ -466,9 +470,12 @@ func serveGithubPullRequest(w http.ResponseWriter, r *http.Request) {
 
 	tags := []string{"pull-request", hookdata.Repository.Name}
 
+	subs := []string{}
 	originator := findEmailByMD5(hookdata.PullRequest.User.GravatarID)
 	if originator == "" {
 		originator = *mailFrom
+	} else {
+		subs = []string{originator}
 	}
 
 	bug := Bug{
@@ -476,6 +483,7 @@ func serveGithubPullRequest(w http.ResponseWriter, r *http.Request) {
 		Title:       hookdata.PullRequest.Title,
 		Description: body,
 		Creator:     originator,
+		Subscribers: subs,
 		Status:      "inbox",
 		Tags:        tags,
 		Type:        "bug",
