@@ -30,12 +30,16 @@ cbuggGrowl.factory('cbuggGrowl', function($rootScope) {
 
 });
 
-function GrowlAlertCtrl($scope, $location, cbuggGrowl) {
+function GrowlAlertCtrl($scope, $route, cbuggGrowl) {
 
     $scope.alerts = cbuggGrowl.currentAlerts;
 
     $scope.closeGrowlAlert = function(alert) {
         cbuggGrowl.closeGrowlAlert(alert);
+    };
+
+    $scope.reload = function() {
+        $route.reload();
     };
 
 }
