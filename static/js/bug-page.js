@@ -451,7 +451,12 @@ function BugCtrl($scope, $routeParams, $http, $rootScope, $timeout, $location, b
             return;
         }
         // if we got this far, we should show the change
-        alert = { title: "Update", template: "change", change: change, context: $location.path()};
+        alertAction = "changed";
+        if(change.action == "commented on") {
+            alertAction = "commented";
+        }
+        alertId = change.bugid + "-" + alertAction + "-by-" + change.user.md5;
+        alert = { title: "Update", template: "change", change: change, context: $location.path(), id: alertId};
         cbuggGrowl.createAlert(alert);
     });
 }

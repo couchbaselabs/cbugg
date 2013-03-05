@@ -2,12 +2,22 @@ var cbuggGrowl = angular.module('cbuggGrowl', []);
 cbuggGrowl.factory('cbuggGrowl', function($rootScope) {
 
     var alerts = [];
+    var alertsById = {};
 
     function createAlert(alert) {
+        if(alert.id) {
+            if(alertsById[alert.id]) {
+                closeGrowlAlert(alertsById[alert.id]);
+            }
+            alertsById[alert.id] = alert;
+        }
         alerts.push(alert);
     }
 
     function closeGrowlAlert(alert) {
+        if(alert.id) {
+            delete alertsById[alert.id];
+        }
         var index = alerts.indexOf(alert);
         alerts.splice(index, 1);
     }
