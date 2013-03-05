@@ -13,12 +13,10 @@ cbuggGrowl.factory('cbuggGrowl', function($rootScope) {
     }
 
     $rootScope.$on('$routeChangeSuccess', function(evt, curr, prev) {
-        console.log("location path changed");
         var i = alerts.length;
         while(i--) {
             var alert = alerts[i];
             if(alert.context && alert.context !==  curr) {
-                console.log("location doesnt match context, removing");
                 closeGrowlAlert(alert);
             }
         }
@@ -38,11 +36,6 @@ function GrowlAlertCtrl($scope, $location, cbuggGrowl) {
 
     $scope.closeGrowlAlert = function(alert) {
         cbuggGrowl.closeGrowlAlert(alert);
-    };
-
-    $scope.refresh = function() {
-        console.log('trying refresh');
-        $location.path($location.path());
     };
 
 }
