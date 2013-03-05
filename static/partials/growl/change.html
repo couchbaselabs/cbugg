@@ -1,0 +1,6 @@
+<div class="clearfix">
+<p><img ng-src="http://www.gravatar.com/avatar/{{alert.change.user.md5}}?s=16"> {{alert.change.user.email}} {{alert.change.action}} 
+	<a class="status-{{alert.change.status}}"
+         title="{{alert.change.title}}" href="/bug/{{alert.change.bugid}}">{{alert.change.bugid}}</a> {{alert.change.time | relDate}}</p>
+<p><a class="pull-right btn btn-primary btn-mini" href="" onClick="location.reload()">Reload</a></p>
+</div>

@@ -29,7 +29,7 @@ angular.module('cbuggFilters', []).
     });
 
 angular.module('cbugg', ['cbuggFilters', 'cbuggAuth', 'cbuggRealtime', 'cbuggEditor', 'cbuggAlert',
-                         'cbuggPage', 'cbuggSearch', 'ui', '$strap.directives']).
+                         'cbuggPage', 'cbuggSearch', 'cbuggGrowl','ui', '$strap.directives']).
     config(['$routeProvider', '$locationProvider',
             function($routeProvider, $locationProvider) {
         $routeProvider.

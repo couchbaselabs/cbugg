@@ -1,4 +1,4 @@
-function BugCtrl($scope, $routeParams, $http, $rootScope, $timeout, $location, bAlert, cbuggAuth, cbuggPage) {
+function BugCtrl($scope, $routeParams, $http, $rootScope, $timeout, $location, bAlert, cbuggAuth, cbuggPage, cbuggGrowl) {
     $rootScope.$watch('loggedin', function() { $scope.auth = cbuggAuth.get(); });
     var updateBug = function(field, newValue) {
         var bug = $scope.bug;
@@ -451,8 +451,7 @@ function BugCtrl($scope, $routeParams, $http, $rootScope, $timeout, $location, b
             return;
         }
         // if we got this far, we should show the change
-        // FIXME - find a more angular way to reload (probably requires using $compile)
-        bAlert("Update", '<img src="http://www.gravatar.com/avatar/' + change.user.md5 + '?s=16"> ' +
-            change.user.email + ' ' + change.action + ' this bug.  <a href="" onclick="location.reload()">Reload</a>' , "info");
+        alert = { title: "Update", template: "change", change: change, context: $location.path()};
+        cbuggGrowl.createAlert(alert);
     });
 }

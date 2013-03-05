@@ -58,6 +58,14 @@
             </div>
         </div>
         <div class="container app">
+            <div id="growl-notifications" class="cbugg-growl" ng-controller="GrowlAlertCtrl" ng-cloak>
+              <div ng-repeat="alert in alerts" class="cbugg-growl-message cbugg-growl-message-style">
+                <a class="cbugg-growl-cross cbugg-growl-close" href="" ng-click="closeGrowlAlert(alert)">x</a>
+                <h1 ng-bind="alert.title"></h1>
+                <div ng-show="alert.template" ng-include src="'/static/partials/growl/' + alert.template + '.html'"></div>
+                <div ng-hide="alert.template" ng-include src="'/static/partials/growl/default.html'"></div>
+              </div>
+            </div>
             <div ng-view></div>
         </div>
         <div class="footer">
@@ -100,6 +108,7 @@
                      '../js/changes',
                      '../js/tag-cloud',
                      '../js/alert',
+                     '../js/growl',
                      '../js/auth',
                      '../js/page',
                      '../js/realtime',
