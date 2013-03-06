@@ -1,6 +1,6 @@
 <h2>Preferences</h2>
 
-<form class="form-horizontal">
+<form class="form-horizontal" ng-submit="save()">
   <h3>Bug Details</h3>
   <div class="control-group">
     <label class="control-label" for="inputRpp">Show Bug Comments</label>
@@ -15,13 +15,13 @@
   <div class="control-group">
     <label class="control-label" for="inputRpp">Results per Page</label>
     <div class="controls">
-      <input type="text" id="inputRpp" placeholder="{{auth.prefs.search.rowsPerPage}}" ng-model="auth.userPrefs.search.rowsPerPage">
+      <input type="text" id="inputRpp" pattern="[0-9]*" placeholder="{{auth.prefs.search.rowsPerPage}}" ng-model="auth.userPrefs.search.rowsPerPage" title="Must be a positive number">
     </div>
   </div>
   <div class="control-group">
     <div class="controls">
-      <button type="submit" class="btn btn-danger" ng-click="reset()">Reset to System Defaults</button>
-      <button type="submit" class="btn btn-primary" ng-click="save()">Save</button>
+      <button type="button" class="btn btn-danger" ng-click="reset()">Reset to System Defaults</button>
+      <button type="submit" class="btn btn-primary">Save</button>
     </div>
   </div>
 </form>
