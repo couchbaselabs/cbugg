@@ -18,8 +18,8 @@ cbuggAuth.factory('cbuggAuth', function($rootScope, $http, bAlert, cbuggPrefs) {
                     auth.loggedin = true;
                     auth.username = res.email;
                     auth.gravatar = res.emailmd5;
+                    auth.prefs = res.prefs;
                     auth.authtoken = "";
-                    auth.prefs = cbuggPrefs.getUserPreferences();
                     $rootScope.loggedin = true;
                 }).
                 error(function(res, err) {
@@ -34,6 +34,7 @@ cbuggAuth.factory('cbuggAuth', function($rootScope, $http, bAlert, cbuggPrefs) {
                         auth.authtoken = "";
                         auth.username = "";
                         auth.gravatar = "";
+                        auth.prefs = cbuggPrefs.getDefaultPreferences();
                     }).
                     error(function(res) {
                         bAlert("Error", "Problem logging out.", "error");

@@ -63,8 +63,8 @@ function NavigatorCtrl($scope, $routeParams, $http, $location, cbuggAuth, cbuggP
     // initialization
     cbuggPage.setTitle("Navigator");
     $scope.result = cbuggSearch.getDefaultSearchResult();
-    $scope.result.options = cbuggSearch.getDefaultSearchOptions($location.search());
     $scope.auth = cbuggAuth.get();
+    $scope.result.options = cbuggSearch.getDefaultSearchOptions($location.search(), $scope.auth.prefs);
 
     $scope.selectedTab = "all";
     if ($routeParams.tab) {
@@ -80,6 +80,7 @@ function NavigatorCtrl($scope, $routeParams, $http, $location, cbuggAuth, cbuggP
         } else {
             // need to re-evaluate query (may look different after auth)
             $scope.buildQueryFromTab();
+            $scope.result.options = cbuggSearch.getDefaultSearchOptions($location.search(), $scope.auth.prefs);
             $scope.doSearch();
         }
     });

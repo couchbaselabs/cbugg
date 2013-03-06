@@ -51,23 +51,30 @@ cbuggSearch.factory('cbuggSearch', function($http, $location) {
 		};
 	};
 
-	var defaultSearchOptions = function(customOptions) {
+	var defaultSearchOptions = function(customOptions, prefs) {
 		var defaultPage = 1;
 		var defaultStatus = [];
 		var defaultTags = [];
 		var defaultLastModified = "";
+		var defaultRpp = 15;
 		if(customOptions) {
 			for(var option in customOptions) {
 				var value = customOptions[option];
 				if(option == "page") {
 					defaultPage = value;
 				} else if (option == "status") {
-					var mv = value.split(",");
+					var mv = value;
+					if(typeof value === 'string') {
+						mv = value.split(",");
+					}
 					for(var i in mv) {
 						defaultStatus.push(mv[i]);
 					}
 				} else if (option == "tags") {
-					var mv2 = value.split(",");
+					var mv2 = value;
+					if(typeof value === 'string') {
+						mv2 = value.split(",");
+					}
 					for(var i2 in mv2) {
 						defaultTags.push(mv2[i2]);
 					}
@@ -76,9 +83,12 @@ cbuggSearch.factory('cbuggSearch', function($http, $location) {
 				}
 			}
 		}
+		if(prefs.search.rowsPerPage) {
+			defaultRpp = parseInt(prefs.search.rowsPerPage, 10);
+		}
 		return {
 			"page": defaultPage,
-			"rpp": 10,
+			"rpp": defaultRpp,
 			"status": defaultStatus,
 			"tags": defaultTags,
 			"last_modified": defaultLastModified,
@@ -160,8 +170,8 @@ cbuggSearch.factory('cbuggSearch', function($http, $location) {
 	};
 
 	return {
-		getDefaultSearchOptions: function(overrides) {
-			return defaultSearchOptions(overrides);
+		getDefaultSearchOptions: function(overrides, prefs) {
+			return defaultSearchOptions(overrides, prefs);
 		},
 		getDefaultSearchResult: function() {
 			return defaultSearchResult();

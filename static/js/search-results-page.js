@@ -34,7 +34,11 @@ function SearchResultsCtrl($scope, $routeParams, $location, cbuggPage, cbuggSear
 
     cbuggPage.setTitle("Search");
     $scope.auth = cbuggAuth.get();
-    $scope.result = cbuggSearch.getDefaultSearchResult();
-    $scope.result.options = cbuggSearch.getDefaultSearchOptions($location.search());
-    $scope.doSearch();
+
+    $scope.$watch('auth.loggedin', function(newval, oldval) {
+        // need to re-evaluate query (may look different after auth)
+        $scope.result = cbuggSearch.getDefaultSearchResult();
+        $scope.result.options = cbuggSearch.getDefaultSearchOptions($location.search(), $scope.auth.prefs);
+        $scope.doSearch();
+    });
 }

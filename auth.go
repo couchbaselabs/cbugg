@@ -164,9 +164,11 @@ func performAuth(w http.ResponseWriter, r *http.Request) {
 
 	log.Printf("Logged in %v", resdata.Email)
 
-	mustEncode(w, map[string]string{
+	user, err := getUser(resdata.Email)
+	mustEncode(w, map[string]interface{}{
 		"email":    resdata.Email,
 		"emailmd5": md5string(resdata.Email),
+		"prefs":    user.Prefs,
 	})
 }
 
@@ -177,9 +179,10 @@ func serveLogin(w http.ResponseWriter, r *http.Request) {
 		performAuth(w, r)
 	} else {
 		log.Printf("Reusing existing thing: %v", me.Id)
-		mustEncode(w, map[string]string{
+		mustEncode(w, map[string]interface{}{
 			"email":    me.Id,
 			"emailmd5": md5string(me.Id),
+			"prefs":    me.Prefs,
 		})
 	}
 }
