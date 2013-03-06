@@ -18,7 +18,11 @@ cbuggAuth.factory('cbuggAuth', function($rootScope, $http, bAlert, cbuggPrefs) {
                     auth.loggedin = true;
                     auth.username = res.email;
                     auth.gravatar = res.emailmd5;
-                    auth.prefs = res.prefs;
+                    if(res.prefs) {
+                        // some users have prefs: null
+                        // in which case they should keep the defaults
+                       auth.prefs = res.prefs;
+                    }
                     auth.authtoken = "";
                     $rootScope.loggedin = true;
                 }).
