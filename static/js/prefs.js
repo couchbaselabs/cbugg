@@ -5,6 +5,9 @@ cbuggPrefs.factory('cbuggPrefs', function($http) {
 		return {
 			search: {
 				rowsPerPage: 15
+			},
+			bug_details: {
+				commentSortOrder: "+created_at"
 			}
 		};
 	}
@@ -32,8 +35,10 @@ function PrefsCtrl($scope, $http, cbuggAuth, cbuggPage, cbuggPrefs, bAlert) {
 	$scope.auth = cbuggAuth.get();
 
 	$scope.save = function() {
-		cbuggPrefs.saveUserPreferences($scope.auth.prefs,
+		cbuggPrefs.saveUserPreferences($scope.auth.userPrefs,
 			function(res) {
+				// now remerge them with the defaults
+				$scope.auth.prefs = $.extend(true, cbuggPrefs.getDefaultPreferences(), $scope.auth.userPrefs);
 				bAlert("Success", "Preferences Saved", "success");
 			},
 			function(err) {
@@ -45,6 +50,7 @@ function PrefsCtrl($scope, $http, cbuggAuth, cbuggPage, cbuggPrefs, bAlert) {
 		cbuggPrefs.saveUserPreferences({},
 			function(res) {
 				bAlert("Success", "Reset to System Defaults", "success");
+				$scope.auth.userPrefs = {};
 				$scope.auth.prefs = cbuggPrefs.getDefaultPreferences();
 			},
 			function(err) {

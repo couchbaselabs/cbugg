@@ -5,7 +5,8 @@ cbuggAuth.factory('cbuggAuth', function($rootScope, $http, bAlert, cbuggPrefs) {
         username: "",
         gravatar: "",
         authtoken: "",
-        prefs: cbuggPrefs.getDefaultPreferences()
+        prefs: cbuggPrefs.getDefaultPreferences(),
+        userPrefs: {}
     };
 
     personaLoaded(function () {
@@ -21,7 +22,8 @@ cbuggAuth.factory('cbuggAuth', function($rootScope, $http, bAlert, cbuggPrefs) {
                     if(res.prefs) {
                         // some users have prefs: null
                         // in which case they should keep the defaults
-                       auth.prefs = res.prefs;
+                       auth.userPrefs = res.prefs;
+                       auth.prefs = $.extend(true, cbuggPrefs.getDefaultPreferences(), auth.userPrefs);
                     }
                     auth.authtoken = "";
                     $rootScope.loggedin = true;
@@ -39,6 +41,7 @@ cbuggAuth.factory('cbuggAuth', function($rootScope, $http, bAlert, cbuggPrefs) {
                         auth.username = "";
                         auth.gravatar = "";
                         auth.prefs = cbuggPrefs.getDefaultPreferences();
+                        auth.userPrefs = {};
                     }).
                     error(function(res) {
                         bAlert("Error", "Problem logging out.", "error");

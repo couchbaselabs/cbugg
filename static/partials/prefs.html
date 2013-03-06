@@ -1,11 +1,21 @@
 <h2>Preferences</h2>
 
 <form class="form-horizontal">
+  <h3>Bug Details</h3>
+  <div class="control-group">
+    <label class="control-label" for="inputRpp">Show Bug Comments</label>
+    <div class="controls">
+      <select class="span6" ng-model="auth.userPrefs.bug_details.commentSortOrder">
+        <option value="+created_at">with Newest Comments at the Bottom</option>
+        <option value="-created_at">with Newest Comments at the Top</option>
+      </select>
+    </div>
+  </div>
   <h3>Search</h3>
   <div class="control-group">
     <label class="control-label" for="inputRpp">Results per Page</label>
     <div class="controls">
-      <input type="text" id="inputRpp" ng-model="auth.prefs.search.rowsPerPage">
+      <input type="text" id="inputRpp" placeholder="{{auth.prefs.search.rowsPerPage}}" ng-model="auth.userPrefs.search.rowsPerPage">
     </div>
   </div>
   <div class="control-group">
