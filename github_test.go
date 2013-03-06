@@ -37,8 +37,8 @@ func TestReferencesFromGithub(t *testing.T) {
 		{"Did some stuff\n\nCbugg: bug-134", []githubCBRef{{"bug-134", false}}},
 		{"Did some stuff\n\n  Cbugg: bug-134", []githubCBRef{{"bug-134", false}}},
 		{"Did some stuff\n\n  cbugg: bug-134", []githubCBRef{{"bug-134", false}}},
-		{"Did some stuff\n\ncbugg: bug-134cBugg: bug-135\n",
-			[]githubCBRef{{"bug-134", false}, {"bug-135", false}}},
+		{"Cbugg: close bug-134 bug-135", []githubCBRef{{"bug-134", true},
+			{"bug-135", true}}},
 	}
 
 	for _, x := range tests {

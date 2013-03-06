@@ -22,7 +22,7 @@ var bugRefRE *regexp.Regexp
 var failedToAdd = errors.New("Failed to add value")
 
 func init() {
-	bugRefRE = regexp.MustCompile(`[Cc][Bb][Uu][Gg][Gg]:\s*(clos\w+)?\s*(bug-\d+)`)
+	bugRefRE = regexp.MustCompile(`[Cc][Bb][Uu][Gg][Gg]:\s*(clos\w+)?\s*((bug-\d+\s*)+)`)
 }
 
 type githubUser struct {
@@ -525,9 +525,11 @@ func extractRefsFromGithub(msg string) []githubCBRef {
 
 	rv := []githubCBRef{}
 	for _, x := range matches {
-		rv = append(rv, githubCBRef{
-			x[2], strings.HasPrefix(strings.ToLower(x[1]), "clos"),
-		})
+		for _, b := range strings.Split(x[2], " ") {
+			rv = append(rv, githubCBRef{
+				b, strings.HasPrefix(strings.ToLower(x[1]), "clos"),
+			})
+		}
 	}
 
 	return rv
