@@ -29,7 +29,7 @@ angular.module('cbuggFilters', []).
     });
 
 angular.module('cbugg', ['cbuggFilters', 'cbuggAuth', 'cbuggRealtime', 'cbuggEditor', 'cbuggAlert',
-                         'cbuggPage', 'cbuggSearch', 'cbuggGrowl','ui', '$strap.directives']).
+                         'cbuggPage', 'cbuggSearch', 'cbuggGrowl', 'cbuggPrefs', 'ui', '$strap.directives']).
     config(['$routeProvider', '$locationProvider',
             function($routeProvider, $locationProvider) {
         $routeProvider.
@@ -57,6 +57,8 @@ angular.module('cbugg', ['cbuggFilters', 'cbuggAuth', 'cbuggRealtime', 'cbuggEdi
                                    controller: 'TagCtrl'}).
             when('/admin/', {templateUrl: '/static/partials/admin.html',
                                    controller: 'AdminCtrl'}).
+            when('/prefs/', {templateUrl: '/static/partials/prefs.html',
+                                   controller: 'PrefsCtrl'}).
 
             otherwise({redirectTo: '/statecounts/'});
         $locationProvider.html5Mode(true);

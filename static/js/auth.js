@@ -1,10 +1,11 @@
 var cbuggAuth = angular.module('cbuggAuth', []);
-cbuggAuth.factory('cbuggAuth', function($rootScope, $http, bAlert) {
+cbuggAuth.factory('cbuggAuth', function($rootScope, $http, bAlert, cbuggPrefs) {
     var auth = {
         loggedin: false,
         username: "",
         gravatar: "",
-        authtoken: ""
+        authtoken: "",
+        prefs: cbuggPrefs.getDefaultPreferences()
     };
 
     personaLoaded(function () {
@@ -18,6 +19,7 @@ cbuggAuth.factory('cbuggAuth', function($rootScope, $http, bAlert) {
                     auth.username = res.email;
                     auth.gravatar = res.emailmd5;
                     auth.authtoken = "";
+                    auth.prefs = cbuggPrefs.getUserPreferences();
                     $rootScope.loggedin = true;
                 }).
                 error(function(res, err) {

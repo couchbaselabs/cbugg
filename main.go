@@ -309,6 +309,7 @@ func main() {
 		"/navigator/",
 		"/admin/",
 		"/changes/",
+		"/prefs/",
 	}
 
 	for _, p := range appPages {
