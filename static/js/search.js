@@ -83,7 +83,7 @@ cbuggSearch.factory('cbuggSearch', function($http, $location) {
 				}
 			}
 		}
-		if(prefs.search.rowsPerPage) {
+		if(prefs && prefs.search && prefs.search.rowsPerPage) {
 			defaultRpp = parseInt(prefs.search.rowsPerPage, 10);
 		}
 		return {

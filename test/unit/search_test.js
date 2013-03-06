@@ -32,7 +32,7 @@ describe("Search Service", function() {
 
 
     it('should invoke service with right paramaeters', function() {
-        $httpBackend.expectPOST('/api/search/?query=bug&from=0&size=10&status=&tags=&modified=').respond(successfulEmtpySearchResponse);
+        $httpBackend.expectPOST('/api/search/?query=bug&from=0&size=15&status=&tags=&modified=').respond(successfulEmtpySearchResponse);
         result = service.query("bug");
         $httpBackend.flush();
         expect(result.inProgress).toBe(false);
@@ -42,7 +42,7 @@ describe("Search Service", function() {
     });
 
     it('should report a warning when response is not from all shards', function() {
-        $httpBackend.expectPOST('/api/search/?query=bug&from=0&size=10&status=&tags=&modified=').respond(partiallySuccessfulEmtpySearchResponse);
+        $httpBackend.expectPOST('/api/search/?query=bug&from=0&size=15&status=&tags=&modified=').respond(partiallySuccessfulEmtpySearchResponse);
         result = service.query("bug");
         $httpBackend.flush();
         expect(result.inProgress).toBe(false);
@@ -52,7 +52,7 @@ describe("Search Service", function() {
     });
 
     it('should report an error when search API returns an error', function() {
-        $httpBackend.expectPOST('/api/search/?query=bug&from=0&size=10&status=&tags=&modified=').respond(500, 'dial tcp 127.0.0.1:9200: connection refused');
+        $httpBackend.expectPOST('/api/search/?query=bug&from=0&size=15&status=&tags=&modified=').respond(500, 'dial tcp 127.0.0.1:9200: connection refused');
         service.query("bug");
         $httpBackend.flush();
         expect(result.inProgress).toBe(false);
