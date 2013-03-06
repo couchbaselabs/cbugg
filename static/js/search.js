@@ -57,6 +57,7 @@ cbuggSearch.factory('cbuggSearch', function($http, $location) {
 		var defaultTags = [];
 		var defaultLastModified = "";
 		var defaultRpp = 15;
+		var defaultSort = "-_score";
 		if(customOptions) {
 			for(var option in customOptions) {
 				var value = customOptions[option];
@@ -80,6 +81,8 @@ cbuggSearch.factory('cbuggSearch', function($http, $location) {
 					}
 				} else if (option == "last_modified") {
 					defaultLastModified = value;
+				} else if (option == "sort") {
+					defaultSort = value;
 				}
 			}
 		}
@@ -93,6 +96,7 @@ cbuggSearch.factory('cbuggSearch', function($http, $location) {
 			"tags": defaultTags,
 			"last_modified": defaultLastModified,
 			"maxPagesToShow": 7,
+			"sort": defaultSort,
 			updateFilter: function(field, value) {
 				switch(field) {
 					case "status":
@@ -133,6 +137,19 @@ cbuggSearch.factory('cbuggSearch', function($http, $location) {
 			},
 			checkSingleValueFilter: function(field, value) {
 				return this[field] === value;
+			},
+			sortBy: function(field) {
+				if(this.sort.match(field + "$")) {
+					// same field, just toggle asc/desc
+					if(this.sort[0] == "-") {
+						this.sort = field;
+					} else {
+						this.sort = "-" + field;
+					}
+				} else {
+					// sort is changing field, default to desc
+					this.sort = "-" + field;
+				}
 			}
 		};
 	};
@@ -167,6 +184,11 @@ cbuggSearch.factory('cbuggSearch', function($http, $location) {
         } else {
             $location.search('last_modified', null);
         }
+        if(options.sort) {
+			$location.search('sort', options.sort);
+        } else {
+			$location.search('sort', null);
+        }
 	};
 
 	return {
@@ -185,7 +207,8 @@ cbuggSearch.factory('cbuggSearch', function($http, $location) {
 			'&size=' + options.rpp +
 			'&status=' + options.status.join(',') +
 			'&tags=' + options.tags.join(',') +
-			'&modified=' + options.last_modified;
+			'&modified=' + options.last_modified +
+			'&sort=' + options.sort;
 
 			result = defaultSearchResult();
 			result.query_string = query_string;

@@ -29,6 +29,11 @@ function NavigatorCtrl($scope, $routeParams, $http, $location, cbuggAuth, cbuggP
         return $scope.result.options.checkFilter(field, value);
     };
 
+    $scope.sortyBy = function(field) {
+        $scope.result.options.sortBy(field);
+        $scope.jumpToPage(1, null);
+    };
+
     $scope.isSubscribed = function(userhash, subscribers) {
         for (var i in subscribers) {
             subscriber = subscribers[i];

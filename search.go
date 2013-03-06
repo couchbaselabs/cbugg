@@ -57,7 +57,7 @@ func findSimilarBugs(w http.ResponseWriter, r *http.Request) {
 
 		queryStringQuery := buildQueryStringQuery(r.FormValue("query"))
 		customScoreQuery := buildCustomFiltersScoreQuery(queryStringQuery, boostFilters, "first")
-		query := buildTopLevelQuery(customScoreQuery, matchFilter, nil, 0, 10)
+		query := buildTopLevelQuery(customScoreQuery, matchFilter, nil, nil, 0, 10)
 
 		if *debugEs {
 			queryJson, err := json.Marshal(query)
@@ -117,6 +117,19 @@ func searchBugs(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			log.Printf("Invalid value for size: %v", r.FormValue("size"))
 			size = 10
+		}
+	}
+
+	sortItems := []SortItem{}
+	if r.FormValue("sort") != "" {
+		sortItems = append(sortItems, buildSortItemFromString(r.FormValue("sort")))
+
+		// if they aren't sorting by +/- _score
+		// add that after what they do want to sort by
+		// this ensure score is still caclulated
+		// and offers secondary sort by the score
+		if !strings.HasSuffix(r.FormValue("sort"), "_score") {
+			sortItems = append(sortItems, buildSortItemFromString("-_score"))
 		}
 	}
 
@@ -182,7 +195,7 @@ func searchBugs(w http.ResponseWriter, r *http.Request) {
 
 	booleanQuery := buildBoolQuery(nil, shouldQueries, nil, 1)
 
-	query := buildTopLevelQuery(booleanQuery, filter, facets, from, size)
+	query := buildTopLevelQuery(booleanQuery, filter, facets, sortItems, from, size)
 
 	if *debugEs {
 		queryJson, err := json.Marshal(query)
@@ -333,6 +346,7 @@ type Query map[string]interface{}
 type Facet map[string]interface{}
 type Facets map[string]interface{}
 type Range map[string]interface{}
+type SortItem map[string]interface{}
 
 func buildTermsFilter(field string, terms []string, execution string) Filter {
 	if execution == "" {
@@ -409,12 +423,16 @@ func buildRange(from, to interface{}) Range {
 	}
 }
 
-func buildTopLevelQuery(query Query, filter Filter, facets Facets, from int, size int) Query {
+func buildTopLevelQuery(query Query, filter Filter, facets Facets, sortItems []SortItem, from int, size int) Query {
 	q := Query{
 		"query":  query,
 		"filter": filter,
 		"from":   from,
 		"size":   size,
+	}
+
+	if sortItems != nil {
+		q["sort"] = sortItems
 	}
 
 	if facets != nil {
@@ -480,4 +498,14 @@ func buildCustomFiltersScoreQuery(query Query, boostFilters Filters, scoreMode s
 			"score_mode": scoreMode,
 		},
 	}
+}
+
+func buildSortItemFromString(sort string) SortItem {
+	rv := SortItem{}
+	if strings.HasPrefix(sort, "-") {
+		rv[sort[1:]] = "desc"
+	} else {
+		rv[sort] = "asc"
+	}
+	return rv
 }
