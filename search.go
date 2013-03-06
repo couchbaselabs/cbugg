@@ -178,20 +178,25 @@ func searchBugs(w http.ResponseWriter, r *http.Request) {
 		"last_modified": lastModifiedFacet,
 	}
 
+	// all the queries that should be matched
+	shouldQueries := []Query{}
+
 	// default to match all query
 	insideQuery := buildMatchAllQuery()
 
 	// if they actually provided a query string, run that instead
 	if r.FormValue("query") != "" {
 		insideQuery = buildQueryStringQuery(r.FormValue("query"))
+
+		// only add these child queries if we actually have a query string
+		childTypesToQuery := []string{"comment", "attachment"}
+		for _, typ := range childTypesToQuery {
+			queryComponent := buildHashChildQuery(typ, insideQuery)
+			shouldQueries = append(shouldQueries, queryComponent)
+		}
 	}
 
-	shouldQueries := []Query{insideQuery}
-	childTypesToQuery := []string{"comment", "attachment"}
-	for _, typ := range childTypesToQuery {
-		queryComponent := buildHashChildQuery(typ, insideQuery)
-		shouldQueries = append(shouldQueries, queryComponent)
-	}
+	shouldQueries = append(shouldQueries, insideQuery)
 
 	booleanQuery := buildBoolQuery(nil, shouldQueries, nil, 1)
 
