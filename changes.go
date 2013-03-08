@@ -6,8 +6,8 @@ import (
 	"log"
 	"time"
 
+	"github.com/couchbaselabs/sockjs-go/sockjs"
 	"github.com/dustin/go-broadcast"
-	"github.com/igm/sockjs-go/sockjs"
 )
 
 var changes_broadcaster = broadcast.NewBroadcaster(100)
