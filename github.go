@@ -275,8 +275,8 @@ func makeIssueFromGithub(issue GithubIssue, repository GithubRepository) (Bug, e
 		return Bug{}, err
 	}
 
-	body := issue.Body
-	if body != "" {
+	body := "```\n" + issue.Body + "\n```"
+	if issue.Body != "" {
 		body += "\n\n----\n"
 	}
 	body += issue.URL +
@@ -460,8 +460,8 @@ func serveGithubPullRequest(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	body := hookdata.PullRequest.Body
-	if body != "" {
+	body := "```\n" + hookdata.PullRequest.Body + "```"
+	if hookdata.PullRequest.Body != "" {
 		body += "\n\n----\n"
 	}
 	body += hookdata.PullRequest.URL +
