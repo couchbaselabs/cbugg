@@ -10,9 +10,9 @@ import (
 	"time"
 
 	"github.com/couchbaselabs/go-couchbase"
+	"github.com/couchbaselabs/sockjs-go/sockjs"
 	"github.com/dustin/gomemcached"
 	"github.com/gorilla/mux"
-	"github.com/igm/sockjs-go/sockjs"
 )
 
 var db *couchbase.Bucket
