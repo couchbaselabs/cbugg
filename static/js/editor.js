@@ -23,6 +23,7 @@ angular.module('cbuggEditor', [])
                         var viewval = ngModel.$viewValue;
                         if(!viewval) {
                             viewval = "";
+                            ngModel.$setViewValue(viewfal);
                         }
                         scope.codeMirror.setValue(viewval);
                     };
