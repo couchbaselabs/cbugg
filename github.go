@@ -521,14 +521,17 @@ type githubCBRef struct {
 }
 
 func extractRefsFromGithub(msg string) []githubCBRef {
-	matches := bugRefRE.FindAllStringSubmatch(msg, 100000)
-
 	rv := []githubCBRef{}
-	for _, x := range matches {
-		for _, b := range strings.Split(x[2], " ") {
-			rv = append(rv, githubCBRef{
-				b, strings.HasPrefix(strings.ToLower(x[1]), "clos"),
-			})
+
+	for _, l := range strings.Split(msg, "\n") {
+		matches := bugRefRE.FindAllStringSubmatch(l, 100000)
+
+		for _, x := range matches {
+			for _, b := range strings.Split(x[2], " ") {
+				rv = append(rv, githubCBRef{
+					b, strings.HasPrefix(strings.ToLower(x[1]), "clos"),
+				})
+			}
 		}
 	}
 
