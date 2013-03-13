@@ -1,5 +1,6 @@
 #*
+*.sublime-*
 *~
 .#*
 /cbugg
-*.sublime-*
+/tools/usermod/usermod
