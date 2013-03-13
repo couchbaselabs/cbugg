@@ -1,0 +1,6 @@
+{
+    "actions" : [
+        { "remove" : { "index" : "cbugg-ver6", "alias" : "cbugg" } },
+        { "add" : { "index" : "cbugg-ver7", "alias" : "cbugg" } }
+    ]
+}
