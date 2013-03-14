@@ -164,6 +164,10 @@ func (mfh myFileHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	mfh.h.ServeHTTP(w, r)
 }
 
+func serveVersion(w http.ResponseWriter, r *http.Request) {
+	mustEncode(w, map[string]string{"version": VERSION})
+}
+
 func main() {
 	addr := flag.String("addr", ":8066", "http listen address")
 	cbServ := flag.String("couchbase", "http://localhost:8091/",
@@ -291,6 +295,8 @@ func main() {
 	r.HandleFunc("/api/state-counts", serveStateCounts)
 	r.HandleFunc("/auth/login", serveLogin).Methods("POST")
 	r.HandleFunc("/auth/logout", serveLogout).Methods("POST")
+
+	r.HandleFunc("/api/version", serveVersion)
 
 	sockjs.Install("/api/changes", ChangesHandler, sockjs.DefaultConfig)
 
