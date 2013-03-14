@@ -404,7 +404,10 @@ func notificationLoop() {
 		case bugid := <-assignedChan:
 			sendBugAssignedNotification(bugid)
 		case c := <-bugChan:
-			changes_broadcaster.Submit(c)
+			// Ugly special case of an exception injection. :(
+			if c.exception == "" {
+				changes_broadcaster.Submit(c)
+			}
 			addBugNotification(c)
 		case t := <-tagChan:
 			sendTagNotification(t.bugid, t.tag, t.actor)

@@ -84,11 +84,6 @@ func (cr *changeRing) process() {
 }
 
 func (cr *changeRing) addItem(i interface{}) {
-	// Ugly special case of an exception injection. :(
-	if bc, ok := i.(bugChange); ok && bc.exception != "" {
-		return
-	}
-
 	if len(cr.items) < cap(cr.items) {
 		cr.items = append(cr.items, i)
 	} else {
