@@ -233,6 +233,42 @@ func serveAttachment(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func serveHeadAttachment(w http.ResponseWriter, r *http.Request) {
+	attid := mux.Vars(r)["attid"]
+	bugid := mux.Vars(r)["bugid"]
+	me := whoami(r)
+	if _, err := getBugOrDisplayErr(bugid, me, w, r); err != nil {
+		return
+	}
+
+	att := Attachment{}
+	err := db.Get(attid, &att)
+	if err != nil {
+		showError(w, r, err.Error(), 500)
+		return
+	}
+
+	if att.Type != "attachment" {
+		showError(w, r, "not an attachment", 500)
+		return
+	}
+
+	res, err := http.Head(att.Url)
+	if err != nil {
+		showError(w, r, err.Error(), 500)
+		return
+	}
+	defer res.Body.Close()
+	if res.StatusCode != 200 {
+		showError(w, r, res.Status, 500)
+		return
+	}
+
+	w.Header().Set("Content-Type", res.Header.Get("Content-Type"))
+	w.Header().Set("Content-Length", fmt.Sprintf("%v", res.ContentLength))
+	w.Header().Set("Content-Disposition", "attachment")
+}
+
 func deleteAttachmentFile(url string) error {
 	log.Printf("Deleting attachment file at %v", url)
 	req, err := http.NewRequest("DELETE", url, nil)
