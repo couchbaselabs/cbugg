@@ -275,7 +275,7 @@ func makeIssueFromGithub(issue GithubIssue, repository GithubRepository) (Bug, e
 		return Bug{}, err
 	}
 
-	body := "```\n" + issue.Body + "\n```"
+	body := issue.Body
 	if issue.Body != "" {
 		body += "\n\n----\n"
 	}
@@ -460,7 +460,7 @@ func serveGithubPullRequest(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	body := "```\n" + hookdata.PullRequest.Body + "```"
+	body := hookdata.PullRequest.Body
 	if hookdata.PullRequest.Body != "" {
 		body += "\n\n----\n"
 	}
@@ -566,7 +566,7 @@ func refBug(hookdata githubPushHook, commit githubCommit, ref githubCBRef) {
 	}
 
 	commentMsg := "Commit [" + commit.Id + "](" + commit.URL + ")\n\n" +
-		commit.Message
+		"```\n" + commit.Message + "\n```\n"
 
 	id := "c-" + bugid + "-" + time.Now().UTC().Format(time.RFC3339Nano)
 
