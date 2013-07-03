@@ -4,15 +4,24 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"net/url"
+	"os"
 	"os/exec"
 	"strings"
+	"text/template"
 	"time"
 )
 
 var queryFlag = flag.String("query", "", "query to execute")
+var tmplFlag = flag.String("t", "", "Result template")
+var tmplFilename = flag.String("T", "", "Display template filename")
+var asJson = flag.Bool("json", false, "dump result as json")
+
+const defaultTmplText = `{{ range $t := . }}{{printf "%s\t\t%s" $t.Id $t.Title}}
+{{ end }}`
 
 type User struct {
 	Email string
@@ -104,10 +113,34 @@ func CbuggSearch(query string) ([]searchDoc, error) {
 
 func main() {
 	flag.Parse()
+
+	tmplstr := *tmplFlag
+	if tmplstr == "" {
+		switch *tmplFilename {
+		case "":
+			tmplstr = defaultTmplText
+		case "-":
+			td, err := ioutil.ReadAll(os.Stdin)
+			maybeF(err)
+			tmplstr = string(td)
+		default:
+			td, err := ioutil.ReadFile(*tmplFilename)
+			maybeF(err)
+			tmplstr = string(td)
+		}
+	}
+
+	tmpl, err := template.New("").Parse(tmplstr)
+	maybeF(err)
+
 	res, err := CbuggSearch(*queryFlag)
 	maybeF(err)
 
-	for _, r := range res {
-		fmt.Printf("%v\t\t%v\n", r.Id, r.Title)
-	}
+	tmpl.Execute(os.Stdout, res)
+
+	/*
+		for _, r := range res {
+			fmt.Printf("%v\t\t%v\n", r.Id, r.Title)
+		}
+	*/
 }
