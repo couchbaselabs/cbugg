@@ -16,6 +16,7 @@ import (
 )
 
 var queryFlag = flag.String("query", "", "query to execute")
+var querySizeFlag = flag.String("numrows", "100", "number of rows to return from query")
 var tmplFlag = flag.String("t", "", "Result template")
 var tmplFilename = flag.String("T", "", "Display template filename")
 var asJson = flag.Bool("json", false, "dump result as json")
@@ -69,7 +70,7 @@ func CbuggSearch(query string) ([]searchDoc, error) {
 		return nil, err
 	}
 	apiURL := base.ResolveReference(apiRelURL)
-	apiURL.RawQuery = url.Values{"query": {query}}.Encode()
+	apiURL.RawQuery = url.Values{"query": {query}, "size": {*querySizeFlag}}.Encode()
 
 	req, err := http.NewRequest("GET", apiURL.String(), nil)
 	if err != nil {
