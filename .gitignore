@@ -3,5 +3,6 @@
 *~
 .#*
 /cbugg
+/cbugg-cli/cbugg-cli
 /tools/usermod/usermod
 /version_git.go
