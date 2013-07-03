@@ -9,9 +9,29 @@ import (
 	"net/url"
 	"os/exec"
 	"strings"
+	"time"
 )
 
 var queryFlag = flag.String("query", "", "query to execute")
+
+type User struct {
+	Email string
+	MD5   string
+}
+
+type searchDoc struct {
+	Id          string
+	Title       string
+	Tags        []string
+	Description string
+	CreatedAt   time.Time `json:"created_at"`
+	Creator     User
+	ModifiedAt  time.Time `json:"modified_at"`
+	ModifiedBy  User      `json:"modified_by"`
+	Owner       User
+	Private     bool
+	Subscribers []User
+}
 
 func maybeF(err error) {
 	if err != nil {
@@ -30,38 +50,64 @@ func Config(maybeVal, varname string) string {
 	return strings.TrimSpace(string(tagBytes))
 }
 
-func CbuggSearch(query string) {
+func CbuggSearch(query string) ([]searchDoc, error) {
 	base, err := url.Parse(Config("", "cbugg.url"))
-	maybeF(err)
+	if err != nil {
+		return nil, err
+	}
 	apiRelURL, err := url.Parse("/api/search/")
-	maybeF(err)
+	if err != nil {
+		return nil, err
+	}
 	apiURL := base.ResolveReference(apiRelURL)
 	apiURL.RawQuery = url.Values{"query": {query}}.Encode()
 
 	req, err := http.NewRequest("GET", apiURL.String(), nil)
-	maybeF(err)
-	req.SetBasicAuth(Config("", "cbugg.user"), Config("", "cbugg.key"))
-	resp, err := http.DefaultClient.Do(req)
-	maybeF(err)
-	defer resp.Body.Close()
-	if resp.StatusCode != 200 {
-		log.Fatalf("Unexpected Response: %v", resp.Status)
+	if err != nil {
+		return nil, err
 	}
 
-	m := map[string]interface{}{}
-	d := json.NewDecoder(resp.Body)
-	err = d.Decode(&m)
-	maybeF(err)
-	hits := m["hits"].(map[string]interface{})["hits"].([]interface{})
-	for _, h := range hits {
-		doc := h.(map[string]interface{})["source"].(map[string]interface{})["doc"].(map[string]interface{})
-		id := doc["id"]
-		title := doc["title"]
-		fmt.Printf("%v\t\t%v\n", id, title)
+	req.SetBasicAuth(Config("", "cbugg.user"), Config("", "cbugg.key"))
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return nil, err
 	}
+
+	defer resp.Body.Close()
+	if resp.StatusCode != 200 {
+		return nil, fmt.Errorf("HTTP Error: %v", resp.Status)
+	}
+
+	results := struct {
+		Hits struct {
+			Hits []struct {
+				Source struct {
+					Doc searchDoc
+				}
+			}
+		}
+	}{}
+
+	d := json.NewDecoder(resp.Body)
+	err = d.Decode(&results)
+	if err != nil {
+		return nil, err
+	}
+
+	rv := []searchDoc{}
+	for _, r := range results.Hits.Hits {
+		rv = append(rv, r.Source.Doc)
+	}
+
+	return rv, nil
 }
 
 func main() {
 	flag.Parse()
-	CbuggSearch(*queryFlag)
+	res, err := CbuggSearch(*queryFlag)
+	maybeF(err)
+
+	for _, r := range res {
+		fmt.Printf("%v\t\t%v\n", r.Id, r.Title)
+	}
 }
