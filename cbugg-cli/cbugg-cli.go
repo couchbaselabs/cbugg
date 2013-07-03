@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -11,6 +12,7 @@ import (
 	"os"
 	"os/exec"
 	"strings"
+	"text/tabwriter"
 	"text/template"
 	"time"
 )
@@ -19,6 +21,7 @@ var queryFlag = flag.String("query", "", "query to execute")
 var querySizeFlag = flag.String("numrows", "100", "number of rows to return from query")
 var tmplFlag = flag.String("t", "", "Result template")
 var tmplFilename = flag.String("T", "", "Display template filename")
+var twFlag = flag.Bool("tw", false, "Send template output through tabwriter")
 var asJson = flag.Bool("json", false, "dump result as json")
 
 const defaultTmplText = `{{ range $t := . }}{{printf "%s\t\t%s" $t.Id $t.Title}}
@@ -137,5 +140,13 @@ func main() {
 	res, err := CbuggSearch(*queryFlag)
 	maybeF(err)
 
-	tmpl.Execute(os.Stdout, res)
+	outf := io.Writer(os.Stdout)
+
+	if *twFlag {
+		tw := tabwriter.NewWriter(os.Stdout, 2, 4, 2, ' ', 0)
+		defer tw.Flush()
+		outf = tw
+	}
+
+	tmpl.Execute(outf, res)
 }
