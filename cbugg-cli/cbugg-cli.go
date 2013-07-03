@@ -138,10 +138,4 @@ func main() {
 	maybeF(err)
 
 	tmpl.Execute(os.Stdout, res)
-
-	/*
-		for _, r := range res {
-			fmt.Printf("%v\t\t%v\n", r.Id, r.Title)
-		}
-	*/
 }
