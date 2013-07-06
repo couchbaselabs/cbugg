@@ -121,7 +121,10 @@
 </div>
 
 <h3>Attachments</h3>
-<div ng-show="auth.loggedin" id="dropbox" class="dropbox" ng-class="dropClass"><span>{{dropText}}</span></div>
+<input type="file" id="attachFileInput">
+<div ng-show="auth.loggedin" id="dropbox" class="dropbox" ng-class="dropClass">
+  <a ng-click="fileDialog()">{{dropText}}</a>
+</div>
 <div ng-show="files.length">
   <div ng-repeat="file in files.slice(0)">
     <span>{{file.webkitRelativePath || file.name}}</span>

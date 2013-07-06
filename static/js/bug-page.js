@@ -34,14 +34,25 @@ function BugCtrl($scope, $routeParams, $http, $rootScope, $timeout, $location, b
     // ============== DRAG & DROP =============
     // http://www.webappers.com/2011/09/28/drag-drop-file-upload-with-html5-javascript/
     var dropbox = document.getElementById("dropbox");
-    $scope.dropText = 'Drop files here...';
+    var fileInput = document.getElementById("attachFileInput");
+    fileInput.addEventListener("change", function() {
+        $scope.files = [];
+        _.each(this.files, function(file) {
+            $scope.files.push(file);
+        });
+        $scope.uploadFile();
+    }, false);
+    $scope.fileDialog = function() {
+        fileInput.click();
+    }
+    $scope.dropText = 'Attach Files Here';
 
     // init event handlers
     function dragEnterLeave(evt) {
         evt.stopPropagation();
         evt.preventDefault();
         $scope.$apply(function(){
-            $scope.dropText = 'Drop files here...';
+            $scope.dropText = 'Attach Files Here';
             $scope.dropClass = '';
         });
     }
@@ -53,7 +64,7 @@ function BugCtrl($scope, $routeParams, $http, $rootScope, $timeout, $location, b
         var clazz = 'not-available';
         var ok = evt.dataTransfer && evt.dataTransfer.types && evt.dataTransfer.types.indexOf('Files') >= 0;
         $scope.$apply(function(){
-            $scope.dropText = ok ? 'Drop files here...' : 'Only files are allowed!';
+            $scope.dropText = ok ? 'Attach Files Here' : 'Only files are allowed!';
             $scope.dropClass = ok ? 'over' : 'not-available';
         });
     }, false);
@@ -62,7 +73,7 @@ function BugCtrl($scope, $routeParams, $http, $rootScope, $timeout, $location, b
         evt.stopPropagation();
         evt.preventDefault();
         $scope.$apply(function(){
-            $scope.dropText = 'Drop files here...';
+            $scope.dropText = 'Attach Files Here';
             $scope.dropClass = '';
         });
         var files = evt.dataTransfer.files;
