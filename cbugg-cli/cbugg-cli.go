@@ -132,7 +132,17 @@ func renderTmpl(docs []searchDoc) {
 		}
 	}
 
-	tmpl, err := template.New("").Parse(tmplstr)
+	tmpl, err := template.New("").Funcs(template.FuncMap{
+		"join": func(o string, s []string) string {
+			return strings.Join(s, o)
+		},
+		"trunc": func(maxlen int, s string) string {
+			if len(s) < maxlen {
+				return s
+			}
+			return strings.TrimSpace(s[:maxlen])
+		},
+	}).Parse(tmplstr)
 	maybeF(err)
 
 	outf := io.Writer(os.Stdout)
