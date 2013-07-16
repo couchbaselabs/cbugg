@@ -146,11 +146,21 @@ func renderTmpl(docs []searchDoc) {
 	maybeF(tmpl.Execute(outf, docs))
 }
 
+func renderJson(docs []searchDoc) {
+	data, err := json.MarshalIndent(docs, "", "  ")
+	maybeF(err)
+	os.Stdout.Write(data)
+}
+
 func main() {
 	flag.Parse()
 
 	res, err := CbuggSearch(*queryFlag)
 	maybeF(err)
 
-	renderTmpl(res)
+	if *asJson {
+		renderJson(res)
+	} else {
+		renderTmpl(res)
+	}
 }
