@@ -115,9 +115,7 @@ func CbuggSearch(query string) ([]searchDoc, error) {
 	return rv, nil
 }
 
-func main() {
-	flag.Parse()
-
+func renderTmpl(docs []searchDoc) {
 	tmplstr := *tmplFlag
 	if tmplstr == "" {
 		switch *tmplFilename {
@@ -137,9 +135,6 @@ func main() {
 	tmpl, err := template.New("").Parse(tmplstr)
 	maybeF(err)
 
-	res, err := CbuggSearch(*queryFlag)
-	maybeF(err)
-
 	outf := io.Writer(os.Stdout)
 
 	if *twFlag {
@@ -148,5 +143,14 @@ func main() {
 		outf = tw
 	}
 
-	tmpl.Execute(outf, res)
+	maybeF(tmpl.Execute(outf, docs))
+}
+
+func main() {
+	flag.Parse()
+
+	res, err := CbuggSearch(*queryFlag)
+	maybeF(err)
+
+	renderTmpl(res)
 }
