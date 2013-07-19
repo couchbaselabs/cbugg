@@ -43,6 +43,9 @@ func userFromCookie(cookie string) (User, error) {
 			u.Id = val.Email
 		}
 		return u, nil
+	} else {
+		log.Printf("Error getting user from secure cookie (%q): %v",
+			cookie, err)
 	}
 	return User{}, err
 }
