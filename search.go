@@ -259,7 +259,10 @@ func convertElasticSearchResponse(searchresponse core.SearchResult) map[string]i
 		}
 
 		// bulk get the docs we're interested in
-		bulkResponse := db.GetBulk(ids)
+		bulkResponse, err := db.GetBulk(ids)
+		if err != nil {
+			log.Printf("Error grabbing bulk response: %v", err)
+		}
 
 		// walk through the hits again, adding the original document to the source
 		for _, hit := range searchresponse.Hits.Hits {
