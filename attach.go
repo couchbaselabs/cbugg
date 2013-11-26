@@ -7,8 +7,10 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"net/url"
 	"time"
 
+	"github.com/couchbaselabs/cbfs/client"
 	"github.com/gorilla/mux"
 )
 
@@ -80,22 +82,23 @@ func serveFileUpload(w http.ResponseWriter, r *http.Request) {
 
 	cr := &countingReader{r: f}
 
-	req, err := http.NewRequest("PUT", dest, cr)
+	durl, err := url.Parse(dest)
+	if err != nil {
+		showError(w, r, err.Error(), 500)
+		return
+	}
+	dpath := durl.Path
+
+	cbfsc, err := cbfsclient.New(*cbfsUrl)
 	if err != nil {
 		showError(w, r, err.Error(), 500)
 		return
 	}
 
-	req.Header.Set("Content-Type", fh.Header.Get("Content-Type"))
-
-	res, err := http.DefaultClient.Do(req)
+	err = cbfsc.Put(fh.Filename, dpath, f,
+		cbfsclient.PutOptions{ContentType: fh.Header.Get("Content-Type")})
 	if err != nil {
 		showError(w, r, err.Error(), 500)
-		return
-	}
-	defer res.Body.Close()
-	if res.StatusCode != 201 {
-		showError(w, r, res.Status, 500)
 		return
 	}
 
