@@ -95,7 +95,7 @@ func serveFileUpload(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = cbfsc.Put(fh.Filename, dpath, f,
+	err = cbfsc.Put(fh.Filename, dpath, cr,
 		cbfsclient.PutOptions{ContentType: fh.Header.Get("Content-Type")})
 	if err != nil {
 		showError(w, r, err.Error(), 500)
