@@ -4,6 +4,10 @@
 
     curl -XPUT http://<elasticsearch hostname>:9200/cbugg -d @cbugg-index.json
 
+2.  Switch the index aliases
+
+   curl -XPOST http://<elasticsearch hostname>:9200/_aliases -d @switch-index-alias.json
+
  # Testing cbugg JavaScript
 
  1.  Install Testacular [http://vojtajina.github.com/testacular/](http://vojtajina.github.com/testacular/)

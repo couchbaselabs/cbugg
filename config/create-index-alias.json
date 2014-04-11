@@ -1,0 +1,5 @@
+{
+    "actions" : [
+        { "add" : { "index" : "cbugg-ver8", "alias" : "cbugg" } }
+    ]
+}
